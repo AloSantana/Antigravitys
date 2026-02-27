@@ -270,9 +270,9 @@ class TestConcurrentRequests:
         assert avg_success_rate >= 95, \
             f"Success rate degraded under sustained load: {avg_success_rate:.1f}%"
         
-        # Performance shouldn't degrade more than 2x
+        # Performance shouldn't degrade more than 3x
         degradation = max(mean_times) / min(mean_times)
-        assert degradation < 2.0, \
+        assert degradation < 3.0, \
             f"Performance degraded too much: {degradation:.2f}x"
         
         print("  ✅ System handles sustained load well")

@@ -26,11 +26,6 @@ MEMORY_LEAK_THRESHOLD = 1.2  # Memory shouldn't grow > 20% after operations
 class TestMemoryUsage:
     """Test memory usage patterns and detect leaks"""
     
-    @pytest.fixture
-    def client(self):
-        """Create test client"""
-        return TestClient(app)
-    
     def get_process_memory_mb(self) -> float:
         """Get current process memory usage in MB"""
         process = psutil.Process(os.getpid())

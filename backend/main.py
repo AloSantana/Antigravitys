@@ -276,8 +276,8 @@ async def health_check(request: Request):
     """Basic health check endpoint - lightweight for load balancers."""
     return {
         "status": "healthy",
-        "watcher": "running" if watcher.is_running() else "stopped",
-        "cache_hit_rate": f"{orchestrator.get_cache_hit_rate():.1%}"
+        "watcher": "running" if (watcher is not None and watcher.is_running()) else "stopped",
+        "cache_hit_rate": f"{orchestrator.get_cache_hit_rate():.1%}" if orchestrator is not None else "N/A"
     }
 
 @app.get("/health/live")

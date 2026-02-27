@@ -166,7 +166,7 @@ class TestAPIResponseTimes:
             
         # Use patch on the Orchestrator's delegate method
         # Note: We patch the method on the class because the instance is already created in the app
-        with patch("backend.agent.orchestrator.Orchestrator._delegate_to_local", side_effect=slow_response):
+        with patch("agent.orchestrator.Orchestrator._delegate_to_local", side_effect=slow_response):
             # Measure cold response (first request)
             # The patch ensures this takes at least 50ms
             cold_start = time.perf_counter()
@@ -214,11 +214,6 @@ class TestAPIResponseTimes:
 
 class TestEndToEndPerformance:
     """Test end-to-end performance scenarios"""
-    
-    @pytest.fixture
-    def client(self):
-        """Create test client"""
-        return TestClient(app)
     
     def test_complete_workflow_performance(self, client):
         """Test performance of complete user workflow"""
