@@ -1,0 +1,25 @@
+name: Deploy to DigitalOcean App Platform
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install doctl
+        uses: digitalocean/action-doctl@v2
+        with:
+          token: ${{ secrets.DIGITALOCEAN_ACCESS_TOKEN }}
+
+      - name: Deploy to App Platform
+        run: |
+          doctl apps create --spec .do/app.yaml --wait
+          
+      - name: Get App URL
+        run: |
+          APP_ID=$(doctl apps list --format ID --no-header | head -1)
+          APP_URL=$(doctl apps get $APP_ID --format DefaultIngress --no-header)
+          echo "🚀 Deployed to: https://$APP_URL"

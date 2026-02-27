@@ -1,0 +1,988 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antigravity | AI-Powered Workspace</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
+    <style>
+        :root {
+            --bg-primary: #0f172a;
+            --bg-secondary: #1e293b;
+            --bg-tertiary: #334155;
+            --glass-bg: rgba(30, 41, 59, 0.8);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --accent-blue: #3b82f6;
+            --accent-green: #10b981;
+            --accent-purple: #8b5cf6;
+            --accent-orange: #f59e0b;
+            --text-primary: #f8fafc;
+            --text-secondary: #94a3b8;
+            --text-muted: #64748b;
+            --border-color: rgba(255, 255, 255, 0.08);
+            --success: #34d399;
+            --error: #f87171;
+            --warning: #fbbf24;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: var(--bg-primary);
+            background-image: radial-gradient(circle at 20% 50%, rgba(59, 130, 246, 0.1) 0%, transparent 50%),
+                              radial-gradient(circle at 80% 80%, rgba(139, 92, 246, 0.1) 0%, transparent 50%);
+            color: var(--text-primary);
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        /* Layout */
+        .app-container {
+            display: grid;
+            grid-template-columns: 280px 1fr 350px;
+            grid-template-rows: 60px 1fr 50px;
+            height: 100vh;
+            gap: 1px;
+            background: var(--border-color);
+        }
+
+        /* Header */
+        .header {
+            grid-column: 1 / -1;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.25rem;
+            font-weight: 700;
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+
+        .status-badges {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            border: 1px solid;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .badge.online {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.3);
+            color: var(--success);
+        }
+
+        .badge.offline {
+            background: rgba(239, 68, 68, 0.15);
+            border-color: rgba(239, 68, 68, 0.3);
+            color: var(--error);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        /* Sidebar - File Explorer */
+        .sidebar {
+            background: var(--bg-secondary);
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .sidebar-section {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .section-title {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+            margin-bottom: 8px;
+        }
+
+        .file-tree {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+
+        .file-item {
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .file-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+        }
+
+        .file-item.active {
+            background: var(--accent-blue);
+            color: white;
+        }
+
+        .file-icon {
+            font-size: 1rem;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            background: var(--bg-secondary);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 2px;
+            background: var(--bg-primary);
+            padding: 8px 8px 0 8px;
+            overflow-x: auto;
+        }
+
+        .tab {
+            padding: 8px 16px;
+            border-radius: 6px 6px 0 0;
+            cursor: pointer;
+            transition: all 0.2s;
+            background: transparent;
+            color: var(--text-muted);
+            font-size: 0.875rem;
+            font-weight: 500;
+            white-space: nowrap;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .tab:hover {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .tab.active {
+            background: var(--bg-secondary);
+            color: var(--text-primary);
+        }
+
+        .tab-close {
+            margin-left: 8px;
+            opacity: 0.6;
+            transition: opacity 0.2s;
+        }
+
+        .tab-close:hover {
+            opacity: 1;
+        }
+
+        /* Content Panels */
+        .content-panel {
+            flex: 1;
+            overflow: hidden;
+            display: none;
+        }
+
+        .content-panel.active {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Chat Panel */
+        .chat-container {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .message {
+            max-width: 75%;
+            padding: 12px 16px;
+            border-radius: 12px;
+            line-height: 1.6;
+            font-size: 0.9rem;
+            animation: slideIn 0.3s ease;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: white;
+            border-bottom-right-radius: 2px;
+        }
+
+        .message.agent {
+            align-self: flex-start;
+            background: var(--glass-bg);
+            border: 1px solid var(--glass-border);
+            border-bottom-left-radius: 2px;
+        }
+
+        .message.system {
+            align-self: center;
+            background: var(--bg-tertiary);
+            color: var(--text-secondary);
+            font-size: 0.85rem;
+            max-width: 90%;
+        }
+
+        .message-source {
+            font-size: 0.7rem;
+            opacity: 0.7;
+            margin-bottom: 4px;
+            display: block;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            font-weight: 600;
+        }
+
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        /* Code Editor Panel */
+        .editor-container {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-toolbar {
+            background: var(--bg-tertiary);
+            padding: 8px 16px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .editor-info {
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+
+        .CodeMirror {
+            flex: 1;
+            height: auto !important;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 14px;
+        }
+
+        /* Terminal Panel */
+        .terminal-container {
+            flex: 1;
+            background: #1e1e1e;
+            padding: 16px;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            overflow-y: auto;
+            color: #d4d4d4;
+        }
+
+        .terminal-line {
+            margin-bottom: 4px;
+            line-height: 1.5;
+        }
+
+        .terminal-prompt {
+            color: #4ec9b0;
+        }
+
+        .terminal-output {
+            color: #d4d4d4;
+        }
+
+        .terminal-error {
+            color: #f48771;
+        }
+
+        /* Right Panel - Agents & Info */
+        .right-panel {
+            background: var(--bg-secondary);
+            padding: 16px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .panel-section {
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            padding: 16px;
+            border: 1px solid var(--border-color);
+        }
+
+        .panel-section-title {
+            font-size: 0.875rem;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .agent-card {
+            background: var(--bg-secondary);
+            border-radius: 6px;
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid var(--border-color);
+        }
+
+        .agent-card:hover {
+            border-color: var(--accent-blue);
+            transform: translateX(2px);
+        }
+
+        .agent-card.selected {
+            background: linear-gradient(135deg, rgba(59, 130, 246, 0.2), rgba(139, 92, 246, 0.2));
+            border-color: var(--accent-blue);
+        }
+
+        .agent-name {
+            font-weight: 600;
+            font-size: 0.875rem;
+            margin-bottom: 4px;
+            color: var(--text-primary);
+        }
+
+        .agent-expertise {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .agent-tools {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px;
+        }
+
+        .tool-badge {
+            background: var(--bg-primary);
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.65rem;
+            color: var(--text-muted);
+        }
+
+        /* Input Area */
+        .input-area {
+            grid-column: 1 / -1;
+            background: var(--glass-bg);
+            backdrop-filter: blur(12px);
+            padding: 12px 24px;
+            display: flex;
+            gap: 12px;
+            align-items: center;
+            border-top: 1px solid var(--border-color);
+        }
+
+        .input-wrapper {
+            flex: 1;
+            position: relative;
+        }
+
+        input {
+            width: 100%;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border-color);
+            padding: 12px 16px;
+            padding-right: 100px;
+            border-radius: 8px;
+            color: var(--text-primary);
+            outline: none;
+            font-family: inherit;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+        }
+
+        input:focus {
+            border-color: var(--accent-blue);
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .selected-agent-label {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 0.75rem;
+            color: var(--accent-blue);
+            background: var(--bg-primary);
+            padding: 4px 8px;
+            border-radius: 4px;
+            pointer-events: none;
+        }
+
+        button {
+            background: linear-gradient(135deg, var(--accent-blue), var(--accent-purple));
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.9rem;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        button:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        button:active {
+            transform: translateY(0);
+        }
+
+        .icon-btn {
+            padding: 12px;
+            background: var(--bg-tertiary);
+            border-radius: 8px;
+            color: var(--text-secondary);
+            min-width: auto;
+        }
+
+        .icon-btn:hover {
+            background: var(--bg-primary);
+            color: var(--text-primary);
+        }
+
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-primary);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--text-muted);
+        }
+
+        /* Loading Animation */
+        .thinking-dots {
+            display: inline-block;
+        }
+
+        .thinking-dots::after {
+            content: '...';
+            animation: thinking 1.5s steps(4) infinite;
+        }
+
+        @keyframes thinking {
+            0% { content: '.'; }
+            33% { content: '..'; }
+            66% { content: '...'; }
+        }
+
+        /* Stats Card */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+
+        .stat-card {
+            background: var(--bg-secondary);
+            padding: 12px;
+            border-radius: 6px;
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--accent-blue);
+        }
+
+        .stat-label {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">🚀</div>
+                <span>Antigravity Workspace</span>
+            </div>
+            <div class="status-badges">
+                <div class="badge online" id="connectionStatus">
+                    <span class="status-dot"></span>
+                    <span>Online</span>
+                </div>
+                <div class="badge" style="background: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-secondary);">
+                    <span id="agentCount">7</span> Agents
+                </div>
+            </div>
+        </div>
+
+        <!-- Left Sidebar - File Explorer -->
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <div class="section-title">📂 Project Files</div>
+                <div class="file-tree" id="fileTree">
+                    <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.875rem;">
+                        Loading files...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <div class="tabs">
+                <div class="tab active" data-panel="chat">
+                    💬 Chat
+                </div>
+                <div class="tab" data-panel="editor">
+                    📝 Editor
+                </div>
+                <div class="tab" data-panel="terminal">
+                    ⚡ Terminal
+                </div>
+            </div>
+
+            <!-- Chat Panel -->
+            <div class="content-panel active" id="chat-panel">
+                <div class="chat-container" id="chat">
+                    <div class="message system">
+                        🚀 Antigravity Workspace initialized with 7 custom AI agents. Select an agent and start coding!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Editor Panel -->
+            <div class="content-panel" id="editor-panel">
+                <div class="editor-container">
+                    <div class="editor-toolbar">
+                        <div class="editor-info" id="editorInfo">No file selected</div>
+                        <button class="icon-btn" onclick="saveFile()">💾 Save</button>
+                    </div>
+                    <textarea id="codeEditor"></textarea>
+                </div>
+            </div>
+
+            <!-- Terminal Panel -->
+            <div class="content-panel" id="terminal-panel">
+                <div class="terminal-container" id="terminal">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">antigravity@workspace:~$</span>
+                        <span class="terminal-output"> Welcome to Antigravity Terminal</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-output">Type 'help' for available commands</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Agents -->
+        <div class="right-panel">
+            <div class="panel-section">
+                <div class="panel-section-title">🤖 Available Agents</div>
+                <div id="agentsList">
+                    <div class="agent-card selected" data-agent="full-stack-developer">
+                        <div class="agent-name">Full-Stack Developer</div>
+                        <div class="agent-expertise">End-to-end web applications</div>
+                        <div class="agent-tools">
+                            <span class="tool-badge">React</span>
+                            <span class="tool-badge">FastAPI</span>
+                            <span class="tool-badge">SQL</span>
+                        </div>
+                    </div>
+                    <div class="agent-card" data-agent="devops-infrastructure">
+                        <div class="agent-name">DevOps & Infrastructure</div>
+                        <div class="agent-expertise">Deployment & containers</div>
+                        <div class="agent-tools">
+                            <span class="tool-badge">Docker</span>
+                            <span class="tool-badge">K8s</span>
+                            <span class="tool-badge">CI/CD</span>
+                        </div>
+                    </div>
+                    <div class="agent-card" data-agent="testing-stability-expert">
+                        <div class="agent-name">Testing Expert</div>
+                        <div class="agent-expertise">Comprehensive testing</div>
+                        <div class="agent-tools">
+                            <span class="tool-badge">PyTest</span>
+                            <span class="tool-badge">Jest</span>
+                        </div>
+                    </div>
+                    <div class="agent-card" data-agent="performance-optimizer">
+                        <div class="agent-name">Performance Optimizer</div>
+                        <div class="agent-expertise">Speed & efficiency</div>
+                        <div class="agent-tools">
+                            <span class="tool-badge">Profiling</span>
+                            <span class="tool-badge">Caching</span>
+                        </div>
+                    </div>
+                    <div class="agent-card" data-agent="code-reviewer">
+                        <div class="agent-name">Code Reviewer</div>
+                        <div class="agent-expertise">Security & quality</div>
+                        <div class="agent-tools">
+                            <span class="tool-badge">Security</span>
+                            <span class="tool-badge">Best Practices</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="panel-section-title">📊 Workspace Stats</div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="filesCount">0</div>
+                        <div class="stat-label">Files</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="messagesCount">1</div>
+                        <div class="stat-label">Messages</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="mcpServers">14</div>
+                        <div class="stat-label">MCP Servers</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">100%</div>
+                        <div class="stat-label">Uptime</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-area">
+            <input type="file" id="fileInput" multiple style="display: none;" onchange="handleFileSelect(this.files)">
+            <button class="icon-btn" onclick="document.getElementById('fileInput').click()" title="Upload Files">
+                📎
+            </button>
+            <div class="input-wrapper">
+                <input type="text" id="input" placeholder="Ask your AI agent anything..." autocomplete="off">
+                <span class="selected-agent-label" id="selectedAgentLabel">@full-stack-developer</span>
+            </div>
+            <button onclick="sendMessage()">
+                Send ✨
+            </button>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
+    <script>
+        // WebSocket connection
+        const ws = new WebSocket("ws://localhost:8000/ws");
+        let selectedAgent = "full-stack-developer";
+        let messageCount = 1;
+        let editor;
+
+        // Initialize CodeMirror
+        document.addEventListener('DOMContentLoaded', function() {
+            editor = CodeMirror.fromTextArea(document.getElementById('codeEditor'), {
+                mode: 'python',
+                theme: 'monokai',
+                lineNumbers: true,
+                lineWrapping: true,
+                indentUnit: 4,
+                tabSize: 4,
+                indentWithTabs: false
+            });
+        });
+
+        // WebSocket handlers
+        ws.onopen = () => {
+            updateConnectionStatus(true);
+            fetchFiles();
+        };
+
+        ws.onmessage = (event) => {
+            const thinking = document.getElementById("thinking");
+            if (thinking) thinking.remove();
+
+            if (event.data.startsWith("Agent:")) {
+                const content = event.data.replace("Agent: ", "");
+                addMessage(content, "agent");
+            }
+        };
+
+        ws.onclose = () => {
+            updateConnectionStatus(false);
+        };
+
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', function() {
+                const panelId = this.getAttribute('data-panel');
+                switchPanel(panelId);
+            });
+        });
+
+        function switchPanel(panelId) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.content-panel').forEach(p => p.classList.remove('active'));
+            
+            document.querySelector(`[data-panel="${panelId}"]`).classList.add('active');
+            document.getElementById(`${panelId}-panel`).classList.add('active');
+        }
+
+        // Agent selection
+        document.querySelectorAll('.agent-card').forEach(card => {
+            card.addEventListener('click', function() {
+                document.querySelectorAll('.agent-card').forEach(c => c.classList.remove('selected'));
+                this.classList.add('selected');
+                selectedAgent = this.getAttribute('data-agent');
+                document.getElementById('selectedAgentLabel').textContent = `@${selectedAgent}`;
+            });
+        });
+
+        // Chat functions
+        function addMessage(text, sender) {
+            const chat = document.getElementById('chat');
+            const msg = document.createElement("div");
+            msg.className = `message ${sender}`;
+
+            let source = sender === "user" ? "You" : (sender === "system" ? "System" : selectedAgent);
+            
+            if (sender === "agent") {
+                msg.innerHTML = `<span class="message-source">${source}</span>${text}`;
+            } else if (sender === "system") {
+                msg.innerHTML = text;
+            } else {
+                msg.innerHTML = `<span class="message-source">${source}</span>${text}`;
+            }
+            
+            chat.appendChild(msg);
+            chat.scrollTop = chat.scrollHeight;
+            
+            messageCount++;
+            document.getElementById('messagesCount').textContent = messageCount;
+        }
+
+        function showThinking() {
+            const chat = document.getElementById('chat');
+            const msg = document.createElement("div");
+            msg.id = "thinking";
+            msg.className = "message agent";
+            msg.innerHTML = `<span class="message-source">${selectedAgent}</span><span class="thinking-dots">Thinking</span>`;
+            chat.appendChild(msg);
+            chat.scrollTop = chat.scrollHeight;
+        }
+
+        function sendMessage() {
+            const input = document.getElementById("input");
+            const text = input.value.trim();
+            if (text) {
+                ws.send(`@${selectedAgent} ${text}`);
+                addMessage(text, "user");
+                showThinking();
+                input.value = "";
+            }
+        }
+
+        document.getElementById("input").addEventListener("keypress", function(event) {
+            if (event.key === "Enter") sendMessage();
+        });
+
+        // File handling
+        async function handleFileSelect(files) {
+            if (files.length > 0) {
+                const formData = new FormData();
+                for (let i = 0; i < files.length; i++) {
+                    formData.append("files", files[i]);
+                }
+
+                addMessage(`Uploading ${files.length} file(s)...`, "system");
+                try {
+                    const res = await fetch("http://localhost:8000/upload", {
+                        method: "POST",
+                        body: formData
+                    });
+                    const result = await res.json();
+                    addMessage(`✅ ${result.message}`, "system");
+                    fetchFiles();
+                } catch (err) {
+                    addMessage(`❌ Upload failed: ${err}`, "system");
+                }
+            }
+        }
+
+        async function fetchFiles() {
+            try {
+                const res = await fetch("http://localhost:8000/files");
+                const data = await res.json();
+                renderFileTree(data);
+            } catch (e) {
+                document.getElementById('fileTree').innerHTML = 
+                    '<div style="color: var(--error); padding: 10px;">Failed to load files</div>';
+            }
+        }
+
+        function renderFileTree(node) {
+            const container = document.getElementById('fileTree');
+            container.innerHTML = "";
+
+            function createNode(item, parent) {
+                const div = document.createElement("div");
+                div.className = "file-item";
+                const icon = item.type === "directory" ? "📁" : "📄";
+                div.innerHTML = `<span class="file-icon">${icon}</span><span>${item.name}</span>`;
+                
+                if (item.type === "file") {
+                    div.addEventListener('click', () => loadFile(item));
+                }
+                
+                parent.appendChild(div);
+
+                if (item.children) {
+                    const childrenContainer = document.createElement("div");
+                    childrenContainer.style.marginLeft = "20px";
+                    item.children.forEach(child => createNode(child, childrenContainer));
+                    parent.appendChild(childrenContainer);
+                }
+            }
+
+            if (node.children && node.children.length > 0) {
+                node.children.forEach(child => createNode(child, container));
+                document.getElementById('filesCount').textContent = countFiles(node);
+            } else {
+                container.innerHTML = '<div style="padding: 10px; text-align: center; color: var(--text-muted); font-size: 0.875rem;">Drop zone is empty</div>';
+            }
+        }
+
+        function countFiles(node) {
+            let count = 0;
+            if (node.type === "file") count++;
+            if (node.children) {
+                node.children.forEach(child => count += countFiles(child));
+            }
+            return count;
+        }
+
+        function loadFile(file) {
+            // Switch to editor tab
+            switchPanel('editor');
+            document.getElementById('editorInfo').textContent = file.name;
+            // In a real implementation, we would load the file content here
+            editor.setValue(`// Content of ${file.name}\n// Loading...`);
+        }
+
+        function saveFile() {
+            const content = editor.getValue();
+            addMessage("💾 File saved successfully", "system");
+            console.log("Saving file:", content);
+        }
+
+        function updateConnectionStatus(connected) {
+            const badge = document.getElementById('connectionStatus');
+            if (connected) {
+                badge.classList.add('online');
+                badge.classList.remove('offline');
+                badge.innerHTML = '<span class="status-dot"></span><span>Online</span>';
+            } else {
+                badge.classList.remove('online');
+                badge.classList.add('offline');
+                badge.innerHTML = '<span class="status-dot"></span><span>Offline</span>';
+            }
+        }
+
+        // Periodic file refresh
+        setInterval(fetchFiles, 10000);
+    </script>
+</body>
+
+</html>

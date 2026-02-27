@@ -1,0 +1,63 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environments
+venv/
+env/
+ENV/
+.env
+.venv
+env.bak/
+venv.bak/
+
+# Antigravity / IDE
+
+.idea/
+.vscode/
+*.swp
+
+# MCP & Node.js
+node_modules/
+.npm/
+.mcp/cache/
+.mcp/logs/
+*.local.json
+mcp-server-*.log
+
+# Project specific
+logs/
+data/
+*.db
+data.db
+.backend.pid
+*.log
+*.backup.*
+install.log
+.coverage
+coverage.xml
+*.pyc
+__pycache__/
+*.db
+*.db-journal
+nul

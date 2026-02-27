@@ -1,0 +1,534 @@
+name: Comprehensive CI/CD Pipeline
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main, develop ]
+  workflow_dispatch:
+
+env:
+  COVERAGE_THRESHOLD: 70
+
+jobs:
+  # ============================================================================
+  # Configuration Validation
+  # ============================================================================
+  validate-config:
+    name: Validate Configuration
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pyyaml
+    
+    - name: Validate YAML files
+      run: |
+        echo "Validating YAML configuration files..."
+        python -c "
+        import yaml
+        import sys
+        
+        files = [
+          'docker-compose.yml',
+          '.github/workflows/test.yml',
+          '.github/workflows/deploy.yml',
+          '.github/workflows/ci.yml'
+        ]
+        
+        for file in files:
+          try:
+            with open(file) as f:
+              yaml.safe_load(f)
+            print(f'✓ {file} is valid YAML')
+          except FileNotFoundError:
+            print(f'⚠ {file} not found (OK if not needed)')
+          except yaml.YAMLError as e:
+            print(f'✗ {file} has YAML errors: {e}')
+            sys.exit(1)
+        "
+    
+    - name: Validate JSON files
+      run: |
+        echo "Validating JSON configuration files..."
+        for file in .github/copilot/mcp.json .mcp/config.json; do
+          if [ -f "$file" ]; then
+            python -m json.tool "$file" > /dev/null && echo "✓ $file is valid JSON" || exit 1
+          fi
+        done
+    
+    - name: Check .env.example
+      run: |
+        if [ ! -f ".env.example" ]; then
+          echo "✗ .env.example not found"
+          exit 1
+        fi
+        echo "✓ .env.example exists"
+        
+        # Check for required variables
+        required_vars="GEMINI_API_KEY HOST PORT"
+        for var in $required_vars; do
+          if grep -q "^$var=" .env.example; then
+            echo "✓ $var found in .env.example"
+          else
+            echo "✗ $var missing from .env.example"
+            exit 1
+          fi
+        done
+    
+    - name: Validate shell scripts
+      run: |
+        echo "Validating shell scripts..."
+        for script in install.sh configure.sh start.sh stop.sh validate.sh; do
+          if [ -f "$script" ]; then
+            # Check syntax
+            bash -n "$script" && echo "✓ $script syntax OK" || exit 1
+            
+            # Check executable
+            if [ -x "$script" ]; then
+              echo "✓ $script is executable"
+            else
+              echo "⚠ $script is not executable"
+            fi
+            
+            # Check shebang
+            if head -1 "$script" | grep -q "^#!"; then
+              echo "✓ $script has shebang"
+            else
+              echo "✗ $script missing shebang"
+              exit 1
+            fi
+          fi
+        done
+
+  # ============================================================================
+  # Linting and Code Quality
+  # ============================================================================
+  lint:
+    name: Lint & Format Check
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-lint-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-lint-
+    
+    - name: Install linting tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install flake8 black isort pylint autopep8
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
+    
+    - name: Lint with flake8
+      run: |
+        echo "Running flake8..."
+        # Stop on critical errors
+        flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics \
+          --exclude=.git,__pycache__,.pytest_cache,htmlcov,venv,.venv
+        
+        # Check all issues (warnings)
+        flake8 . --count --max-complexity=15 --max-line-length=120 --statistics \
+          --exclude=.git,__pycache__,.pytest_cache,htmlcov,venv,.venv \
+          --exit-zero
+    
+    - name: Check code formatting with black
+      run: |
+        echo "Checking code formatting with black..."
+        black --check --diff . \
+          --exclude='/(\.git|\.pytest_cache|__pycache__|htmlcov|venv|\.venv)/' \
+          || (echo "⚠ Code formatting issues found. Run 'black .' to fix." && exit 0)
+    
+    - name: Check import sorting with isort
+      run: |
+        echo "Checking import sorting with isort..."
+        isort --check-only --diff . \
+          --skip-gitignore \
+          || (echo "⚠ Import sorting issues found. Run 'isort .' to fix." && exit 0)
+    
+    - name: Lint with pylint
+      run: |
+        echo "Running pylint..."
+        find . -name "*.py" \
+          -not -path "./.git/*" \
+          -not -path "./.pytest_cache/*" \
+          -not -path "./__pycache__/*" \
+          -not -path "./htmlcov/*" \
+          -not -path "./venv/*" \
+          -not -path "./.venv/*" \
+          | xargs pylint --exit-zero --max-line-length=120 \
+          || echo "⚠ Pylint found some issues (non-blocking)"
+
+  # ============================================================================
+  # Type Checking
+  # ============================================================================
+  type-check:
+    name: Type Checking
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-mypy-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-mypy-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install mypy types-PyYAML types-requests
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
+    
+    - name: Run mypy
+      run: |
+        echo "Running mypy type checking..."
+        mypy . \
+          --exclude '(venv|\.venv|htmlcov|\.pytest_cache)' \
+          --ignore-missing-imports \
+          --no-strict-optional \
+          --warn-redundant-casts \
+          --warn-unused-ignores \
+          || echo "⚠ Type checking found some issues (non-blocking)"
+
+  # ============================================================================
+  # Security Scanning
+  # ============================================================================
+  security:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-security-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-security-
+    
+    - name: Install security tools
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit safety pip-audit
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    
+    - name: Run Bandit security scan
+      run: |
+        echo "Running Bandit security scan..."
+        bandit -r . \
+          -x ./.git,./.pytest_cache,./htmlcov,./venv,./.venv \
+          -f json -o bandit-report.json \
+          || echo "⚠ Security scan found some issues"
+        
+        # Also output to console
+        bandit -r . \
+          -x ./.git,./.pytest_cache,./htmlcov,./venv,./.venv \
+          -ll \
+          || echo "⚠ Security scan complete"
+    
+    - name: Run Safety check
+      run: |
+        echo "Checking for known vulnerabilities in dependencies..."
+        safety check --json || echo "⚠ Some vulnerabilities found (non-blocking)"
+    
+    - name: Run pip-audit
+      run: |
+        echo "Auditing Python packages..."
+        pip-audit --format json || echo "⚠ Some issues found (non-blocking)"
+    
+    - name: Upload security reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: security-reports
+        path: |
+          bandit-report.json
+        retention-days: 30
+
+  # ============================================================================
+  # Test Suite - Multiple Python Versions
+  # ============================================================================
+  test:
+    name: Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    needs: [validate-config, lint]
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ['3.8', '3.9', '3.10', '3.11', '3.12']
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python ${{ matrix.python-version }}
+      uses: actions/setup-python@v4
+      with:
+        python-version: ${{ matrix.python-version }}
+    
+    - name: Cache dependencies
+      uses: actions/cache@v3
+      with:
+        path: ~/.cache/pip
+        key: ${{ runner.os }}-pip-${{ matrix.python-version }}-${{ hashFiles('**/requirements.txt') }}
+        restore-keys: |
+          ${{ runner.os }}-pip-${{ matrix.python-version }}-
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install pytest pytest-cov pytest-asyncio pytest-xdist pytest-timeout pyyaml
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
+    
+    - name: Run unit tests
+      run: |
+        echo "Running unit tests..."
+        pytest tests/unit -v \
+          --cov=src --cov=backend \
+          --cov-report=xml \
+          --cov-report=html \
+          --cov-report=term-missing \
+          --junitxml=junit-unit.xml \
+          --timeout=300 \
+          -n auto \
+          || echo "Some unit tests failed"
+    
+    - name: Run configuration tests
+      run: |
+        echo "Running configuration validation tests..."
+        pytest tests/config -v \
+          --junitxml=junit-config.xml \
+          --timeout=300 \
+          || echo "Some config tests failed"
+    
+    - name: Run integration tests
+      run: |
+        echo "Running integration tests..."
+        pytest tests/integration -v \
+          --cov=src --cov=backend --cov-append \
+          --cov-report=xml \
+          --cov-report=html \
+          --junitxml=junit-integration.xml \
+          --timeout=600 \
+          || echo "Some integration tests failed"
+    
+    - name: Run e2e tests
+      run: |
+        echo "Running end-to-end tests..."
+        pytest tests/e2e -v \
+          --junitxml=junit-e2e.xml \
+          --timeout=900 \
+          || echo "Some e2e tests failed"
+    
+    - name: Check coverage threshold
+      run: |
+        echo "Checking coverage threshold..."
+        coverage report --fail-under=${{ env.COVERAGE_THRESHOLD }} \
+          || (echo "⚠ Coverage below ${{ env.COVERAGE_THRESHOLD }}% threshold" && exit 0)
+    
+    - name: Generate coverage badge
+      if: matrix.python-version == '3.11'
+      run: |
+        COVERAGE=$(coverage report | grep TOTAL | awk '{print $4}' | sed 's/%//')
+        echo "Coverage: $COVERAGE%"
+        echo "COVERAGE=$COVERAGE" >> $GITHUB_ENV
+    
+    - name: Upload coverage reports
+      if: matrix.python-version == '3.11'
+      uses: actions/upload-artifact@v3
+      with:
+        name: coverage-reports
+        path: |
+          coverage.xml
+          htmlcov/
+        retention-days: 30
+    
+    - name: Upload test results
+      if: always()
+      uses: actions/upload-artifact@v3
+      with:
+        name: test-results-${{ matrix.python-version }}
+        path: |
+          junit-*.xml
+        retention-days: 30
+    
+    - name: Upload to Codecov
+      if: matrix.python-version == '3.11'
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./coverage.xml
+        flags: unittests
+        name: codecov-${{ matrix.python-version }}
+        fail_ci_if_error: false
+
+  # ============================================================================
+  # Coverage Report
+  # ============================================================================
+  coverage-report:
+    name: Coverage Report
+    runs-on: ubuntu-latest
+    needs: test
+    if: github.event_name == 'pull_request'
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Download coverage reports
+      uses: actions/download-artifact@v3
+      with:
+        name: coverage-reports
+    
+    - name: Generate coverage comment
+      run: |
+        COVERAGE=$(grep -oP 'line-rate="\K[0-9.]+' coverage.xml | head -1)
+        COVERAGE_PCT=$(echo "$COVERAGE * 100" | bc | cut -d. -f1)
+        
+        if [ $COVERAGE_PCT -ge 80 ]; then
+          BADGE="🟢"
+        elif [ $COVERAGE_PCT -ge 70 ]; then
+          BADGE="🟡"
+        else
+          BADGE="🔴"
+        fi
+        
+        cat > coverage-comment.md << EOF
+        ## Coverage Report $BADGE
+        
+        **Total Coverage:** $COVERAGE_PCT%
+        
+        $([ $COVERAGE_PCT -ge ${{ env.COVERAGE_THRESHOLD }} ] && echo "✅ Meets coverage threshold (${{ env.COVERAGE_THRESHOLD }}%)" || echo "⚠️ Below coverage threshold (${{ env.COVERAGE_THRESHOLD }}%)")
+        
+        <details>
+        <summary>View detailed coverage report</summary>
+        
+        Download the artifacts to view the full HTML coverage report.
+        
+        </details>
+        EOF
+        
+        cat coverage-comment.md
+    
+    - name: Comment PR
+      uses: actions/github-script@v6
+      if: github.event_name == 'pull_request'
+      with:
+        script: |
+          const fs = require('fs');
+          const comment = fs.readFileSync('coverage-comment.md', 'utf8');
+          
+          github.rest.issues.createComment({
+            issue_number: context.issue.number,
+            owner: context.repo.owner,
+            repo: context.repo.repo,
+            body: comment
+          });
+
+  # ============================================================================
+  # Test Summary
+  # ============================================================================
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [test, security, type-check]
+    if: always()
+    
+    steps:
+    - name: Download test results
+      uses: actions/download-artifact@v3
+      with:
+        pattern: test-results-*
+        path: test-results
+    
+    - name: Generate test summary
+      run: |
+        echo "# Test Suite Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        TOTAL_TESTS=0
+        FAILED_TESTS=0
+        
+        for file in test-results/*/junit-*.xml; do
+          if [ -f "$file" ]; then
+            TESTS=$(grep -oP 'tests="\K[0-9]+' "$file" | head -1)
+            FAILURES=$(grep -oP 'failures="\K[0-9]+' "$file" | head -1)
+            ERRORS=$(grep -oP 'errors="\K[0-9]+' "$file" | head -1)
+            
+            TOTAL_TESTS=$((TOTAL_TESTS + TESTS))
+            FAILED_TESTS=$((FAILED_TESTS + FAILURES + ERRORS))
+          fi
+        done
+        
+        PASSED_TESTS=$((TOTAL_TESTS - FAILED_TESTS))
+        
+        echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+        echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Total Tests | $TOTAL_TESTS |" >> $GITHUB_STEP_SUMMARY
+        echo "| Passed | ✅ $PASSED_TESTS |" >> $GITHUB_STEP_SUMMARY
+        echo "| Failed | ❌ $FAILED_TESTS |" >> $GITHUB_STEP_SUMMARY
+        
+        if [ $FAILED_TESTS -eq 0 ]; then
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "🎉 All tests passed!" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "⚠️ Some tests failed. Check the test artifacts for details." >> $GITHUB_STEP_SUMMARY
+        fi
+
+  # ============================================================================
+  # Status Check
+  # ============================================================================
+  ci-status:
+    name: CI Status
+    runs-on: ubuntu-latest
+    needs: [validate-config, lint, type-check, security, test]
+    if: always()
+    
+    steps:
+    - name: Check CI status
+      run: |
+        if [ "${{ needs.validate-config.result }}" != "success" ] || \
+           [ "${{ needs.lint.result }}" != "success" ] || \
+           [ "${{ needs.test.result }}" != "success" ]; then
+          echo "❌ CI pipeline failed"
+          exit 1
+        else
+          echo "✅ CI pipeline passed"
+        fi

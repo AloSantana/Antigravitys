@@ -1,0 +1,105 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.0, pytest-9.0.2, pluggy-1.6.0 -- C:\Python314\python.exe
+cachedir: .pytest_cache
+rootdir: C:\anti\antigravity-workspace-template
+configfile: pytest.ini
+testpaths: tests
+plugins: cov-7.0.0, anyio-4.12.1
+collecting ... collected 82 items / 5 errors
+
+=================================== ERRORS ====================================
+____________ ERROR collecting tests/e2e/test_complete_workflow.py _____________
+C:\Python314\Lib\site-packages\starlette\testclient.py:38: in <module>
+    import httpx
+E   ModuleNotFoundError: No module named 'httpx'
+
+During handling of the above exception, another exception occurred:
+tests\e2e\test_complete_workflow.py:7: in <module>
+    from fastapi.testclient import TestClient
+C:\Python314\Lib\site-packages\fastapi\testclient.py:1: in <module>
+    from starlette.testclient import TestClient as TestClient  # noqa
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\site-packages\starlette\testclient.py:40: in <module>
+    raise RuntimeError(
+E   RuntimeError: The starlette.testclient module requires the httpx package to be installed.
+E   You can install this with:
+E       $ pip install httpx
+__________ ERROR collecting tests/integration/test_api_endpoints.py ___________
+C:\Python314\Lib\site-packages\starlette\testclient.py:38: in <module>
+    import httpx
+E   ModuleNotFoundError: No module named 'httpx'
+
+During handling of the above exception, another exception occurred:
+tests\integration\test_api_endpoints.py:7: in <module>
+    from fastapi.testclient import TestClient
+C:\Python314\Lib\site-packages\fastapi\testclient.py:1: in <module>
+    from starlette.testclient import TestClient as TestClient  # noqa
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\site-packages\starlette\testclient.py:40: in <module>
+    raise RuntimeError(
+E   RuntimeError: The starlette.testclient module requires the httpx package to be installed.
+E   You can install this with:
+E       $ pip install httpx
+________ ERROR collecting tests/performance/test_api_response_times.py ________
+C:\Python314\Lib\site-packages\starlette\testclient.py:38: in <module>
+    import httpx
+E   ModuleNotFoundError: No module named 'httpx'
+
+During handling of the above exception, another exception occurred:
+tests\performance\test_api_response_times.py:11: in <module>
+    from fastapi.testclient import TestClient
+C:\Python314\Lib\site-packages\fastapi\testclient.py:1: in <module>
+    from starlette.testclient import TestClient as TestClient  # noqa
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\site-packages\starlette\testclient.py:40: in <module>
+    raise RuntimeError(
+E   RuntimeError: The starlette.testclient module requires the httpx package to be installed.
+E   You can install this with:
+E       $ pip install httpx
+_________ ERROR collecting tests/performance/test_cache_efficiency.py _________
+C:\Python314\Lib\site-packages\starlette\testclient.py:38: in <module>
+    import httpx
+E   ModuleNotFoundError: No module named 'httpx'
+
+During handling of the above exception, another exception occurred:
+tests\performance\test_cache_efficiency.py:10: in <module>
+    from fastapi.testclient import TestClient
+C:\Python314\Lib\site-packages\fastapi\testclient.py:1: in <module>
+    from starlette.testclient import TestClient as TestClient  # noqa
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\site-packages\starlette\testclient.py:40: in <module>
+    raise RuntimeError(
+E   RuntimeError: The starlette.testclient module requires the httpx package to be installed.
+E   You can install this with:
+E       $ pip install httpx
+_______ ERROR collecting tests/performance/test_concurrent_requests.py ________
+C:\Python314\Lib\site-packages\starlette\testclient.py:38: in <module>
+    import httpx
+E   ModuleNotFoundError: No module named 'httpx'
+
+During handling of the above exception, another exception occurred:
+tests\performance\test_concurrent_requests.py:12: in <module>
+    from fastapi.testclient import TestClient
+C:\Python314\Lib\site-packages\fastapi\testclient.py:1: in <module>
+    from starlette.testclient import TestClient as TestClient  # noqa
+    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+C:\Python314\Lib\site-packages\starlette\testclient.py:40: in <module>
+    raise RuntimeError(
+E   RuntimeError: The starlette.testclient module requires the httpx package to be installed.
+E   You can install this with:
+E       $ pip install httpx
+============================== warnings summary ===============================
+..\..\Users\LocalAdminUser\AppData\Roaming\Python\Python314\site-packages\_pytest\config\__init__.py:1428
+  C:\Users\LocalAdminUser\AppData\Roaming\Python\Python314\site-packages\_pytest\config\__init__.py:1428: PytestConfigWarning: Unknown config option: asyncio_mode
+  
+    self._warn_or_fail_if_strict(f"Unknown config option: {key}\n")
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+ERROR tests/e2e/test_complete_workflow.py - RuntimeError: The starlette.testc...
+ERROR tests/integration/test_api_endpoints.py - RuntimeError: The starlette.t...
+ERROR tests/performance/test_api_response_times.py - RuntimeError: The starle...
+ERROR tests/performance/test_cache_efficiency.py - RuntimeError: The starlett...
+ERROR tests/performance/test_concurrent_requests.py - RuntimeError: The starl...
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 5 failures !!!!!!!!!!!!!!!!!!!!!!!!!!
+======================== 1 warning, 5 errors in 1.19s =========================

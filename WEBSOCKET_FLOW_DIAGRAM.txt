@@ -1,0 +1,246 @@
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                   WEBSOCKET RECONNECTION FLOW DIAGRAM                         ║
+║                      WITH EXPONENTIAL BACKOFF + JITTER                        ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ NORMAL OPERATION                                                            │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    User Opens Page
+         │
+         ▼
+    Initialize WebSocket
+         │
+         ▼
+    ws.onopen()
+         │
+         ├─► reconnectAttempts = 0
+         ├─► Clear reconnectTimeout
+         └─► UI: [●] Online
+         
+    ┌────────────────┐
+    │  CONNECTED     │ ◄────┐
+    │  Normal ops    │      │
+    └────────────────┘      │
+         │                  │
+         │  Messages flow   │
+         │  back and forth  │
+         │                  │
+         ▼                  │
+    Everything OK           │
+         │                  │
+         └──────────────────┘
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ DISCONNECTION + RECONNECTION FLOW                                           │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+    Network/Server Issue
+         │
+         ▼
+    ws.onclose()
+         │
+         ├─► reconnectAttempts++
+         ├─► updateConnectionStatus(false)
+         │   └─► UI: [●] Reconnecting... (attempt 1)
+         │
+         ▼
+    calculateReconnectDelay()
+         │
+         ├─► exponentialDelay = 1000 × (1.5 ^ attempts)
+         ├─► cappedDelay = min(exponentialDelay, 30000)
+         ├─► jitter = random(-0.2, 0.2)
+         └─► finalDelay = cappedDelay × (1 + jitter)
+         │
+         ▼
+    setTimeout(connectWebSocket, finalDelay)
+         │
+         ▼
+    ┌──────── Wait for Delay ────────┐
+    │                                 │
+    │  Attempt 1: ~1.0s (0.8-1.2s)   │
+    │  Attempt 2: ~1.5s (1.2-1.8s)   │
+    │  Attempt 3: ~2.25s (1.8-2.7s)  │
+    │  Attempt 4: ~3.4s (2.7-4.1s)   │
+    │  Attempt 5: ~5.1s (4.0-6.1s)   │
+    │  Attempt 6+: →30s (24-36s)     │
+    │                                 │
+    └─────────────────────────────────┘
+         │
+         ▼
+    Try Reconnect
+         │
+         ├─────────────┬─────────────┐
+         │             │             │
+         ▼             ▼             ▼
+    SUCCESS      STILL DOWN     ERROR
+         │             │             │
+         │             │             └─► ws.onerror()
+         │             │                      │
+         │             └──────────────────────┘
+         │                                    │
+         ▼                                    ▼
+    ws.onopen()                    Back to ws.onclose()
+         │                                    │
+         ├─► reconnectAttempts = 0           ├─► reconnectAttempts++
+         ├─► Clear timeout                   ├─► Calculate new delay
+         ├─► UI: [●] Online                  ├─► UI: [●] Reconnecting... (attempt N)
+         └─► CONNECTED                       └─► Try again with longer delay
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ EXPONENTIAL BACKOFF TIMELINE                                                │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+Time  │ Attempt │ Delay    │ UI Display
+──────┼─────────┼──────────┼────────────────────────────────────────
+0.0s  │    -    │    -     │ [●] Online
+0.0s  │    -    │    -     │ ⚡ Disconnect!
+0.0s  │    1    │  ~1.0s   │ [●] Reconnecting... (attempt 1)
+1.0s  │    -    │    -     │ Try reconnect... Failed!
+1.0s  │    2    │  ~1.5s   │ [●] Reconnecting... (attempt 2)
+2.5s  │    -    │    -     │ Try reconnect... Failed!
+2.5s  │    3    │  ~2.25s  │ [●] Reconnecting... (attempt 3)
+4.75s │    -    │    -     │ Try reconnect... Failed!
+4.75s │    4    │  ~3.4s   │ [●] Reconnecting... (attempt 4)
+8.15s │    -    │    -     │ Try reconnect... Failed!
+8.15s │    5    │  ~5.1s   │ [●] Reconnecting... (attempt 5)
+13.3s │    -    │    -     │ Try reconnect... Failed!
+13.3s │    6    │  ~7.6s   │ [●] Reconnecting... (attempt 6)
+20.9s │    -    │    -     │ Try reconnect... Failed!
+20.9s │    7    │  ~11.4s  │ [●] Reconnecting... (attempt 7)
+32.3s │    -    │    -     │ Try reconnect... SUCCESS! ✅
+32.3s │    -    │    -     │ [●] Online
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ JITTER EFFECT (Thundering Herd Prevention)                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+WITHOUT JITTER (1000 clients):
+│
+├─ All clients disconnect at t=0
+│
+└─ Reconnection timeline:
+    
+    t=3s:  ████████████████████ (1000 simultaneous connections)
+    t=6s:  ████████████████████ (1000 simultaneous connections)
+    t=9s:  ████████████████████ (1000 simultaneous connections)
+           ⚠️  SERVER OVERLOAD
+
+
+WITH JITTER (1000 clients):
+│
+├─ All clients disconnect at t=0
+│
+└─ Reconnection timeline:
+    
+    t=0.8-1.2s:  ████▌▌▌▌  (distributed over 0.4s)
+    t=1.2-1.8s:  ████▌▌▌▌▌▌ (distributed over 0.6s)
+    t=1.8-2.7s:  ████▌▌▌▌▌▌▌▌▌ (distributed over 0.9s)
+                 ✅ SMOOTH LOAD
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ STATE DIAGRAM                                                               │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+                    ┌──────────────┐
+                    │  CONNECTED   │
+                    │ attempts = 0 │
+                    └──────┬───────┘
+                           │
+                   Disconnect Event
+                           │
+                           ▼
+                    ┌──────────────┐
+                    │ DISCONNECTED │
+                    │ attempts++   │
+                    └──────┬───────┘
+                           │
+                   Calculate Delay
+                           │
+                           ▼
+                    ┌──────────────┐
+                    │   WAITING    │
+                    │  (backoff)   │
+                    └──────┬───────┘
+                           │
+                   Timer Expires
+                           │
+                           ▼
+                    ┌──────────────┐
+                    │  CONNECTING  │
+                    │ Try reconnect│
+                    └──────┬───────┘
+                           │
+                  ┌────────┴────────┐
+                  │                 │
+              SUCCESS            FAILED
+                  │                 │
+                  ▼                 │
+           ┌──────────────┐         │
+           │  CONNECTED   │         │
+           │ attempts = 0 │         │
+           └──────────────┘         │
+                                    │
+                                    └─► Back to DISCONNECTED
+                                        (attempts++, longer delay)
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ COMPARISON: BEFORE vs AFTER                                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+BEFORE (Fixed 3s delay):
+────────────────────────────────────────────────────────────────────────────
+0s:   Disconnect
+3s:   Try (attempt 1) ────┐
+6s:   Try (attempt 2) ────┤
+9s:   Try (attempt 3) ────┤
+12s:  Try (attempt 4) ────┤  All at fixed 3s intervals
+15s:  Try (attempt 5) ────┤  No adaptation
+18s:  Try (attempt 6) ────┤  Server load: CONSTANT HIGH
+...   ...            ────┘  User: No feedback
+60s:  Try (attempt 20)
+
+AFTER (Exponential backoff + jitter):
+────────────────────────────────────────────────────────────────────────────
+0s:   Disconnect
+1s:   Try (attempt 1) ────┐
+2.5s: Try (attempt 2) ────┤
+4.8s: Try (attempt 3) ────┤  Increasing delays
+8.2s: Try (attempt 4) ────┤  Smart adaptation
+13s:  Try (attempt 5) ────┤  Server load: DECREASING
+21s:  Try (attempt 6) ────┤  User: Shows "Reconnecting... (attempt X)"
+32s:  Try (attempt 7) ────┤  Reaches 30s max
+62s:  Try (attempt 8) ────┘
+92s:  Try (attempt 9)
+
+Result: 80% fewer attempts! 🚀
+
+
+┌─────────────────────────────────────────────────────────────────────────────┐
+│ KEY METRICS                                                                 │
+└─────────────────────────────────────────────────────────────────────────────┘
+
+┌─────────────────────────────────┐  ┌─────────────────────────────────┐
+│ BEFORE (Fixed 3s)               │  │ AFTER (Exponential Backoff)     │
+├─────────────────────────────────┤  ├─────────────────────────────────┤
+│ • 1 min:  ~20 attempts          │  │ • 1 min:  ~10 attempts          │
+│ • 5 min:  ~100 attempts         │  │ • 5 min:  ~20 attempts          │
+│ • Load:   Constant High █████   │  │ • Load:   Decreasing ██▌        │
+│ • UI:     No feedback           │  │ • UI:     Shows progress        │
+│ • Smart:  No                    │  │ • Smart:  Yes                   │
+└─────────────────────────────────┘  └─────────────────────────────────┘
+
+          ❌ Inefficient                      ✅ Optimized
+
+
+╔═══════════════════════════════════════════════════════════════════════════════╗
+║                            IMPLEMENTATION COMPLETE                            ║
+║                                    ✅ 100%                                    ║
+╚═══════════════════════════════════════════════════════════════════════════════╝
+

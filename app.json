@@ -1,0 +1,24 @@
+{
+  "name": "Antigravity Workspace",
+  "description": "AI-powered development workspace with 12 specialized agents, 18 MCP servers, and an enhanced web GUI",
+  "repository": "https://github.com/primoscope/antigravity-workspace-template",
+  "logo": "https://img.shields.io/badge/Antigravity-Workspace-blue",
+  "env": {
+    "GEMINI_API_KEY": {
+      "description": "Google Gemini AI API Key (get from https://aistudio.google.com/app/apikey)",
+      "required": true
+    },
+    "COPILOT_MCP_GITHUB_TOKEN": {
+      "description": "GitHub Personal Access Token for MCP integration",
+      "required": false
+    },
+    "LOG_LEVEL": {
+      "description": "Logging level",
+      "value": "INFO",
+      "required": false
+    }
+  },
+  "options": {
+    "allow-unauthenticated": true
+  }
+}

@@ -1,0 +1,62 @@
+steps:
+  # Build the Docker image
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'build'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/antigravity-workspace:$COMMIT_SHA'
+      - '-t'
+      - 'gcr.io/$PROJECT_ID/antigravity-workspace:latest'
+      - '.'
+
+  # Push to Container Registry
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/antigravity-workspace:$COMMIT_SHA'
+
+  - name: 'gcr.io/cloud-builders/docker'
+    args:
+      - 'push'
+      - 'gcr.io/$PROJECT_ID/antigravity-workspace:latest'
+
+  # Deploy to Cloud Run
+  - name: 'gcr.io/google.com/cloudsdktool/cloud-sdk'
+    entrypoint: gcloud
+    args:
+      - 'run'
+      - 'deploy'
+      - 'antigravity-workspace'
+      - '--image'
+      - 'gcr.io/$PROJECT_ID/antigravity-workspace:$COMMIT_SHA'
+      - '--region'
+      - '${_REGION}'
+      - '--platform'
+      - 'managed'
+      - '--allow-unauthenticated'
+      - '--port'
+      - '8000'
+      - '--memory'
+      - '2Gi'
+      - '--cpu'
+      - '2'
+      - '--timeout'
+      - '300'
+      - '--concurrency'
+      - '80'
+      - '--min-instances'
+      - '0'
+      - '--max-instances'
+      - '10'
+      - '--set-env-vars'
+      - 'HOST=0.0.0.0,PORT=8000,ALLOWED_ORIGINS=*,REMOTE_ACCESS=true,LOG_LEVEL=INFO'
+
+substitutions:
+  _REGION: us-central1
+
+images:
+  - 'gcr.io/$PROJECT_ID/antigravity-workspace:$COMMIT_SHA'
+  - 'gcr.io/$PROJECT_ID/antigravity-workspace:latest'
+
+options:
+  logging: CLOUD_LOGGING_ONLY

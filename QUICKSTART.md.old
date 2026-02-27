@@ -1,0 +1,349 @@
+# Quick Start Guide
+
+Get up and running with Antigravity Workspace in minutes!
+
+## ✅ Prerequisites Check
+
+Before you begin, ensure you have:
+- Ubuntu 20.04+ or Debian 11+ (or similar Linux distribution)
+- At least 2GB RAM available
+- At least 5GB disk space
+- Internet connection
+- sudo/root access (for installation)
+
+## 🚀 For Ubuntu VPS (Recommended)
+
+### Step 1: Clone and Install
+
+```bash
+# Clone the repository
+git clone https://github.com/primoscope/antigravity-workspace-template.git
+cd antigravity-workspace-template
+
+# Make scripts executable
+chmod +x *.sh
+
+# Run automated installation (installs everything you need)
+./install.sh
+```
+
+The installation script will:
+- ✅ Install Node.js, Python, Docker
+- ✅ Setup MCP servers
+- ✅ Create Python virtual environment
+- ✅ Install all dependencies
+- ✅ Configure systemd service
+- ✅ Setup Nginx reverse proxy (optional)
+- ✅ Configure firewall
+
+**Time:** ~5-10 minutes
+
+### Step 1.5: Verify Installation
+
+After installation completes, verify everything is set up correctly:
+
+```bash
+# Run the comprehensive test suite
+./test-setup.sh
+```
+
+This will check:
+- ✅ Backend imports successfully
+- ✅ All routes are properly configured
+- ✅ Frontend files are correct
+- ✅ No duplicate routes
+- ✅ Configuration files are valid
+- ✅ All helper scripts are executable
+- ✅ Custom agents are present
+
+**Expected Result:** All tests should pass (100% success rate)
+
+### Step 2: Configure
+
+```bash
+# Run interactive configuration wizard
+./configure.sh
+```
+
+You'll be guided through:
+- Gemini AI API key setup
+- GitHub token configuration
+- Local Ollama setup (optional)
+- Optional services (Brave Search, PostgreSQL)
+- Server settings
+
+**Time:** ~2-3 minutes
+
+### Step 3: Start
+
+```bash
+# Start all services
+./start.sh
+
+# Or use systemd
+sudo systemctl start antigravity
+```
+
+### Step 4: Access
+
+Open your browser:
+```
+http://your-server-ip/
+```
+
+**That's it! You're ready to code with AI! 🎉**
+
+---
+
+## 💻 For Local Development
+
+### Quick Setup (5 minutes)
+
+```bash
+# 1. Clone
+git clone https://github.com/primoscope/antigravity-workspace-template.git
+cd antigravity-workspace-template
+
+# 2. Create virtual environment
+python3 -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# 3. Install Python dependencies
+pip install -r requirements.txt
+pip install -r backend/requirements.txt
+
+# 4. Install Node.js MCP servers
+npm install -g @modelcontextprotocol/server-filesystem
+npm install -g @modelcontextprotocol/server-git
+npm install -g @github/mcp-server
+
+# 5. Configure
+cp .env.example .env
+nano .env  # Add your GEMINI_API_KEY
+
+# 6. Start backend
+cd backend
+python main.py
+```
+
+### Access
+Open `frontend/index.html` in your browser or go to `http://localhost:8000`
+
+---
+
+## 🐳 For Docker Users
+
+### Using Docker Compose (Easiest)
+
+```bash
+# 1. Clone
+git clone https://github.com/primoscope/antigravity-workspace-template.git
+cd antigravity-workspace-template
+
+# 2. Configure environment
+cp .env.example .env
+nano .env  # Add your API keys
+
+# 3. Start all services
+docker-compose up -d
+
+# 4. View logs
+docker-compose logs -f
+
+# 5. Access
+# http://localhost:8000
+```
+
+### Using Docker (Manual)
+
+```bash
+# Build
+docker build -t antigravity .
+
+# Run
+docker run -d \
+  --name antigravity \
+  -p 8000:8000 \
+  --env-file .env \
+  -v $(pwd)/drop_zone:/app/drop_zone \
+  -v $(pwd)/logs:/app/logs \
+  antigravity
+
+# View logs
+docker logs -f antigravity
+```
+
+---
+
+## 📋 Verification
+
+After installation, validate your setup:
+
+```bash
+# Run validation script
+./validate.sh
+```
+
+This checks:
+- ✅ Python environment
+- ✅ Node.js and npm
+- ✅ Configuration files
+- ✅ Directory structure
+- ✅ Custom agents
+- ✅ Docker setup
+- ✅ Services status
+
+---
+
+## 🎯 First Steps
+
+### 1. Test the Web Interface
+
+1. Open http://localhost:8000 in your browser
+2. You should see the enhanced web GUI
+3. Try sending a message in the chat
+
+### 2. Use an AI Agent
+
+In the web interface:
+1. Select an agent from the right panel (e.g., "Full-Stack Developer")
+2. Type: "Create a simple REST API endpoint"
+3. Watch the agent respond with code and instructions
+
+### 3. Drop a File
+
+1. Drag and drop a code file into the drop zone area
+2. The file will be ingested into the RAG system
+3. Ask questions about the file content
+
+### 4. Use GitHub Copilot Integration
+
+In VS Code with GitHub Copilot:
+```
+@agent:full-stack-developer Create a user authentication system
+```
+
+---
+
+## 📖 Common Tasks
+
+### Start Services
+```bash
+./start.sh
+# Or: sudo systemctl start antigravity
+# Or: docker-compose up -d
+```
+
+### Stop Services
+```bash
+./stop.sh
+# Or: sudo systemctl stop antigravity
+# Or: docker-compose down
+```
+
+### View Logs
+```bash
+# Systemd
+sudo journalctl -u antigravity -f
+
+# Docker
+docker-compose logs -f
+
+# Direct
+tail -f logs/backend.log
+```
+
+### Update Configuration
+```bash
+./configure.sh
+sudo systemctl restart antigravity  # If using systemd
+```
+
+### Check Health
+```bash
+curl http://localhost:8000/health
+curl http://localhost:8000/performance/health
+```
+
+---
+
+## 🆘 Troubleshooting
+
+### Port Already in Use
+```bash
+# Find what's using port 8000
+sudo lsof -i :8000
+
+# Kill the process
+sudo kill -9 <PID>
+
+# Or change the port in .env
+echo "PORT=8001" >> .env
+```
+
+### Service Won't Start
+```bash
+# Check logs
+sudo journalctl -u antigravity -xe
+
+# Validate setup
+./validate.sh
+
+# Check Python environment
+source venv/bin/activate
+python -c "import fastapi; print('FastAPI OK')"
+```
+
+### Missing Dependencies
+```bash
+# Reinstall Python deps
+source venv/bin/activate
+pip install -r requirements.txt --force-reinstall
+
+# Reinstall MCP servers
+npm install -g @modelcontextprotocol/server-filesystem --force
+```
+
+### Docker Issues
+```bash
+# Reset Docker environment
+docker-compose down -v
+docker-compose up -d --build
+
+# Check Docker logs
+docker-compose logs backend
+
+# Restart Docker
+sudo systemctl restart docker
+```
+
+---
+
+## 🎓 Next Steps
+
+1. **Read the full README**: [README.md](README.md)
+2. **Learn about agents**: [.github/agents/README.md](.github/agents/README.md)
+3. **Explore MCP servers**: [.mcp/README.md](.mcp/README.md)
+4. **Check workflows**: [.github/agents/CODING_WORKFLOW.md](.github/agents/CODING_WORKFLOW.md)
+
+---
+
+## 💡 Tips
+
+1. **Use the agent selector** in the web GUI to switch between agents
+2. **Monitor performance** at http://localhost:8000/performance/analysis
+3. **Check agent recommendations** with the agent manager
+4. **Enable Ollama** for local AI (free, no API key needed)
+5. **Customize agents** by editing files in `.github/agents/`
+
+---
+
+## 🎉 You're Ready!
+
+Your Antigravity Workspace is now set up and ready to supercharge your development workflow!
+
+**Happy Coding!** 🚀
+
+For support, check:
+- GitHub Issues: https://github.com/primoscope/antigravity-workspace-template/issues
+- Discussions: https://github.com/primoscope/antigravity-workspace-template/discussions

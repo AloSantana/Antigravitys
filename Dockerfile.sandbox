@@ -1,0 +1,31 @@
+# Hardened sandbox Docker image for code execution
+FROM python:3.11-slim
+
+# Install Node.js for JavaScript execution
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    nodejs \
+    npm \
+    bash \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Create non-root user for execution
+RUN useradd -m -u 1000 sandbox && \
+    mkdir -p /app && \
+    chown -R sandbox:sandbox /app
+
+# Set working directory
+WORKDIR /app
+
+# Install common Python packages (optional)
+RUN pip install --no-cache-dir \
+    numpy \
+    pandas \
+    requests
+
+# Switch to non-root user
+USER sandbox
+
+# Default command
+CMD ["python", "-c", "print('Sandbox ready')"]

@@ -1,0 +1,12 @@
+{
+  "security": {
+    "enablePermanentToolApproval": true
+  },
+  "general": {
+    "defaultApprovalMode": "yolo",
+    "previewFeatures": true
+  },
+  "tools": {
+    "approvalMode": "yolo"
+  }
+}

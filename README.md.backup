@@ -1,0 +1,589 @@
+# Antigravity Workspace Template
+
+<div align="center">
+
+![Antigravity Banner](https://img.shields.io/badge/Antigravity-Workspace-blue?style=for-the-badge)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](https://opensource.org/licenses/MIT)
+[![Python 3.8+](https://img.shields.io/badge/python-3.8+-blue.svg?style=for-the-badge)](https://www.python.org/downloads/)
+[![Node.js 20+](https://img.shields.io/badge/node.js-20+-green.svg?style=for-the-badge)](https://nodejs.org/)
+
+**A production-ready, AI-powered development workspace with automated setup, custom coding agents, 18+ MCP servers, and an enhanced web GUI for advanced development workflows.**
+
+[Quick Start](#-quick-start) • [Remote VPS Deploy](#-remote-vps-deployment) • [Features](#-features) • [Documentation](#-documentation) • [Support](#-support)
+
+</div>
+
+---
+
+## 🚀 One-Line Installation
+
+### Local Installation (Ubuntu/Debian)
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install.sh | bash
+```
+
+### Remote VPS Installation (via SSH)
+
+```bash
+# Basic installation
+curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh | bash
+```
+
+```bash
+# With automatic SSL for seecast.cloud domain
+AUTO_SSL_DOMAIN=seecast.cloud AUTO_SSL_EMAIL=admin@seecast.cloud \
+  curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh | bash
+```
+
+> **💡 Tip**: The remote installer automatically configures firewall, nginx, and SSL with Let's Encrypt!  
+> **🔒 SSL**: For seecast.cloud domain, SSL is configured automatically when you provide AUTO_SSL_DOMAIN and AUTO_SSL_EMAIL.
+
+---
+
+## ✨ What's New
+
+### 🤖 **9 Specialized AI Agents**
+- **full-stack-developer**: Complete web application development
+- **devops-infrastructure**: Docker, Kubernetes, CI/CD pipelines
+- **testing-stability-expert**: Comprehensive testing and validation
+- **performance-optimizer**: Performance profiling and optimization
+- **code-reviewer**: Security and quality code reviews
+- **docs-master**: Documentation creation and verification
+- **repo-optimizer**: Repository setup and tooling
+
+### 🔧 **18 MCP Servers**
+**Core**: filesystem, git, github, python-analysis, memory, sequential-thinking  
+**Data**: sqlite, postgres  
+**Web**: puppeteer, fetch, brave-search  
+**Infrastructure**: docker, kubernetes  
+**Communication**: slack, time  
+**Cloud**: aws, sentry, gitlab
+
+### 🎨 **Enhanced Web GUI**
+- **Multi-tab Interface**: Chat, Code Editor, Terminal
+- **Agent Selector**: Switch between AI agents on the fly
+- **Code Editor**: Syntax highlighting with CodeMirror
+- **Live Terminal**: Interactive command execution
+- **Real-time Stats**: Monitor workspace performance
+- **Dynamic Backend Detection**: Automatically finds backend on any port
+- **Remote Access Support**: Works seamlessly on VPS deployments
+
+---
+
+## 🌐 Remote VPS Deployment
+
+Deploy Antigravity Workspace on your Ubuntu VPS in minutes!
+
+### Quick Remote Deploy
+
+```bash
+# 1. SSH into your VPS
+ssh user@your-vps-ip
+
+# 2. Run the remote installer
+curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh | bash
+
+# 3. Add your API keys
+nano .env
+
+# 4. Start the workspace
+./start.sh
+
+# 5. Access from browser
+# http://your-vps-ip
+```
+
+### What the Remote Installer Does
+
+- ✅ **Installs all dependencies** (Node.js, Python, Docker)
+- ✅ **Configures firewall** (ports 80, 443, 3000, 8000)
+- ✅ **Sets up nginx** reverse proxy with error handling
+- ✅ **Enables CORS** for remote access
+- ✅ **Auto-SSL for seecast.cloud** (when AUTO_SSL_DOMAIN is set)
+- ✅ **Optional SSL** with Let's Encrypt for any domain
+- ✅ **Auto-configuration** for your VPS IP/domain
+- ✅ **Validates installation** to ensure all components installed correctly
+
+### Remote Access Features
+
+- **Dynamic Host Detection**: Frontend automatically finds backend
+- **CORS Configuration**: Supports wildcard or specific origins
+- **WebSocket Support**: Real-time communication over remote connections
+- **SSL/HTTPS Ready**: Easy setup with Let's Encrypt
+- **Nginx Reverse Proxy**: Production-ready configuration included
+
+📖 **[Complete Remote Deployment Guide →](docs/REMOTE_DEPLOYMENT.md)**
+
+---
+
+## 📦 Quick Start
+
+### Option 1: Automated Installation (Recommended for Ubuntu VPS)
+
+```bash
+# Clone the repository
+git clone https://github.com/primoscope/antigravity-workspace-template.git
+cd antigravity-workspace-template
+
+# Run automated installation
+./install.sh
+
+# Configure your environment
+./configure.sh
+
+# Start the workspace
+./start.sh
+```
+
+### Option 2: Manual Setup
+
+```bash
+# 1. Install system dependencies
+sudo apt-get update
+sudo apt-get install -y python3 python3-pip python3-venv nodejs npm docker.io
+
+# 2. Create Python virtual environment
+python3 -m venv venv
+source venv/bin/activate
+
+# 3. Install Python dependencies
+pip install -r requirements.txt
+pip install -r backend/requirements.txt
+
+# 4. Install MCP servers
+npm install -g @modelcontextprotocol/server-filesystem
+npm install -g @modelcontextprotocol/server-git
+npm install -g @github/mcp-server
+# ... (see install.sh for complete list)
+
+# 5. Configure environment
+cp .env.example .env
+nano .env  # Edit with your API keys
+
+# 6. Start the backend
+cd backend
+python main.py
+```
+
+### Option 3: Docker Compose
+
+```bash
+# Start all services
+docker-compose up -d
+
+# View logs
+docker-compose logs -f
+
+# Stop services
+docker-compose down
+```
+
+## 🔑 Configuration
+
+### Required API Keys
+
+Get your API keys from:
+- **Gemini AI**: https://aistudio.google.com/app/apikey
+- **Vertex AI** (optional, enterprise-grade): https://console.cloud.google.com/apis/credentials
+- **GitHub Token**: https://github.com/settings/tokens (scopes: `repo`, `read:org`)
+
+### Configuration Wizard
+
+Run the interactive configuration wizard:
+```bash
+./configure.sh
+```
+
+This will guide you through:
+- ✅ Gemini AI setup
+- ✅ Vertex AI setup (optional, for enterprise use)
+- ✅ GitHub integration
+- ✅ Local Ollama configuration
+- ✅ Optional services (Brave Search, PostgreSQL, etc.)
+- ✅ Server settings
+
+### Manual Configuration
+
+Edit `.env` file:
+```bash
+# AI Models
+GEMINI_API_KEY=your_api_key_here
+
+# Vertex AI (optional, for enterprise)
+VERTEX_API_KEY=your_vertex_api_key_here
+VERTEX_PROJECT_ID=your-gcp-project-id
+VERTEX_LOCATION=us-central1
+VERTEX_MODEL=gemini-pro
+
+# Local Models
+LOCAL_MODEL=llama3
+
+# GitHub Integration
+COPILOT_MCP_GITHUB_TOKEN=your_token_here
+
+# Optional Services
+COPILOT_MCP_BRAVE_API_KEY=
+COPILOT_MCP_POSTGRES_CONNECTION_STRING=
+
+# Server Configuration
+HOST=0.0.0.0
+PORT=8000
+```
+
+## 🎯 Usage
+
+### Starting the Workspace
+
+```bash
+# Quick start (recommended)
+./start.sh
+
+# Or use systemd service
+sudo systemctl start antigravity
+sudo systemctl enable antigravity  # Auto-start on boot
+
+# Or use Docker
+docker-compose up -d
+```
+
+### Stopping the Workspace
+
+```bash
+# Quick stop
+./stop.sh
+
+# Or systemd
+sudo systemctl stop antigravity
+
+# Or Docker
+docker-compose down
+```
+
+### Accessing the Interface
+
+Open your browser and navigate to:
+- **Web GUI**: http://localhost:8000 (or your server IP)
+- **API Docs**: http://localhost:8000/docs
+- **Health Check**: http://localhost:8000/health
+
+### Using AI Agents
+
+#### In the Web Interface
+1. Select an agent from the right panel
+2. Type your request in the chat
+3. The selected agent will respond with expertise
+
+#### With GitHub Copilot
+```bash
+# In GitHub Copilot Chat or IDE
+@agent:full-stack-developer Create a REST API for user management
+@agent:devops-infrastructure Set up Docker containers for this app
+@agent:testing-stability-expert Write comprehensive tests
+@agent:performance-optimizer Analyze and optimize performance
+```
+
+### Example Workflows
+
+#### 1. Create a New Feature
+```bash
+@full-stack-developer Create a user authentication system with:
+- JWT token-based auth
+- Login/register endpoints
+- Password hashing with bcrypt
+- Session management
+Include both backend API and frontend components
+```
+
+#### 2. Setup CI/CD Pipeline
+```bash
+@devops-infrastructure Create a GitHub Actions workflow that:
+- Runs tests on Python 3.9, 3.10, 3.11
+- Builds Docker images
+- Deploys to staging on develop branch
+- Deploys to production on main with approval
+```
+
+#### 3. Optimize Performance
+```bash
+@performance-optimizer Analyze the application and:
+- Profile CPU and memory usage
+- Identify bottlenecks
+- Suggest optimization strategies
+- Implement caching where appropriate
+```
+
+## 📊 Monitoring & Maintenance
+
+### Health Check
+
+```bash
+# Run comprehensive validation
+./validate.sh
+
+# Check service status
+sudo systemctl status antigravity
+
+# View logs
+sudo journalctl -u antigravity -f
+```
+
+### Performance Monitoring
+
+Access performance metrics:
+- **Health**: http://localhost:8000/performance/health
+- **Metrics**: http://localhost:8000/performance/metrics
+- **Analysis**: http://localhost:8000/performance/analysis
+
+### Backup & Restore
+
+```bash
+# Backup data
+tar -czf backup.tar.gz drop_zone/ data.db logs/ .env
+
+# Restore data
+tar -xzf backup.tar.gz
+```
+
+## 🏗️ Architecture
+
+```mermaid
+graph TD
+    User[User] -->|Interacts| WebGUI[Web GUI]
+    WebGUI -->|WebSocket| Backend[FastAPI Backend]
+    
+    subgraph "AI Intelligence Layer"
+        Backend --> AgentManager[Agent Manager]
+        AgentManager --> FSAgent[Full-Stack Agent]
+        AgentManager --> DevOpsAgent[DevOps Agent]
+        AgentManager --> TestAgent[Testing Agent]
+        AgentManager --> PerfAgent[Performance Agent]
+        
+        FSAgent --> Gemini[Gemini AI]
+        DevOpsAgent --> Gemini
+        FSAgent --> Ollama[Local Ollama]
+    end
+    
+    subgraph "MCP Server Layer"
+        AgentManager --> MCP[MCP Servers]
+        MCP --> FS[Filesystem]
+        MCP --> Git[Git]
+        MCP --> GitHub[GitHub]
+        MCP --> Docker[Docker]
+        MCP --> DB[Databases]
+    end
+    
+    subgraph "Data Layer"
+        Backend --> ChromaDB[(ChromaDB)]
+        Backend --> Redis[(Redis)]
+        Backend --> SQLite[(SQLite)]
+    end
+    
+    Backend --> DropZone[Drop Zone]
+    DropZone --> Watcher[File Watcher]
+    Watcher --> Ingest[RAG Ingestion]
+    Ingest --> ChromaDB
+```
+
+## 📁 Project Structure
+
+```
+antigravity-workspace-template/
+├── .github/
+│   ├── agents/                    # Custom AI agents
+│   │   ├── full-stack-developer.agent.md
+│   │   ├── devops-infrastructure.agent.md
+│   │   ├── testing-stability-expert.agent.md
+│   │   ├── performance-optimizer.agent.md
+│   │   └── ...
+│   └── copilot/
+│       └── mcp.json               # MCP server configuration
+├── .mcp/
+│   └── config.json                # MCP configuration
+├── backend/
+│   ├── agent/
+│   │   ├── manager.py             # Agent management system
+│   │   ├── orchestrator.py       # AI orchestration
+│   │   └── ...
+│   ├── utils/
+│   │   ├── performance.py         # Performance monitoring
+│   │   └── ...
+│   ├── rag/                       # RAG implementation
+│   └── main.py                    # FastAPI application
+├── frontend/
+│   └── index.html                 # Enhanced web GUI
+├── drop_zone/                     # File drop area
+├── artifacts/                     # Generated artifacts
+├── logs/                          # Application logs
+├── install.sh                     # Automated installation
+├── configure.sh                   # Configuration wizard
+├── start.sh                       # Quick start script
+├── stop.sh                        # Stop script
+├── validate.sh                    # Setup validation
+├── docker-compose.yml             # Docker orchestration
+├── Dockerfile                     # Container definition
+├── requirements.txt               # Python dependencies
+└── README.md                      # This file
+```
+
+## 🔧 Advanced Configuration
+
+### MCP Server Customization
+
+Edit `.github/copilot/mcp.json` to enable/disable servers:
+
+```json
+{
+  "mcpServers": {
+    "filesystem": {
+      "enabled": true,
+      "priority": "high"
+    },
+    "postgres": {
+      "enabled": false,
+      "note": "Enable when using PostgreSQL"
+    }
+  }
+}
+```
+
+### Adding Custom Agents
+
+Create a new agent in `.github/agents/`:
+
+```markdown
+# My Custom Agent
+
+## Agent Metadata
+- **Name**: my-custom-agent
+- **Type**: Custom Agent
+- **Expertise**: Your specialty area
+- **Priority**: high
+
+## Purpose
+Description of what this agent does...
+
+## Core Responsibilities
+1. **Task 1**: Description
+2. **Task 2**: Description
+
+## Available Tools
+- filesystem: File operations
+- git: Version control
+```
+
+### Performance Tuning
+
+Edit `backend/main.py` to adjust:
+- Worker count
+- Timeout settings
+- Cache configuration
+- Rate limiting
+
+## 🚀 Deployment
+
+### Ubuntu VPS
+
+```bash
+# 1. Install
+./install.sh
+
+# 2. Configure
+./configure.sh
+
+# 3. Enable service
+sudo systemctl enable antigravity
+sudo systemctl start antigravity
+
+# 4. Setup firewall
+sudo ufw allow 80/tcp
+sudo ufw allow 443/tcp
+sudo ufw enable
+```
+
+### Docker Production
+
+```bash
+# Build production image
+docker build -t antigravity:latest .
+
+# Run with production settings
+docker run -d \
+  --name antigravity \
+  -p 80:8000 \
+  --env-file .env \
+  --restart unless-stopped \
+  antigravity:latest
+```
+
+### Kubernetes
+
+Deploy to Kubernetes:
+```bash
+kubectl apply -f k8s/
+```
+
+See `.github/agents/devops-infrastructure.agent.md` for complete K8s manifests.
+
+## 🧪 Testing
+
+```bash
+# Run tests
+pytest tests/ -v
+
+# With coverage
+pytest --cov=backend tests/
+
+# Specific test file
+pytest tests/test_agent.py -v
+```
+
+## 📚 Documentation
+
+### Quick Guides
+- **[Quick Start Guide](QUICKSTART.md)**: Get up and running in 5 minutes
+- **[Remote VPS Deployment](docs/REMOTE_DEPLOYMENT.md)**: Complete guide for deploying on remote servers
+- **[Setup Guide](COPILOT_SETUP.md)**: Detailed setup instructions
+- **[Troubleshooting](TROUBLESHOOTING.md)**: Common issues and solutions
+
+### Developer Guides
+- **[Copilot Instructions](.github/copilot-instructions.md)**: Repository guidelines for GitHub Copilot
+- **[Agent Documentation](.github/agents/README.md)**: How to use agents
+- **[Workflow Guide](.github/agents/CODING_WORKFLOW.md)**: Development workflows
+- **[Architecture](docs/ARCHITECTURE.md)**: System architecture overview
+
+### Configuration & Advanced
+- **[MCP Servers](.mcp/README.md)**: MCP server details
+- **[Configuration Reference](CONFIG_VALIDATION_QUICK_REFERENCE.md)**: Environment variables
+- **[Performance Guide](PERFORMANCE.md)**: Performance optimization tips
+- **[Security Guide](docs/SECURITY.md)**: Security best practices
+
+## 🤝 Contributing
+
+Contributions are welcome! Please:
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Submit a pull request
+
+## 📄 License
+
+MIT License - see [LICENSE](LICENSE) file for details.
+
+## 🆘 Support
+
+- **Issues**: https://github.com/primoscope/antigravity-workspace-template/issues
+- **Discussions**: https://github.com/primoscope/antigravity-workspace-template/discussions
+
+## 🎉 Acknowledgments
+
+Built with:
+- FastAPI - Modern web framework
+- ChromaDB - Vector database
+- Langchain - AI orchestration
+- GitHub Copilot - AI assistance
+- MCP Protocol - Model Context Protocol
+
+---
+
+**Ready to elevate your development workflow?** Run `./install.sh` to get started! 🚀

@@ -1,0 +1,9 @@
+google-genai>=1.0.0
+google-cloud-aiplatform>=1.38.0
+pydantic
+pydantic-settings
+python-dotenv
+pytest
+pyngrok>=7.0.0
+httpx
+mcp

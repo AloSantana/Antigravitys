@@ -1,0 +1,1222 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Antigravity | AI-Powered Workspace</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/theme/monokai.min.css">
+    <link rel="stylesheet" href="css/legacy.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <div class="header">
+            <div class="logo">
+                <div class="logo-icon">🚀</div>
+                <span>Antigravity Workspace</span>
+            </div>
+            <div class="status-badges">
+                <div class="badge online" id="connectionStatus">
+                    <span class="status-dot"></span>
+                    <span>Online</span>
+                </div>
+                <div class="badge" style="background: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-secondary);">
+                    <span id="agentCount">7</span> Agents
+                </div>
+            </div>
+        </div>
+
+        <!-- Left Sidebar - File Explorer -->
+        <div class="sidebar">
+            <div class="sidebar-section">
+                <div class="section-title">📂 Project Files</div>
+                <div class="file-tree" id="fileTree">
+                    <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.875rem;">
+                        Loading files...
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content Area -->
+        <div class="main-content">
+            <div class="tabs">
+                <div class="tab active" data-panel="chat">
+                    💬 Chat
+                </div>
+                <div class="tab" data-panel="editor">
+                    📝 Editor
+                </div>
+                <div class="tab" data-panel="terminal">
+                    ⚡ Terminal
+                </div>
+                <div class="tab" data-panel="performance">
+                    📊 Performance
+                </div>
+                <div class="tab" data-panel="settings">
+                    ⚙️ Settings
+                </div>
+                <div class="tab" data-panel="debug">
+                    🐛 Debug
+                </div>
+                <div class="tab" data-panel="swarm">
+                    🐝 Swarm
+                </div>
+                <div class="tab" data-panel="sandbox">
+                    🏖️ Sandbox
+                </div>
+                <div class="tab" data-panel="tools">
+                    🔧 Tools
+                </div>
+                <div class="tab" data-panel="rotator">
+                    🔄 Model Rotator
+                </div>
+            </div>
+
+            <!-- Chat Panel -->
+            <div class="content-panel active" id="chat-panel">
+                <div class="chat-container" id="chat">
+                    <div class="message system">
+                        🚀 Antigravity Workspace initialized with 7 custom AI agents. Select an agent and start coding!
+                    </div>
+                </div>
+            </div>
+
+            <!-- Editor Panel -->
+            <div class="content-panel" id="editor-panel">
+                <div class="editor-container">
+                    <div class="editor-toolbar">
+                        <div class="editor-info" id="editorInfo">No file selected</div>
+                        <button class="icon-btn" onclick="saveFile()">💾 Save</button>
+                    </div>
+                    <textarea id="codeEditor"></textarea>
+                </div>
+            </div>
+
+            <!-- Terminal Panel -->
+            <div class="content-panel" id="terminal-panel">
+                <div class="terminal-container" id="terminal">
+                    <div class="terminal-line">
+                        <span class="terminal-prompt">antigravity@workspace:~$</span>
+                        <span class="terminal-output"> Welcome to Antigravity Terminal</span>
+                    </div>
+                    <div class="terminal-line">
+                        <span class="terminal-output">Type 'help' for available commands</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Performance Panel -->
+            <div class="content-panel" id="performance-panel">
+                <div class="performance-container">
+                    <!-- Header with Controls -->
+                    <div class="perf-header">
+                        <div class="perf-title">📊 Performance Dashboard</div>
+                        <div class="perf-controls">
+                            <div class="perf-time-range">
+                                <button class="perf-time-btn" onclick="setTimeRange(1)">1m</button>
+                                <button class="perf-time-btn" onclick="setTimeRange(5)">5m</button>
+                                <button class="perf-time-btn active" onclick="setTimeRange(15)">15m</button>
+                                <button class="perf-time-btn" onclick="setTimeRange(60)">1h</button>
+                            </div>
+                            <button class="perf-btn" onclick="refreshPerformance()">🔄 Refresh</button>
+                            <button class="perf-btn" onclick="exportMetrics()">📥 Export</button>
+                        </div>
+                    </div>
+
+                    <!-- Real-Time System Metrics -->
+                    <div class="settings-section">
+                        <div class="settings-section-title">
+                            💻 System Metrics (Real-Time)
+                        </div>
+                        <div class="perf-grid">
+                            <div class="perf-card">
+                                <div class="perf-card-header">
+                                    <div class="perf-card-title">🔥 CPU Usage</div>
+                                </div>
+                                <div class="perf-card-subtitle">Last 60 data points</div>
+                                <div class="perf-chart-container">
+                                    <canvas id="cpuChart"></canvas>
+                                </div>
+                                <div class="perf-metric-row">
+                                    <span class="perf-metric-label">Current</span>
+                                    <span class="perf-metric-value" id="cpuCurrent">--%</span>
+                                </div>
+                                <div class="perf-metric-row">
+                                    <span class="perf-metric-label">Average</span>
+                                    <span class="perf-metric-value" id="cpuAverage">--%</span>
+                                </div>
+                            </div>
+
+                            <div class="perf-card">
+                                <div class="perf-card-header">
+                                    <div class="perf-card-title">💾 Memory Usage</div>
+                                </div>
+                                <div class="perf-card-subtitle">Last 60 data points</div>
+                                <div class="perf-chart-container">
+                                    <canvas id="memoryChart"></canvas>
+                                </div>
+                                <div class="perf-metric-row">
+                                    <span class="perf-metric-label">Current</span>
+                                    <span class="perf-metric-value" id="memoryCurrent">--%</span>
+                                </div>
+                                <div class="perf-metric-row">
+                                    <span class="perf-metric-label">Average</span>
+                                    <span class="perf-metric-value" id="memoryAverage">--%</span>
+                                </div>
+                            </div>
+
+                            <div class="perf-card">
+                                <div class="perf-card-header">
+                                    <div class="perf-card-title">💿 Disk Usage</div>
+                                </div>
+                                <div class="perf-gauge">
+                                    <div class="perf-gauge-circle" id="diskGauge" style="--percentage: 0">
+                                        <div class="perf-gauge-inner">
+                                            <div class="perf-gauge-value" id="diskValue">0%</div>
+                                            <div class="perf-gauge-label">Used</div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="perf-metric-row">
+                                    <span class="perf-metric-label">Status</span>
+                                    <span class="perf-metric-value" id="diskStatus">Normal</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Cache Performance -->
+                    <div class="settings-section">
+                        <div class="settings-section-title">
+                            🗄️ Cache Performance
+                        </div>
+                        <div class="perf-grid">
+                            <div class="perf-card">
+                                <div class="perf-card-header">
+                                    <div class="perf-card-title">📈 Hit Rate</div>
+                                </div>
+                                <div class="perf-card-value" id="cacheHitRate">0%</div>
+                                <div class="perf-progress-bar">
+                                    <div class="perf-progress-fill" id="cacheHitProgress" style="width: 0%"></div>
+                                </div>
+                                <div class="perf-metric-row">
+                                    <span class="perf-metric-label">Hits</span>
+                                    <span class="perf-metric-value" id="cacheHits">0</span>
+                                </div>
+                                <div class="perf-metric-row">
+                                    <span class="perf-metric-label">Misses</span>
+                                    <span class="perf-metric-value" id="cacheMisses">0</span>
+                                </div>
+                            </div>
+
+                            <div class="perf-card">
+                                <div class="perf-card-header">
+                                    <div class="perf-card-title">📊 Cache Stats</div>
+                                </div>
+                                <div class="perf-metric-row">
+                                    <span class="perf-metric-label">Size</span>
+                                    <span class="perf-metric-value" id="cacheSize">0 items</span>
+                                </div>
+                                <div class="perf-metric-row">
+                                    <span class="perf-metric-label">Total Accesses</span>
+                                    <span class="perf-metric-value" id="cacheAccesses">0</span>
+                                </div>
+                                <div class="perf-chart-container" style="height: 100px; margin-top: 16px;">
+                                    <canvas id="cacheChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- WebSocket Connections -->
+                    <div class="settings-section">
+                        <div class="settings-section-title">
+                            🔌 WebSocket Connections
+                        </div>
+                        <div class="perf-grid">
+                            <div class="perf-card">
+                                <div class="perf-card-header">
+                                    <div class="perf-card-title">Active Connections</div>
+                                </div>
+                                <div class="perf-card-value" id="wsActiveCount">0</div>
+                                <div class="perf-metric-row">
+                                    <span class="perf-metric-label">Total Connections</span>
+                                    <span class="perf-metric-value" id="wsTotalCount">0</span>
+                                </div>
+                                <div class="perf-metric-row">
+                                    <span class="perf-metric-label">Avg Duration</span>
+                                    <span class="perf-metric-value" id="wsAvgDuration">0s</span>
+                                </div>
+                            </div>
+
+                            <div class="perf-card">
+                                <div class="perf-card-header">
+                                    <div class="perf-card-title">Connection History</div>
+                                </div>
+                                <div class="perf-chart-container">
+                                    <canvas id="wsChart"></canvas>
+                                </div>
+                            </div>
+
+                            <div class="perf-card">
+                                <div class="perf-card-header">
+                                    <div class="perf-card-title">Active Connections</div>
+                                </div>
+                                <div id="wsActiveList" style="max-height: 200px; overflow-y: auto; font-size: 0.8rem;">
+                                    <div style="color: var(--text-muted); text-align: center; padding: 20px;">
+                                        No active connections
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- MCP Server Performance -->
+                    <div class="settings-section">
+                        <div class="settings-section-title">
+                            🔧 MCP Server Performance
+                        </div>
+                        <div id="mcpServersPerf">
+                            <table class="perf-table">
+                                <thead>
+                                    <tr>
+                                        <th>Server</th>
+                                        <th>Status</th>
+                                        <th>Avg Response</th>
+                                        <th>Success Rate</th>
+                                        <th>Total Requests</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="mcpTableBody">
+                                    <tr>
+                                        <td colspan="5" style="text-align: center; color: var(--text-muted);">
+                                            No MCP server data available
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Request Analytics -->
+                    <div class="settings-section">
+                        <div class="settings-section-title">
+                            📡 Request Analytics
+                        </div>
+                        <div class="perf-grid">
+                            <div class="perf-card">
+                                <div class="perf-card-header">
+                                    <div class="perf-card-title">Requests/Minute</div>
+                                </div>
+                                <div class="perf-card-value" id="reqPerMinute">0</div>
+                                <div class="perf-metric-row">
+                                    <span class="perf-metric-label">Total Requests</span>
+                                    <span class="perf-metric-value" id="reqTotal">0</span>
+                                </div>
+                                <div class="perf-metric-row">
+                                    <span class="perf-metric-label">Error Rate</span>
+                                    <span class="perf-metric-value" id="reqErrorRate">0%</span>
+                                </div>
+                            </div>
+
+                            <div class="perf-card">
+                                <div class="perf-card-header">
+                                    <div class="perf-card-title">Response Times</div>
+                                </div>
+                                <div class="perf-chart-container">
+                                    <canvas id="responseTimeChart"></canvas>
+                                </div>
+                                <div class="perf-metric-row">
+                                    <span class="perf-metric-label">Average</span>
+                                    <span class="perf-metric-value" id="reqAvgTime">0ms</span>
+                                </div>
+                            </div>
+
+                            <div class="perf-card">
+                                <div class="perf-card-header">
+                                    <div class="perf-card-title">Slowest Endpoints</div>
+                                </div>
+                                <div id="slowestEndpoints" style="max-height: 200px; overflow-y: auto; font-size: 0.8rem;">
+                                    <div style="color: var(--text-muted); text-align: center; padding: 20px;">
+                                        No data available
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Panel -->
+            <div class="content-panel" id="settings-panel">
+                <div class="settings-container">
+                    
+                    <!-- Live Status Banner -->
+                    <div id="liveStatusBanner" class="live-status-banner">
+                        <div class="status-banner-item">
+                            <span class="status-banner-label">🤖 Active Model:</span>
+                            <span class="status-banner-value" id="statusActiveModel">Loading...</span>
+                        </div>
+                        <div class="status-banner-item">
+                            <span class="status-banner-label">🌐 Ngrok URL:</span>
+                            <span class="status-banner-value" id="statusNgrokUrl">Checking...</span>
+                        </div>
+                        <div class="status-banner-item">
+                            <span class="status-banner-label">❤️ Health:</span>
+                            <span class="status-banner-value" id="statusBackendHealth">Checking...</span>
+                        </div>
+                    </div>
+                    
+                    <!-- AI Model Configuration -->
+                    <div class="settings-section">
+                        <div class="settings-section-title">
+                            🤖 AI Model Configuration
+                        </div>
+                        
+                        <!-- Model Selection UI -->
+                        <div class="model-selection-section">
+                            <label style="display: block; font-size: 0.85rem; font-weight: 600; color: var(--text-secondary); margin-bottom: 12px;">
+                                Select AI Model Provider
+                            </label>
+                            <div class="model-selection-group">
+                                <label class="model-radio-option">
+                                    <input type="radio" name="activeModel" value="gemini" onchange="selectModel('gemini')">
+                                    <div class="model-radio-content">
+                                        <div class="model-radio-icon">✨</div>
+                                        <div class="model-radio-label">Gemini</div>
+                                        <div class="model-radio-desc">Google AI</div>
+                                    </div>
+                                </label>
+                                <label class="model-radio-option">
+                                    <input type="radio" name="activeModel" value="vertex" onchange="selectModel('vertex')">
+                                    <div class="model-radio-content">
+                                        <div class="model-radio-icon">☁️</div>
+                                        <div class="model-radio-label">Vertex AI</div>
+                                        <div class="model-radio-desc">Enterprise</div>
+                                    </div>
+                                </label>
+                                <label class="model-radio-option">
+                                    <input type="radio" name="activeModel" value="ollama" onchange="selectModel('ollama')">
+                                    <div class="model-radio-content">
+                                        <div class="model-radio-icon">🦙</div>
+                                        <div class="model-radio-label">Ollama</div>
+                                        <div class="model-radio-desc">Local</div>
+                                    </div>
+                                </label>
+                                <label class="model-radio-option">
+                                    <input type="radio" name="activeModel" value="auto" onchange="selectModel('auto')">
+                                    <div class="model-radio-content">
+                                        <div class="model-radio-icon">🎯</div>
+                                        <div class="model-radio-label">Auto</div>
+                                        <div class="model-radio-desc">Smart Select</div>
+                                    </div>
+                                </label>
+                            </div>
+                            <div id="modelSelectionStatus" style="margin-top: 12px;"></div>
+                        </div>
+
+                        <!-- Reload Environment Button -->
+                        <div style="margin-top: 20px;">
+                            <button class="settings-btn settings-btn-primary" onclick="reloadEnvironment()" style="width: 100%; justify-content: center;">
+                                🔄 Reload Environment Variables
+                            </button>
+                            <div id="reloadEnvStatus" style="margin-top: 12px;"></div>
+                        </div>
+
+                        <div class="settings-form-group" style="margin-top: 20px;">
+                            <label>Test Connection</label>
+                            <div class="settings-button-group">
+                                <button class="settings-btn settings-btn-secondary" onclick="testConnection('gemini')">
+                                    Test Gemini
+                                </button>
+                                <button class="settings-btn settings-btn-secondary" onclick="testConnection('vertex')">
+                                    Test Vertex
+                                </button>
+                                <button class="settings-btn settings-btn-secondary" onclick="testConnection('ollama')">
+                                    Test Ollama
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="connectionTestResult" style="margin-top: 12px;"></div>
+                    </div>
+
+                    <!-- Ngrok Tunnel Section -->
+                    <div class="settings-section">
+                        <div class="settings-section-title">
+                            🌐 Ngrok Tunnel
+                            <button class="settings-btn settings-btn-secondary" style="margin-left: auto; padding: 6px 12px; font-size: 0.75rem;" onclick="refreshNgrokStatus()">
+                                🔄 Refresh
+                            </button>
+                        </div>
+                        
+                        <div id="ngrokStatusContainer">
+                            <div class="ngrok-status-item">
+                                <div class="ngrok-status-label">Status:</div>
+                                <div class="ngrok-status-value" id="ngrokStatusBadge">
+                                    <span class="status-indicator status-warning">⏳ Checking...</span>
+                                </div>
+                            </div>
+                            
+                            <div class="ngrok-status-item" id="ngrokUrlContainer" style="display: none;">
+                                <div class="ngrok-status-label">Public URL:</div>
+                                <div class="ngrok-status-value">
+                                    <div style="display: flex; gap: 8px; align-items: center;">
+                                        <input type="text" id="ngrokPublicUrl" class="settings-input" readonly style="flex: 1; font-size: 0.8rem;">
+                                        <button class="settings-btn settings-btn-secondary" onclick="copyToClipboard('ngrokPublicUrl')" style="padding: 8px 12px;">
+                                            📋 Copy
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="ngrok-status-item" id="ngrokWsContainer" style="display: none;">
+                                <div class="ngrok-status-label">WebSocket URL:</div>
+                                <div class="ngrok-status-value">
+                                    <div style="display: flex; gap: 8px; align-items: center;">
+                                        <input type="text" id="ngrokWsUrl" class="settings-input" readonly style="flex: 1; font-size: 0.8rem;">
+                                        <button class="settings-btn settings-btn-secondary" onclick="copyToClipboard('ngrokWsUrl')" style="padding: 8px 12px;">
+                                            📋 Copy
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- API Keys Management -->
+                    <div class="settings-section">
+                        <div class="settings-section-title">
+                            🔑 API Keys Management
+                        </div>
+                        
+                        <div class="settings-form-group">
+                            <label for="geminiApiKey">Gemini API Key</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="password" id="geminiApiKey" class="settings-input" placeholder="AIza...">
+                                <button class="settings-btn settings-btn-secondary" onclick="updateApiKey('GEMINI_API_KEY', 'geminiApiKey')">
+                                    💾 Save
+                                </button>
+                                <button class="settings-btn settings-btn-secondary" onclick="togglePasswordVisibility('geminiApiKey')">
+                                    👁️
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="settings-form-group">
+                            <label for="vertexApiKey">Vertex AI API Key</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="password" id="vertexApiKey" class="settings-input" placeholder="Enter Vertex API key">
+                                <button class="settings-btn settings-btn-secondary" onclick="updateApiKey('VERTEX_API_KEY', 'vertexApiKey')">
+                                    💾 Save
+                                </button>
+                                <button class="settings-btn settings-btn-secondary" onclick="togglePasswordVisibility('vertexApiKey')">
+                                    👁️
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="settings-form-group">
+                            <label for="githubToken">GitHub Token (for MCP)</label>
+                            <div style="display: flex; gap: 10px;">
+                                <input type="password" id="githubToken" class="settings-input" placeholder="ghp_... or github_pat_...">
+                                <button class="settings-btn settings-btn-secondary" onclick="updateApiKey('COPILOT_MCP_GITHUB_TOKEN', 'githubToken')">
+                                    💾 Save
+                                </button>
+                                <button class="settings-btn settings-btn-secondary" onclick="togglePasswordVisibility('githubToken')">
+                                    👁️
+                                </button>
+                            </div>
+                        </div>
+
+                        <div id="apiKeyStatus" style="margin-top: 12px;"></div>
+                    </div>
+
+                    <!-- MCP Server Manager -->
+                    <div class="settings-section">
+                        <div class="settings-section-title">
+                            🔌 MCP Server Manager
+                            <button class="settings-btn settings-btn-secondary" style="margin-left: auto; padding: 6px 12px; font-size: 0.75rem;" onclick="refreshMCPServers()">
+                                🔄 Refresh
+                            </button>
+                        </div>
+                        
+                        <div id="mcpServersContainer">
+                            <!-- MCP servers will be loaded here -->
+                            <div style="text-align: center; color: var(--text-muted); padding: 20px;">
+                                <div class="loading-spinner"></div>
+                                <div style="margin-top: 10px;">Loading MCP servers...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Server Settings -->
+                    <div class="settings-section">
+                        <div class="settings-section-title">
+                            🖥️ Server Configuration
+                        </div>
+                        
+                        <div class="settings-form-group">
+                            <label for="serverHost">Host</label>
+                            <input type="text" id="serverHost" class="settings-input" value="0.0.0.0">
+                        </div>
+
+                        <div class="settings-form-group">
+                            <label for="serverPort">Backend Port</label>
+                            <input type="number" id="serverPort" class="settings-input" value="8000">
+                        </div>
+
+                        <div class="settings-form-group">
+                            <label for="frontendPort">Frontend Port</label>
+                            <input type="number" id="frontendPort" class="settings-input" value="3000">
+                        </div>
+
+                        <div class="settings-form-group">
+                            <label for="corsOrigins">CORS Allowed Origins (comma-separated)</label>
+                            <textarea id="corsOrigins" class="settings-input" rows="3" placeholder="http://localhost:3000,http://localhost:8000"></textarea>
+                        </div>
+
+                        <div class="settings-button-group">
+                            <button class="settings-btn settings-btn-primary" onclick="saveServerSettings()">
+                                💾 Apply Changes
+                            </button>
+                            <button class="settings-btn settings-btn-secondary" onclick="loadSettings()">
+                                🔄 Reset
+                            </button>
+                        </div>
+
+                        <div id="serverSettingsStatus" style="margin-top: 12px;"></div>
+                    </div>
+
+                    <!-- Environment Variables -->
+                    <div class="settings-section">
+                        <div class="settings-section-title">
+                            📝 Environment Variables
+                            <button class="settings-btn settings-btn-secondary" style="margin-left: auto; padding: 6px 12px; font-size: 0.75rem;" onclick="loadEnvironmentVariables()">
+                                🔄 Reload
+                            </button>
+                        </div>
+                        
+                        <div style="overflow-x: auto;">
+                            <table class="env-var-table" id="envVarTable">
+                                <thead>
+                                    <tr>
+                                        <th>Variable</th>
+                                        <th>Value</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="envVarTableBody">
+                                    <!-- Environment variables will be loaded here -->
+                                    <tr>
+                                        <td colspan="3" style="text-align: center; color: var(--text-muted); padding: 20px;">
+                                            <div class="loading-spinner"></div>
+                                            <div style="margin-top: 10px;">Loading environment variables...</div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                    <!-- Export Configuration -->
+                    <div class="settings-section">
+                        <div class="settings-section-title">
+                            📦 Configuration Export
+                        </div>
+                        
+                        <p style="color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 12px;">
+                            Export your current configuration (sanitized, without sensitive data) for backup or sharing.
+                        </p>
+
+                        <div class="settings-button-group">
+                            <button class="settings-btn settings-btn-primary" onclick="exportConfiguration()">
+                                📥 Export Configuration
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Debug Panel -->
+            <div class="content-panel" id="debug-panel">
+                <div class="debug-container">
+                    
+                    <!-- Real-time Log Stream -->
+                    <div class="debug-section">
+                        <div class="debug-section-title">
+                            📜 Real-time Log Stream
+                            <div style="margin-left: auto; display: flex; gap: 8px;">
+                                <label style="display: flex; align-items: center; gap: 6px; font-size: 0.85rem; font-weight: normal;">
+                                    <input type="checkbox" id="autoScrollLogs" checked style="cursor: pointer;">
+                                    Auto-scroll
+                                </label>
+                                <button class="debug-action-btn debug-action-btn-secondary" onclick="clearLogsDisplay()">
+                                    🗑️ Clear Display
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Filter Controls -->
+                        <div class="debug-controls">
+                            <div class="debug-filter-group">
+                                <span class="debug-filter-label">Severity:</span>
+                                <select id="logSeverityFilter" class="debug-select" onchange="applyLogFilters()">
+                                    <option value="ALL">All Levels</option>
+                                    <option value="DEBUG">Debug</option>
+                                    <option value="INFO">Info</option>
+                                    <option value="WARN">Warning</option>
+                                    <option value="ERROR">Error</option>
+                                </select>
+                            </div>
+
+                            <div class="debug-filter-group">
+                                <span class="debug-filter-label">Model:</span>
+                                <select id="logModelFilter" class="debug-select" onchange="applyLogFilters()">
+                                    <option value="ALL">All Models</option>
+                                    <option value="gemini">Gemini</option>
+                                    <option value="vertex">Vertex AI</option>
+                                    <option value="ollama">Ollama</option>
+                                </select>
+                            </div>
+
+                            <button class="debug-action-btn debug-action-btn-secondary" onclick="refreshLogs()">
+                                🔄 Refresh
+                            </button>
+                        </div>
+
+                        <!-- Log Display -->
+                        <div class="debug-logs-container" id="debugLogsDisplay">
+                            <div class="debug-loading">
+                                <div>⏳ Loading logs...</div>
+                            </div>
+                        </div>
+
+                        <!-- Pagination -->
+                        <div class="debug-pagination">
+                            <button class="debug-page-btn" id="prevLogsBtn" onclick="loadPreviousLogs()" disabled>
+                                ← Previous
+                            </button>
+                            <span class="debug-page-info" id="logsPageInfo">Page 1</span>
+                            <button class="debug-page-btn" id="nextLogsBtn" onclick="loadNextLogs()">
+                                Next →
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Action Buttons -->
+                    <div class="debug-section">
+                        <div class="debug-section-title">⚡ Quick Actions</div>
+                        <div class="debug-controls">
+                            <button class="debug-action-btn debug-action-btn-primary" onclick="exportLogs()">
+                                📥 Export Logs
+                            </button>
+                            <button class="debug-action-btn debug-action-btn-secondary" onclick="loadFailedRequests()">
+                                ⚠️ Failed Requests
+                            </button>
+                            <button class="debug-action-btn debug-action-btn-secondary" onclick="loadMissingData()">
+                                📊 Missing Data
+                            </button>
+                            <button class="debug-action-btn debug-action-btn-danger" onclick="clearLogsConfirm()">
+                                🗑️ Clear All Logs
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Failed Requests Panel -->
+                    <div class="debug-section">
+                        <div class="debug-collapsible">
+                            <div class="debug-collapsible-header" onclick="toggleCollapsible('failedRequests')">
+                                <span class="debug-collapsible-icon" id="failedRequestsIcon">▶</span>
+                                <span style="font-weight: 600;">⚠️ Failed Requests</span>
+                                <span id="failedRequestsCount" style="margin-left: auto; color: var(--text-muted);">0 items</span>
+                            </div>
+                            <div class="debug-collapsible-content" id="failedRequestsContent">
+                                <div id="failedRequestsList">
+                                    <div class="debug-empty-state">
+                                        <div class="debug-empty-icon">✓</div>
+                                        <div>No failed requests</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Missing Data Panel -->
+                    <div class="debug-section">
+                        <div class="debug-collapsible">
+                            <div class="debug-collapsible-header" onclick="toggleCollapsible('missingData')">
+                                <span class="debug-collapsible-icon" id="missingDataIcon">▶</span>
+                                <span style="font-weight: 600;">📊 Missing RAG Context</span>
+                                <span id="missingDataCount" style="margin-left: auto; color: var(--text-muted);">0 items</span>
+                            </div>
+                            <div class="debug-collapsible-content" id="missingDataContent">
+                                <div id="missingDataList">
+                                    <div class="debug-empty-state">
+                                        <div class="debug-empty-icon">✓</div>
+                                        <div>All requests have proper context</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Swarm Panel -->
+            <div class="content-panel" id="swarm-panel">
+                <div class="swarm-container">
+                    
+                    <!-- Task Execution -->
+                    <div class="swarm-controls">
+                        <div class="swarm-section-title">
+                            🐝 Multi-Agent Swarm Orchestrator
+                        </div>
+                        
+                        <textarea id="swarmTaskInput" class="swarm-task-input" placeholder="Enter a complex task that requires multiple agents...
+
+Example: Create a REST API for user management with authentication, tests, and deployment configuration"></textarea>
+                        
+                        <div class="swarm-options">
+                            <label class="swarm-checkbox">
+                                <input type="checkbox" id="swarmVerbose" checked>
+                                Verbose output
+                            </label>
+                        </div>
+                        
+                        <button class="swarm-execute-btn" id="swarmExecuteBtn" onclick="executeSwarm()">
+                            <span>🚀</span>
+                            <span>Execute with Swarm</span>
+                        </button>
+                    </div>
+
+                    <!-- Agent Status -->
+                    <div class="swarm-controls">
+                        <div class="swarm-section-title">
+                            👥 Available Agents
+                        </div>
+                        
+                        <div class="swarm-agents-grid" id="swarmAgentsGrid">
+                            <div class="swarm-agent-card active">
+                                <div class="swarm-status-indicator active"></div>
+                                <div class="swarm-agent-info">
+                                    <div class="swarm-agent-name">Router Agent</div>
+                                    <div class="swarm-agent-role">Task Analysis & Delegation</div>
+                                </div>
+                            </div>
+                            <div class="swarm-agent-card active">
+                                <div class="swarm-status-indicator active"></div>
+                                <div class="swarm-agent-info">
+                                    <div class="swarm-agent-name">Coder Agent</div>
+                                    <div class="swarm-agent-role">Code Implementation</div>
+                                </div>
+                            </div>
+                            <div class="swarm-agent-card active">
+                                <div class="swarm-status-indicator active"></div>
+                                <div class="swarm-agent-info">
+                                    <div class="swarm-agent-name">Reviewer Agent</div>
+                                    <div class="swarm-agent-role">Code Review & Quality</div>
+                                </div>
+                            </div>
+                            <div class="swarm-agent-card active">
+                                <div class="swarm-status-indicator active"></div>
+                                <div class="swarm-agent-info">
+                                    <div class="swarm-agent-name">Researcher Agent</div>
+                                    <div class="swarm-agent-role">Research & Analysis</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Delegation Plan -->
+                    <div class="swarm-controls">
+                        <div class="swarm-section-title">
+                            📋 Delegation Plan
+                        </div>
+                        
+                        <div class="swarm-plan-display" id="swarmPlanDisplay">
+                            <div style="text-align: center; color: var(--text-muted); padding: 20px;">
+                                Execute a task to see the delegation plan
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Results -->
+                    <div class="swarm-controls">
+                        <div class="swarm-section-title">
+                            ✨ Execution Results
+                        </div>
+                        
+                        <div class="swarm-results-display" id="swarmResultsDisplay">
+                            <div style="text-align: center; color: var(--text-muted); padding: 20px;">
+                                Results will appear here after execution
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Sandbox Panel -->
+            <div class="content-panel" id="sandbox-panel">
+                <div class="sandbox-container">
+                    
+                    <!-- Code Editor -->
+                    <div class="sandbox-controls">
+                        <div class="swarm-section-title">
+                            🏖️ Code Sandbox
+                        </div>
+                        
+                        <div class="sandbox-toolbar">
+                            <select id="sandboxLanguage" class="sandbox-select">
+                                <option value="python">Python</option>
+                                <option value="javascript">JavaScript (Node.js)</option>
+                                <option value="bash">Bash</option>
+                            </select>
+                            
+                            <select id="sandboxType" class="sandbox-select">
+                                <option value="local">Local Process</option>
+                                <option value="docker">Docker Container</option>
+                            </select>
+                            
+                            <input type="number" id="sandboxTimeout" class="sandbox-input" value="30" min="1" max="300" placeholder="Timeout (s)">
+                            
+                            <div style="flex: 1;"></div>
+                            
+                            <button class="sandbox-btn sandbox-btn-secondary" onclick="clearSandbox()">
+                                🗑️ Clear
+                            </button>
+                        </div>
+                        
+                        <textarea id="sandboxCode" class="sandbox-editor" placeholder="# Write your code here...
+
+# Python Example:
+print('Hello from Antigravity Sandbox!')
+for i in range(5):
+    print(f'Count: {i}')
+
+# JavaScript Example:
+// console.log('Hello from Antigravity Sandbox!');
+// for (let i = 0; i < 5; i++) {
+//     console.log(`Count: ${i}`);
+// }
+
+# Bash Example:
+# echo 'Hello from Antigravity Sandbox!'
+# for i in {1..5}; do
+#     echo \"Count: $i\"
+# done"></textarea>
+                        
+                        <div class="sandbox-actions">
+                            <button class="sandbox-btn sandbox-btn-primary" id="sandboxRunBtn" onclick="runSandbox()">
+                                ▶️ Run Code
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Output -->
+                    <div class="sandbox-output-panel">
+                        <div class="swarm-section-title">
+                            📄 Output
+                        </div>
+                        
+                        <div id="sandboxOutputContainer">
+                            <div class="sandbox-empty-state">
+                                Run code to see output
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <!-- Tools Panel -->
+            <div class="content-panel" id="tools-panel">
+                <div class="tools-container">
+                    
+                    <!-- MCP Servers Status -->
+                    <div class="tools-section">
+                        <div class="tools-section-title">
+                            <span>🔌 MCP Servers</span>
+                            <button class="tools-refresh-btn" onclick="loadMCPServers()">
+                                🔄 Refresh
+                            </button>
+                        </div>
+                        
+                        <div class="tools-mcp-servers-grid" id="toolsMCPServersGrid">
+                            <div class="tools-loading">
+                                <div class="tools-loading-spinner"></div>
+                                <div>Loading MCP servers...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tool Discovery -->
+                    <div class="tools-section">
+                        <div class="tools-section-title">
+                            <span>🔍 Discovered Tools</span>
+                            <button class="tools-refresh-btn" onclick="loadToolsList()">
+                                🔄 Refresh
+                            </button>
+                        </div>
+                        
+                        <input type="text" id="toolsSearchInput" class="tools-search-bar" placeholder="🔎 Search tools by name or description..." oninput="filterTools()">
+                        
+                        <div class="tools-list" id="toolsList">
+                            <div class="tools-loading">
+                                <div class="tools-loading-spinner"></div>
+                                <div>Loading tools...</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tool Details -->
+                    <div class="tools-section" id="toolDetailsSection" style="display: none;">
+                        <div class="tools-section-title">
+                            📖 Tool Details
+                        </div>
+                        
+                        <div class="tools-details-panel" id="toolDetailsPanel">
+                            <!-- Details will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Tool Testing -->
+                    <div class="tools-section" id="toolTestSection" style="display: none;">
+                        <div class="tools-section-title">
+                            🧪 Test Tool
+                        </div>
+                        
+                        <div class="tools-test-panel">
+                            <div class="tools-details-label">Tool Arguments (JSON)</div>
+                            <textarea id="toolTestInput" class="tools-test-input" placeholder='{
+  "arg1": "value1",
+  "arg2": "value2"
+}'></textarea>
+                            
+                            <button class="tools-test-btn" id="toolTestBtn" onclick="testTool()">
+                                🚀 Execute Tool
+                            </button>
+                            
+                            <div id="toolTestResultContainer" style="display: none;">
+                                <div class="tools-details-label" style="margin-top: 16px;">Result</div>
+                                <div class="tools-test-result" id="toolTestResult"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+
+        <!-- Model Rotator Panel -->
+        <div class="content-panel" id="rotator-panel">
+            <div class="rotator-container">
+                
+                <!-- Key Management Section -->
+                <div class="rotator-section">
+                    <div class="rotator-section-title">
+                        <span>🔑 API Key Management</span>
+                    </div>
+                    
+                    <!-- Add Key Form -->
+                    <div class="rotator-form">
+                        <div class="rotator-form-group">
+                            <label class="rotator-form-label">Service</label>
+                            <select id="rotatorService" class="rotator-select">
+                                <option value="gemini">Gemini</option>
+                                <option value="openai">OpenAI</option>
+                                <option value="vertex">Vertex AI</option>
+                            </select>
+                        </div>
+                        
+                        <div class="rotator-form-group">
+                            <label class="rotator-form-label">API Key</label>
+                            <input type="password" id="rotatorApiKey" class="rotator-input" placeholder="Enter API key...">
+                        </div>
+                        
+                        <div class="rotator-form-group">
+                            <label class="rotator-form-label">Key Name (optional)</label>
+                            <input type="text" id="rotatorKeyName" class="rotator-input" placeholder="My API Key">
+                        </div>
+                        
+                        <button class="rotator-btn" onclick="addRotatorKey()">
+                            ➕ Add Key
+                        </button>
+                    </div>
+                    
+                    <!-- Configured Keys -->
+                    <div class="rotator-keys-grid" id="rotatorKeysGrid">
+                        <div class="rotator-loading">Loading keys...</div>
+                    </div>
+                </div>
+
+                <!-- Statistics Dashboard -->
+                <div class="rotator-section">
+                    <div class="rotator-section-title">
+                        <span>📊 Statistics Dashboard</span>
+                        <div class="rotator-actions-bar">
+                            <button class="rotator-btn rotator-btn-secondary" onclick="refreshRotatorStats()">
+                                🔄 Refresh
+                            </button>
+                            <button class="rotator-btn rotator-btn-secondary" onclick="exportRotatorStats()">
+                                💾 Export
+                            </button>
+                            <button class="rotator-btn rotator-btn-danger" onclick="resetRotatorStats()">
+                                🗑️ Reset Stats
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Overall Stats -->
+                    <div class="rotator-stats-grid" id="rotatorStatsGrid">
+                        <div class="rotator-loading">Loading statistics...</div>
+                    </div>
+                    
+                    <!-- Key Usage Chart -->
+                    <div class="rotator-chart">
+                        <div class="rotator-chart-title">Key Usage Distribution</div>
+                        <div class="rotator-chart-bars" id="rotatorUsageChart">
+                            <div class="rotator-loading" style="padding: 20px;">No data available</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Monitoring Panel -->
+                <div class="rotator-section">
+                    <div class="rotator-section-title">
+                        <span>🔍 Live Monitoring</span>
+                        <span style="font-size: 0.75rem; color: var(--text-muted); font-weight: normal;">
+                            Auto-refresh every 5s
+                        </span>
+                    </div>
+                    
+                    <div class="rotator-monitor-grid" id="rotatorMonitorGrid">
+                        <div class="rotator-loading">Loading monitoring data...</div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Right Panel - Agents -->
+        <div class="right-panel">
+            <div class="panel-section">
+                <div class="panel-section-title">🤖 Available Agents</div>
+                <div id="agentsList">
+                    <div class="agent-card selected" data-agent="full-stack-developer">
+                        <div class="agent-name">Full-Stack Developer</div>
+                        <div class="agent-expertise">End-to-end web applications</div>
+                        <div class="agent-tools">
+                            <span class="tool-badge">React</span>
+                            <span class="tool-badge">FastAPI</span>
+                            <span class="tool-badge">SQL</span>
+                        </div>
+                    </div>
+                    <div class="agent-card" data-agent="devops-infrastructure">
+                        <div class="agent-name">DevOps & Infrastructure</div>
+                        <div class="agent-expertise">Deployment & containers</div>
+                        <div class="agent-tools">
+                            <span class="tool-badge">Docker</span>
+                            <span class="tool-badge">K8s</span>
+                            <span class="tool-badge">CI/CD</span>
+                        </div>
+                    </div>
+                    <div class="agent-card" data-agent="testing-stability-expert">
+                        <div class="agent-name">Testing Expert</div>
+                        <div class="agent-expertise">Comprehensive testing</div>
+                        <div class="agent-tools">
+                            <span class="tool-badge">PyTest</span>
+                            <span class="tool-badge">Jest</span>
+                        </div>
+                    </div>
+                    <div class="agent-card" data-agent="performance-optimizer">
+                        <div class="agent-name">Performance Optimizer</div>
+                        <div class="agent-expertise">Speed & efficiency</div>
+                        <div class="agent-tools">
+                            <span class="tool-badge">Profiling</span>
+                            <span class="tool-badge">Caching</span>
+                        </div>
+                    </div>
+                    <div class="agent-card" data-agent="code-reviewer">
+                        <div class="agent-name">Code Reviewer</div>
+                        <div class="agent-expertise">Security & quality</div>
+                        <div class="agent-tools">
+                            <span class="tool-badge">Security</span>
+                            <span class="tool-badge">Best Practices</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="panel-section">
+                <div class="panel-section-title">📊 Workspace Stats</div>
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-value" id="filesCount">0</div>
+                        <div class="stat-label">Files</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="messagesCount">1</div>
+                        <div class="stat-label">Messages</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="mcpServers">14</div>
+                        <div class="stat-label">MCP Servers</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value">100%</div>
+                        <div class="stat-label">Uptime</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Input Area -->
+        <div class="input-area">
+            <input type="file" id="fileInput" multiple style="display: none;" onchange="handleFileSelect(this.files)">
+            <button class="icon-btn" onclick="document.getElementById('fileInput').click()" title="Upload Files">
+                📎
+            </button>
+            <div class="input-wrapper">
+                <input type="text" id="input" placeholder="Ask your AI agent anything..." autocomplete="off">
+                <span class="selected-agent-label" id="selectedAgentLabel">@full-stack-developer</span>
+            </div>
+            <button onclick="sendMessage()">
+                Send ✨
+            </button>
+        </div>
+    </div>
+
+    <!-- Debug Modal -->
+    <div class="debug-modal" id="debugModal">
+        <div class="debug-modal-content">
+            <div class="debug-modal-header">
+                <div class="debug-modal-title" id="debugModalTitle">Log Details</div>
+                <button class="debug-modal-close" onclick="closeDebugModal()">×</button>
+            </div>
+            <div class="debug-modal-body">
+                <div class="debug-json" id="debugModalContent"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Chart.js for Performance Dashboard -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/javascript/javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/python/python.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/htmlmixed/htmlmixed.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.2/mode/css/css.min.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

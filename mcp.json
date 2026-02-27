@@ -1,0 +1,23 @@
+{
+    "mcpServers": {
+        "gitkraken": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@gitkraken/mcp-server"
+            ],
+            "env": {
+                "GK_API_KEY": ""
+            },
+            "enabled": false
+        },
+        "sequential-thinking": {
+            "command": "npx",
+            "args": [
+                "-y",
+                "@modelcontextprotocol/server-sequential-thinking"
+            ],
+            "enabled": true
+        }
+    }
+}

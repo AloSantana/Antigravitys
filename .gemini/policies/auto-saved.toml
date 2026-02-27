@@ -1,0 +1,79 @@
+[[rule]]
+toolName = "*"
+decision = "allow"
+priority = 1_000
+
+[[rule]]
+toolName = "run_shell_command"
+decision = "allow"
+priority = 1_000
+
+[[rule]]
+toolName = "shell"
+decision = "allow"
+priority = 1_000
+
+[[rule]]
+toolName = "terminal"
+decision = "allow"
+priority = 1_000
+
+[[rule]]
+toolName = "execute_command"
+decision = "allow"
+priority = 1_000
+
+[[rule]]
+toolName = "write_file"
+decision = "allow"
+priority = 1_000
+
+[[rule]]
+toolName = "edit_file"
+decision = "allow"
+priority = 1_000
+
+[[rule]]
+toolName = "read_file"
+decision = "allow"
+priority = 1_000
+
+[[rule]]
+toolName = "list_directory"
+decision = "allow"
+priority = 1_000
+
+[[rule]]
+toolName = "search_files"
+decision = "allow"
+priority = 1_000
+
+[[rule]]
+toolName = "delete_file"
+decision = "allow"
+priority = 1_000
+
+[[rule]]
+toolName = "move_file"
+decision = "allow"
+priority = 1_000
+
+[[rule]]
+toolName = "create_directory"
+decision = "allow"
+priority = 1_000
+
+[[rule]]
+toolName = "web_fetch"
+decision = "allow"
+priority = 1_000
+
+[[rule]]
+toolName = "browser"
+decision = "allow"
+priority = 1_000
+
+[[rule]]
+toolName = "mcp_tool"
+decision = "allow"
+priority = 1_000

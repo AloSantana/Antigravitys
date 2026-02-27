@@ -1,0 +1,52 @@
+{
+  "mcpServers": {
+    "filesystem": {
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "/tmp"],
+      "enabled": true,
+      "description": "File system operations"
+    },
+    "git": {
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-git"],
+      "enabled": true,
+      "description": "Git repository operations"
+    },
+    "github": {
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-github"],
+      "env": {
+        "GITHUB_TOKEN": "${COPILOT_MCP_GITHUB_TOKEN}"
+      },
+      "enabled": true,
+      "description": "GitHub API integration"
+    },
+    "sqlite": {
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sqlite", "--db-path", "./data.db"],
+      "enabled": true,
+      "description": "SQLite database operations"
+    },
+    "brave_search": {
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "env": {
+        "BRAVE_API_KEY": "${COPILOT_MCP_BRAVE_API_KEY}"
+      },
+      "enabled": false,
+      "description": "Web search using Brave Search API"
+    },
+    "puppeteer": {
+      "transport": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-puppeteer"],
+      "enabled": false,
+      "description": "Browser automation with Puppeteer"
+    }
+  }
+}

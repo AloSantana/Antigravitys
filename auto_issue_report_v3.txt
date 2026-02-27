@@ -1,0 +1,705 @@
+
+[1m=== Diagnostic Report ===[0m
+
+Timestamp: 2026-02-12T19:16:36.695492
+Duration: 0.92s
+
+[1mSummary:[0m
+  Total Issues: 172
+  [91mCritical: 0[0m
+  [93mHigh: 11[0m
+  [94mMedium: 87[0m
+  [92mLow: 6[0m
+  [96mInfo: 68[0m
+  Fixed: 0
+
+[1mIssues:[0m
+
+[96m[INFO][0m locustfile.py:246
+  Missing docstring for function 'tick'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m locustfile.py:263
+  Missing docstring for function 'tick'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m locustfile.py:289
+  Missing docstring for function 'tick'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[94m[MEDIUM][0m .agent\scripts\auto_preview.py:58
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[94m[MEDIUM][0m .agent\scripts\auto_preview.py:120
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[96m[INFO][0m .agent\scripts\auto_preview.py:26
+  Missing docstring for function 'get_project_root'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\auto_preview.py:29
+  Missing docstring for function 'is_running'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\auto_preview.py:36
+  Missing docstring for function 'get_start_command'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\auto_preview.py:51
+  Missing docstring for function 'start_server'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\auto_preview.py:89
+  Missing docstring for function 'stop_server'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\auto_preview.py:108
+  Missing docstring for function 'status_server'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\auto_preview.py:133
+  Missing docstring for function 'main'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\checklist.py:30
+  Missing docstring for class 'Colors'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\checklist.py:40
+  Missing docstring for function 'print_header'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\checklist.py:45
+  Missing docstring for function 'print_step'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\checklist.py:48
+  Missing docstring for function 'print_success'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\checklist.py:51
+  Missing docstring for function 'print_warning'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\checklist.py:54
+  Missing docstring for function 'print_error'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\checklist.py:162
+  Missing docstring for function 'main'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\session_manager.py:19
+  Missing docstring for function 'get_project_root'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\session_manager.py:22
+  Missing docstring for function 'analyze_package_json'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\session_manager.py:56
+  Missing docstring for function 'count_files'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\session_manager.py:67
+  Missing docstring for function 'detect_features'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\session_manager.py:82
+  Missing docstring for function 'print_status'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\session_manager.py:106
+  Missing docstring for function 'main'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\verify_all.py:33
+  Missing docstring for class 'Colors'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\verify_all.py:43
+  Missing docstring for function 'print_header'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\verify_all.py:48
+  Missing docstring for function 'print_step'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\verify_all.py:51
+  Missing docstring for function 'print_success'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\verify_all.py:54
+  Missing docstring for function 'print_warning'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\verify_all.py:57
+  Missing docstring for function 'print_error'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\scripts\verify_all.py:263
+  Missing docstring for function 'main'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\skills\api-patterns\scripts\api_validator.py:162
+  Missing docstring for function 'main'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[94m[MEDIUM][0m .agent\skills\database-design\scripts\schema_validator.py:25
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[96m[INFO][0m .agent\skills\database-design\scripts\schema_validator.py:94
+  Missing docstring for function 'main'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[94m[MEDIUM][0m .agent\skills\frontend-design\scripts\accessibility_checker.py:26
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[96m[INFO][0m .agent\skills\frontend-design\scripts\accessibility_checker.py:111
+  Missing docstring for function 'main'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[94m[MEDIUM][0m .agent\skills\frontend-design\scripts\ux_audit.py:109
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[94m[MEDIUM][0m .agent\skills\frontend-design\scripts\ux_audit.py:308
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[96m[INFO][0m .agent\skills\frontend-design\scripts\ux_audit.py:98
+  Missing docstring for class 'UXAuditor'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\skills\frontend-design\scripts\ux_audit.py:691
+  Missing docstring for function 'main'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\skills\frontend-design\scripts\ux_audit.py:105
+  Missing docstring for function 'audit_file'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\skills\frontend-design\scripts\ux_audit.py:674
+  Missing docstring for function 'audit_directory'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\skills\frontend-design\scripts\ux_audit.py:682
+  Missing docstring for function 'get_report'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\skills\geo-fundamentals\scripts\geo_checker.py:222
+  Missing docstring for function 'main'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[94m[MEDIUM][0m .agent\skills\i18n-localization\scripts\i18n_checker.py:182
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[94m[MEDIUM][0m .agent\skills\i18n-localization\scripts\i18n_checker.py:88
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[96m[INFO][0m .agent\skills\i18n-localization\scripts\i18n_checker.py:199
+  Missing docstring for function 'main'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[94m[MEDIUM][0m .agent\skills\lint-and-validate\scripts\lint_runner.py:25
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[94m[MEDIUM][0m .agent\skills\lint-and-validate\scripts\lint_runner.py:55
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[96m[INFO][0m .agent\skills\lint-and-validate\scripts\lint_runner.py:116
+  Missing docstring for function 'main'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\skills\lint-and-validate\scripts\type_coverage.py:128
+  Missing docstring for function 'main'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[94m[MEDIUM][0m .agent\skills\mobile-design\scripts\mobile_audit.py:85
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[94m[MEDIUM][0m .agent\skills\mobile-design\scripts\mobile_audit.py:450
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[94m[MEDIUM][0m .agent\skills\mobile-design\scripts\mobile_audit.py:413
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[96m[INFO][0m .agent\skills\mobile-design\scripts\mobile_audit.py:74
+  Missing docstring for class 'MobileAuditor'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\skills\mobile-design\scripts\mobile_audit.py:631
+  Missing docstring for function 'main'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\skills\mobile-design\scripts\mobile_audit.py:81
+  Missing docstring for function 'audit_file'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\skills\mobile-design\scripts\mobile_audit.py:613
+  Missing docstring for function 'audit_directory'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\skills\mobile-design\scripts\mobile_audit.py:621
+  Missing docstring for function 'get_report'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\skills\nextjs-react-expert\scripts\react_performance_checker.py:14
+  Missing docstring for class 'PerformanceChecker'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m .agent\skills\nextjs-react-expert\scripts\react_performance_checker.py:234
+  Missing docstring for function 'main'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[94m[MEDIUM][0m .agent\skills\seo-fundamentals\scripts\seo_checker.py:29
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[96m[INFO][0m .agent\skills\seo-fundamentals\scripts\seo_checker.py:148
+  Missing docstring for function 'main'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[94m[MEDIUM][0m .agent\skills\testing-patterns\scripts\test_runner.py:23
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[94m[MEDIUM][0m .agent\skills\testing-patterns\scripts\test_runner.py:66
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[96m[INFO][0m .agent\skills\vulnerability-scanner\scripts\security_scan.py:421
+  Missing docstring for function 'main'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m backend\main.py:73
+  Missing docstring for asyncfunction 'lifespan'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m backend\main.py:1559
+  Missing docstring for class 'AgentSessionRequest'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m backend\main.py:1564
+  Missing docstring for class 'AgentHandoffRequest'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m backend\main.py:1570
+  Missing docstring for class 'CollaborativeRequest'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m backend\watcher.py:14
+  Missing docstring for class 'DropHandler'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m backend\watcher.py:183
+  Missing docstring for class 'Watcher'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m backend\agent\gemini_client.py:7
+  Missing docstring for class 'GeminiClient'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[94m[MEDIUM][0m backend\agent\local_client.py:130
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[96m[INFO][0m backend\agent\local_client.py:7
+  Missing docstring for class 'LocalClient'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m backend\agent\orchestrator.py:36
+  Missing docstring for class 'Orchestrator'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m backend\rag\ingest.py:22
+  Missing docstring for class 'IngestionPipeline'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m backend\rag\store.py:20
+  Missing docstring for class 'VectorStore'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[94m[MEDIUM][0m backend\utils\performance.py:481
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[96m[INFO][0m backend\utils\performance.py:765
+  Missing docstring for asyncfunction 'capture_metrics_task'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m backend\utils\performance.py:774
+  Missing docstring for asyncfunction 'startup_event'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m backend\utils\performance.py:779
+  Missing docstring for asyncfunction 'shutdown_event'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[94m[MEDIUM][0m src\sandbox\docker_exec.py:112
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[94m[MEDIUM][0m src\sandbox\local_exec.py:101
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[96m[INFO][0m tests\conftest.py:235
+  Missing docstring for asyncfunction 'root'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[96m[INFO][0m tests\conftest.py:239
+  Missing docstring for asyncfunction 'health'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[93m[HIGH][0m tests\test_auto_issue_finder.py:110
+  Potential hardcoded password
+  ≡ƒÆí Use environment variables or secure secret management
+
+[93m[HIGH][0m tests\test_config.py:376
+  Potential hardcoded API key
+  ≡ƒÆí Use environment variables or secure secret management
+
+[93m[HIGH][0m tests\test_config.py:377
+  Potential hardcoded API key
+  ≡ƒÆí Use environment variables or secure secret management
+
+[93m[HIGH][0m tests\test_config.py:387
+  Potential hardcoded API key
+  ≡ƒÆí Use environment variables or secure secret management
+
+[93m[HIGH][0m tests\test_config.py:432
+  Potential hardcoded API key
+  ≡ƒÆí Use environment variables or secure secret management
+
+[93m[HIGH][0m tests\test_settings_api.py:271
+  Potential hardcoded token
+  ≡ƒÆí Use environment variables or secure secret management
+
+[94m[MEDIUM][0m tests\performance\test_cache_efficiency.py:202
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[94m[MEDIUM][0m tests\performance\test_cache_efficiency.py:61
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[94m[MEDIUM][0m tests\performance\test_cache_efficiency.py:102
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[94m[MEDIUM][0m tests\performance\test_cache_efficiency.py:121
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[94m[MEDIUM][0m tests\performance\test_cache_efficiency.py:160
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[94m[MEDIUM][0m tests\performance\test_cache_efficiency.py:295
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[94m[MEDIUM][0m tests\performance\test_cache_efficiency.py:328
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[94m[MEDIUM][0m tests\performance\test_memory_usage.py:214
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[94m[MEDIUM][0m tests\performance\test_memory_usage.py:131
+  Bare except clause found - catches all exceptions
+  ≡ƒÆí Specify exception types: except (ValueError, KeyError):
+
+[93m[HIGH][0m tests\unit\test_agent.py:98
+  Potential hardcoded API key
+  ≡ƒÆí Use environment variables or secure secret management
+
+[93m[HIGH][0m tests\unit\test_config.py:32
+  Potential hardcoded API key
+  ≡ƒÆí Use environment variables or secure secret management
+
+[93m[HIGH][0m tests\unit\test_config.py:138
+  Potential hardcoded API key
+  ≡ƒÆí Use environment variables or secure secret management
+
+[93m[HIGH][0m tests\unit\test_gemini_client.py:24
+  Potential hardcoded API key
+  ≡ƒÆí Use environment variables or secure secret management
+
+[93m[HIGH][0m tests\unit\test_gemini_client.py:103
+  Potential hardcoded API key
+  ≡ƒÆí Use environment variables or secure secret management
+
+[96m[INFO][0m tools\split_monolith.py:9
+  Missing docstring for function 'split_monolith'
+  ≡ƒÆí Add a docstring describing the purpose and parameters
+
+[94m[MEDIUM][0m health-check.sh:44
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m health-check.sh:187
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m health-check.sh:188
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m health-check.sh:191
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m health-check.sh:192
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m health-check.sh:227
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m health-check.sh:230
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install-remote.sh:99
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install-remote.sh:157
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install-remote.sh:227
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install-remote.sh:229
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install-remote.sh:230
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install-remote.sh:231
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install-remote.sh:232
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install-remote.sh:233
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install-remote.sh:240
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install-remote.sh:242
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install-remote.sh:243
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install-remote.sh:244
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install-remote.sh:245
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install-remote.sh:300
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install.sh:126
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install.sh:127
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install.sh:315
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install.sh:665
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install.sh:666
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install.sh:668
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install.sh:669
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install.sh:699
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install.sh:706
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install.sh:708
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install.sh:709
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install.sh:710
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install.sh:711
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install.sh:712
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install.sh:719
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install.sh:721
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install.sh:722
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m install.sh:723
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m quick-fix.sh:24
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m quick-fix.sh:145
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m stop.sh:106
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m stop.sh:111
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m test-fixes.sh:191
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m test-fixes.sh:197
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m test-settings-ui.sh:198
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m test-settings-ui.sh:216
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m test-setup.sh:226
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m test-setup.sh:232
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m test-setup.sh:264
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m validate-phase2.sh:210
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m validate-rotator.sh:241
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m validate-rotator.sh:253
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m validate.sh:359
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m validate.sh:365
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m validate.sh:367
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m validate.sh:378
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[94m[MEDIUM][0m verify-phase3.sh:74
+  Unquoted variable - may cause word splitting
+  ≡ƒÆí Quote variables: "$VAR" instead of $VAR
+
+[92m[LOW][0m requirements.txt:3
+  Package 'pydantic' not version-pinned
+  ≡ƒÆí Pin package versions for reproducibility: package==1.0.0
+
+[92m[LOW][0m requirements.txt:4
+  Package 'pydantic-settings' not version-pinned
+  ≡ƒÆí Pin package versions for reproducibility: package==1.0.0
+
+[92m[LOW][0m requirements.txt:5
+  Package 'python-dotenv' not version-pinned
+  ≡ƒÆí Pin package versions for reproducibility: package==1.0.0
+
+[92m[LOW][0m requirements.txt:6
+  Package 'pytest' not version-pinned
+  ≡ƒÆí Pin package versions for reproducibility: package==1.0.0
+
+[92m[LOW][0m requirements.txt:8
+  Package 'httpx' not version-pinned
+  ≡ƒÆí Pin package versions for reproducibility: package==1.0.0
+
+[92m[LOW][0m requirements.txt:9
+  Package 'mcp' not version-pinned
+  ≡ƒÆí Pin package versions for reproducibility: package==1.0.0
+

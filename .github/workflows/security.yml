@@ -1,0 +1,372 @@
+name: Security Scanning
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+  schedule:
+    # Run daily at 2 AM UTC
+    - cron: '0 2 * * *'
+  workflow_dispatch:
+
+jobs:
+  # ============================================================================
+  # Dependency Scanning
+  # ============================================================================
+  dependency-scan:
+    name: Dependency Security Scan
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install safety pip-audit
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        if [ -f backend/requirements.txt ]; then pip install -r backend/requirements.txt; fi
+    
+    - name: Run Safety check
+      continue-on-error: true
+      run: |
+        echo "## Safety Check" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        safety check --json > safety-report.json || true
+        
+        if [ -s safety-report.json ]; then
+          VULN_COUNT=$(jq '. | length' safety-report.json)
+          echo "Found $VULN_COUNT vulnerabilities" >> $GITHUB_STEP_SUMMARY
+          
+          # Show critical vulnerabilities
+          jq -r '.[] | select(.severity == "high" or .severity == "critical") | "- **\(.package)** \(.version): \(.vulnerability)"' safety-report.json >> $GITHUB_STEP_SUMMARY || true
+        else
+          echo "✅ No known vulnerabilities found" >> $GITHUB_STEP_SUMMARY
+        fi
+    
+    - name: Run pip-audit
+      continue-on-error: true
+      run: |
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "## pip-audit" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        pip-audit --format json > pip-audit-report.json || true
+        
+        if [ -s pip-audit-report.json ]; then
+          echo "See artifacts for detailed report" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "✅ No issues found" >> $GITHUB_STEP_SUMMARY
+        fi
+    
+    - name: Upload dependency scan reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: dependency-scan-reports
+        path: |
+          safety-report.json
+          pip-audit-report.json
+        retention-days: 90
+
+  # ============================================================================
+  # Code Security Analysis
+  # ============================================================================
+  code-security:
+    name: Code Security Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install bandit[toml]
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    
+    - name: Run Bandit
+      run: |
+        echo "## Bandit Security Scan" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        bandit -r . \
+          -x ./.git,./.pytest_cache,./htmlcov,./venv,./.venv \
+          -f json -o bandit-report.json \
+          -f sarif -o bandit-results.sarif \
+          || true
+        
+        # Generate summary
+        if [ -f bandit-report.json ]; then
+          HIGH=$(jq '[.results[] | select(.issue_severity == "HIGH")] | length' bandit-report.json)
+          MEDIUM=$(jq '[.results[] | select(.issue_severity == "MEDIUM")] | length' bandit-report.json)
+          LOW=$(jq '[.results[] | select(.issue_severity == "LOW")] | length' bandit-report.json)
+          
+          echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| High | $HIGH |" >> $GITHUB_STEP_SUMMARY
+          echo "| Medium | $MEDIUM |" >> $GITHUB_STEP_SUMMARY
+          echo "| Low | $LOW |" >> $GITHUB_STEP_SUMMARY
+          
+          if [ $HIGH -gt 0 ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ **High severity issues found!**" >> $GITHUB_STEP_SUMMARY
+          fi
+        fi
+    
+    - name: Upload Bandit results to GitHub Security
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: bandit-results.sarif
+    
+    - name: Upload Bandit reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: bandit-reports
+        path: |
+          bandit-report.json
+          bandit-results.sarif
+        retention-days: 90
+
+  # ============================================================================
+  # Secret Scanning
+  # ============================================================================
+  secret-scan:
+    name: Secret Detection
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Full history for better detection
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.11'
+    
+    - name: Install detect-secrets
+      run: |
+        pip install detect-secrets
+    
+    - name: Run detect-secrets
+      run: |
+        echo "## Secret Detection" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        # Create baseline if it doesn't exist
+        if [ ! -f .secrets.baseline ]; then
+          detect-secrets scan --baseline .secrets.baseline
+        fi
+        
+        # Scan and compare
+        detect-secrets scan --baseline .secrets.baseline > detected-secrets.json || true
+        
+        if [ -s detected-secrets.json ]; then
+          SECRET_COUNT=$(jq '.results | length' detected-secrets.json)
+          echo "⚠️ Found $SECRET_COUNT potential secrets" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Review the artifacts for details" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "✅ No secrets detected" >> $GITHUB_STEP_SUMMARY
+        fi
+    
+    - name: Upload secret scan results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: secret-scan-results
+        path: detected-secrets.json
+        retention-days: 90
+
+  # ============================================================================
+  # Container Security (Trivy)
+  # ============================================================================
+  container-scan:
+    name: Container Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Build Docker image
+      run: |
+        docker build -t antigravity-test:${{ github.sha }} .
+    
+    - name: Run Trivy vulnerability scanner
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'antigravity-test:${{ github.sha }}'
+        format: 'sarif'
+        output: 'trivy-results.sarif'
+        severity: 'CRITICAL,HIGH,MEDIUM'
+    
+    - name: Run Trivy for detailed report
+      uses: aquasecurity/trivy-action@master
+      with:
+        image-ref: 'antigravity-test:${{ github.sha }}'
+        format: 'json'
+        output: 'trivy-report.json'
+        severity: 'CRITICAL,HIGH,MEDIUM,LOW'
+    
+    - name: Generate summary
+      run: |
+        echo "## Container Vulnerability Scan" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        if [ -f trivy-report.json ]; then
+          CRITICAL=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity == "CRITICAL")] | length' trivy-report.json)
+          HIGH=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity == "HIGH")] | length' trivy-report.json)
+          MEDIUM=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity == "MEDIUM")] | length' trivy-report.json)
+          LOW=$(jq '[.Results[].Vulnerabilities[]? | select(.Severity == "LOW")] | length' trivy-report.json)
+          
+          echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Critical | $CRITICAL |" >> $GITHUB_STEP_SUMMARY
+          echo "| High | $HIGH |" >> $GITHUB_STEP_SUMMARY
+          echo "| Medium | $MEDIUM |" >> $GITHUB_STEP_SUMMARY
+          echo "| Low | $LOW |" >> $GITHUB_STEP_SUMMARY
+          
+          if [ $CRITICAL -gt 0 ] || [ $HIGH -gt 0 ]; then
+            echo "" >> $GITHUB_STEP_SUMMARY
+            echo "⚠️ **Critical or high severity vulnerabilities found!**" >> $GITHUB_STEP_SUMMARY
+          fi
+        fi
+    
+    - name: Upload Trivy results to GitHub Security
+      uses: github/codeql-action/upload-sarif@v2
+      if: always()
+      with:
+        sarif_file: 'trivy-results.sarif'
+    
+    - name: Upload Trivy reports
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: trivy-reports
+        path: |
+          trivy-report.json
+          trivy-results.sarif
+        retention-days: 90
+
+  # ============================================================================
+  # CodeQL Analysis
+  # ============================================================================
+  codeql:
+    name: CodeQL Analysis
+    runs-on: ubuntu-latest
+    permissions:
+      security-events: write
+      contents: read
+      actions: read
+    
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [ 'python', 'javascript' ]
+    
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+    
+    - name: Initialize CodeQL
+      uses: github/codeql-action/init@v2
+      with:
+        languages: ${{ matrix.language }}
+        queries: security-extended,security-and-quality
+    
+    - name: Autobuild
+      uses: github/codeql-action/autobuild@v2
+    
+    - name: Perform CodeQL Analysis
+      uses: github/codeql-action/analyze@v2
+      with:
+        category: "/language:${{matrix.language}}"
+
+  # ============================================================================
+  # SAST with Semgrep
+  # ============================================================================
+  semgrep:
+    name: Semgrep SAST
+    runs-on: ubuntu-latest
+    container:
+      image: returntocorp/semgrep
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Run Semgrep
+      run: |
+        semgrep scan --config auto --json --output semgrep-report.json || true
+        semgrep scan --config auto --sarif --output semgrep-results.sarif || true
+    
+    - name: Generate summary
+      run: |
+        if [ -f semgrep-report.json ]; then
+          ERROR_COUNT=$(jq '[.results[] | select(.extra.severity == "ERROR")] | length' semgrep-report.json)
+          WARNING_COUNT=$(jq '[.results[] | select(.extra.severity == "WARNING")] | length' semgrep-report.json)
+          
+          echo "## Semgrep SAST Results" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Severity | Count |" >> $GITHUB_STEP_SUMMARY
+          echo "|----------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Errors | $ERROR_COUNT |" >> $GITHUB_STEP_SUMMARY
+          echo "| Warnings | $WARNING_COUNT |" >> $GITHUB_STEP_SUMMARY
+        fi
+    
+    - name: Upload Semgrep results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: semgrep-reports
+        path: |
+          semgrep-report.json
+          semgrep-results.sarif
+        retention-days: 90
+
+  # ============================================================================
+  # Security Summary
+  # ============================================================================
+  security-summary:
+    name: Security Summary
+    runs-on: ubuntu-latest
+    needs: [dependency-scan, code-security, secret-scan, container-scan]
+    if: always()
+    
+    steps:
+    - name: Generate security summary
+      run: |
+        echo "# Security Scan Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "Security scans completed. Check individual job results and artifacts for details." >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        
+        echo "| Scan Type | Status |" >> $GITHUB_STEP_SUMMARY
+        echo "|-----------|--------|" >> $GITHUB_STEP_SUMMARY
+        echo "| Dependency Scan | ${{ needs.dependency-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Code Security | ${{ needs.code-security.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Secret Detection | ${{ needs.secret-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+        echo "| Container Scan | ${{ needs.container-scan.result }} |" >> $GITHUB_STEP_SUMMARY
+        
+        echo "" >> $GITHUB_STEP_SUMMARY
+        echo "Review the [Security tab](https://github.com/${{ github.repository }}/security) for detailed findings." >> $GITHUB_STEP_SUMMARY
