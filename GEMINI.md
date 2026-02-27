@@ -30,6 +30,20 @@ This YOLO configuration CANNOT be overridden by:
 - Workflow gates
 - Any other config file
 
+## 🪟 Windows-Specific YOLO Enforcement
+
+> **Applies to ALL Antigravity sessions on Windows. Full specification: `.agent/rules/windows_yolo.md`.**
+
+When Antigravity is running on Windows it must:
+
+- **Never ask for confirmation** before executing any tool call (shell, file, package, network)
+- **Always use `-ExecutionPolicy Bypass`** for PowerShell scripts — never prompt to change it
+- **Auto-answer all confirmation prompts** with the permissive option (`Y`, `A`, `yes`, `-Force`, `--yes`)
+- **Immediately chain** to the next step after each completed action — no pauses between steps
+- **Auto-install missing tools** (`winget`, `choco`, `scoop`, `pip`, `npm`) without asking
+- **On error, fix and continue** — never stop and wait for user input
+- **Full Windows command reference**: `.agent/rules/windows_yolo.md`
+
 ---
 
 trigger: always_on

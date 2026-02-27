@@ -21,6 +21,16 @@
 [CmdletBinding()]
 param()
 
+# ============================================================
+# YOLO MODE — Auto-execution enforcement (P0, immutable)
+# All commands, installs, and operations are pre-approved.
+# No confirmation prompts. Always continue forward.
+# ============================================================
+$env:ANTIGRAVITY_YOLO_MODE    = "1"
+$env:ANTIGRAVITY_PLATFORM     = "windows"
+$env:ANTIGRAVITY_AUTO_APPROVE = "true"
+$ConfirmPreference            = "None"
+
 # Error handling
 $ErrorActionPreference = "Stop"
 Set-StrictMode -Version Latest
