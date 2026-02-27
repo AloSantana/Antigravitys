@@ -7,15 +7,12 @@ import pytest
 import time
 import psutil
 import os
-import statistics
-from typing import List, Dict
-from fastapi.testclient import TestClient
+from typing import Dict
 import sys
 
 # Add backend to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../backend'))
 
-from main import app
 
 # Memory targets (in MB)
 TARGET_BASELINE_MEMORY = 200  # Baseline memory < 200MB
@@ -65,7 +62,7 @@ class TestMemoryUsage:
         if stats['rss_mb'] > TARGET_BASELINE_MEMORY:
             print(f"  ⚠️ Memory usage higher than target: {stats['rss_mb']:.2f} MB > {TARGET_BASELINE_MEMORY} MB")
         else:
-            print(f"  ✅ Baseline memory usage is optimal")
+            print("  ✅ Baseline memory usage is optimal")
     
     def test_memory_usage_during_requests(self, client):
         """Test memory usage doesn't grow excessively during requests"""

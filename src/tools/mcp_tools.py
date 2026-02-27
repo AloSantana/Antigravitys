@@ -5,8 +5,7 @@ These tools provide convenient access to MCP server information
 and tool discovery for agents.
 """
 
-from typing import Dict, Any, List
-import asyncio
+from typing import Dict, Any
 from src.mcp_client import MCPClientManagerSync
 
 

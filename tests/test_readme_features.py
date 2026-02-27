@@ -2,7 +2,6 @@ import pytest
 from fastapi.testclient import TestClient
 from pathlib import Path
 import sys
-import os
 
 # Ensure backend path is in sys.path
 backend_path = Path(__file__).parent.parent / "backend"

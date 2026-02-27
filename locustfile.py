@@ -5,9 +5,7 @@ Run with: locust -f locustfile.py --host=http://localhost:8000
 
 from locust import HttpUser, task, between, events
 import random
-import time
 import json
-from typing import List
 
 # Test data
 SAMPLE_QUERIES = [

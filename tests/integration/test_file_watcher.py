@@ -4,9 +4,7 @@ Integration tests for file watcher and processing flow
 
 import pytest
 import asyncio
-from pathlib import Path
 from unittest.mock import patch, Mock, AsyncMock
-import time
 
 
 @pytest.mark.integration
@@ -16,7 +14,7 @@ class TestFileWatcherIntegration:
     
     async def test_watcher_detects_new_folder(self, temp_dir, mock_ingestion_pipeline):
         """Test watcher detects new folder creation."""
-        from backend.watcher import Watcher, DropHandler
+        from backend.watcher import DropHandler
         
         loop = asyncio.get_event_loop()
         handler = DropHandler(mock_ingestion_pipeline, loop)

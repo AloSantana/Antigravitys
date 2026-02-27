@@ -6,7 +6,7 @@ Measures cache hit rates, effectiveness, and performance impact
 import pytest
 import time
 import statistics
-from typing import List, Dict
+from typing import Dict
 from fastapi.testclient import TestClient
 import sys
 import os
@@ -14,7 +14,6 @@ import os
 # Add backend to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../backend'))
 
-from main import app
 
 # Cache performance targets
 TARGET_CACHE_HIT_RATE = 0.8  # 80% hit rate for repeated queries
@@ -166,7 +165,7 @@ class TestCacheEfficiency:
             for i in range(num_unique_queries):
                 try:
                     client.post("/agent/ask", params={"query": f"unique query {i}"})
-                except Exception as e:
+                except Exception:
                     pass
         
         # Check cache size

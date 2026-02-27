@@ -1,5 +1,4 @@
 import aiohttp
-import json
 import os
 import asyncio
 from typing import Optional
@@ -67,7 +66,7 @@ class LocalClient:
                     await asyncio.sleep(0.5 * (attempt + 1))
                     continue
                 return f"Local LLM Error: Request timed out after {self._max_retries + 1} attempts"
-            except aiohttp.ClientError as e:
+            except aiohttp.ClientError:
                 if attempt < self._max_retries:
                     print(f"Connection error, retrying (attempt {attempt + 1})...")
                     await asyncio.sleep(0.5 * (attempt + 1))

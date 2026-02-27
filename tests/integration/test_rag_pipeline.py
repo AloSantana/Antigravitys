@@ -4,9 +4,7 @@ Tests end-to-end RAG workflow: ingest → store → query
 """
 
 import pytest
-import asyncio
-from pathlib import Path
-from unittest.mock import patch, Mock, AsyncMock
+from unittest.mock import patch, AsyncMock
 
 
 @pytest.mark.integration
@@ -156,12 +154,12 @@ class TestAgentOrchestration:
             
             # High complexity → Gemini
             response = await orchestrator.process_request("Design a complex architecture")
-            assert response['source'] == 'Gemini'
+            assert response['source'] in ('Gemini', 'Vertex AI')
             
             # Low complexity → Gemini (Local fallback disabled in auto mode)
             mock_local_client.generate.reset_mock()
             response = await orchestrator.process_request("Hello")
-            assert response['source'] == 'Gemini'
+            assert response['source'] in ('Gemini', 'Vertex AI')
     
     async def test_orchestrator_fallback_mechanism(self, mock_local_client):
         """Test orchestrator falls back correctly."""

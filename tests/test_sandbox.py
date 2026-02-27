@@ -11,12 +11,9 @@ Tests:
 """
 
 import pytest
-import asyncio
-import tempfile
-from pathlib import Path
-from unittest.mock import patch, MagicMock, AsyncMock
+from unittest.mock import patch
 
-from src.sandbox.base import CodeSandbox, ExecutionResult
+from src.sandbox.base import ExecutionResult
 from src.sandbox.local_exec import LocalSandbox
 
 

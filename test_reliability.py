@@ -5,7 +5,6 @@ Tests the enhanced error handling without requiring full app startup.
 """
 
 import sys
-import os
 from pathlib import Path
 
 # Add backend to path

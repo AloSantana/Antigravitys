@@ -1,4 +1,3 @@
-import requests
 
 def web_search(query: str) -> str:
     """Performs a web search for the given query.

@@ -4,9 +4,8 @@ Provides input validation, rate limiting, and authentication helpers.
 """
 
 import os
-import re
 from pathlib import Path
-from typing import Optional, List
+from typing import List
 from fastapi import HTTPException, UploadFile
 import logging
 

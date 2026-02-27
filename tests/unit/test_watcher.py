@@ -5,9 +5,7 @@ Tests the Watcher and DropHandler classes for file monitoring
 
 import pytest
 import asyncio
-from pathlib import Path
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from watchdog.events import FileSystemEvent
+from unittest.mock import Mock, patch
 
 
 @pytest.mark.unit

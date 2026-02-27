@@ -6,7 +6,6 @@ Provides code execution in isolated Docker containers with enhanced security.
 
 import asyncio
 import time
-import json
 from typing import Optional
 
 from .base import CodeSandbox, ExecutionResult

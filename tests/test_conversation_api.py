@@ -6,7 +6,7 @@ Integration tests for conversation history API.
 
 import pytest
 from fastapi.testclient import TestClient
-from backend.main import app, conversation_manager
+from backend.main import app
 import tempfile
 import os
 

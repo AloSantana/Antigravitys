@@ -227,7 +227,6 @@ def mock_settings():
 def mock_app():
     """Create a mock FastAPI application for testing."""
     from fastapi import FastAPI
-    from fastapi.testclient import TestClient
     
     app = FastAPI()
     

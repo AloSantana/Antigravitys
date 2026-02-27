@@ -8,7 +8,6 @@ import asyncio
 import tempfile
 import os
 import time
-from pathlib import Path
 from typing import Optional
 
 from .base import CodeSandbox, ExecutionResult

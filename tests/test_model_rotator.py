@@ -6,15 +6,14 @@ import pytest
 import asyncio
 import os
 import time
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 # Add src to path
 import sys
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'src'))
 
 from model_rotator import (
-    ModelRotator, APIKey, KeyStatus, ServiceConfig,
-    get_rotator, get_api_key, mark_api_success, mark_api_failure
+    ModelRotator, APIKey, KeyStatus, get_api_key, mark_api_success, mark_api_failure
 )
 
 

@@ -4,8 +4,6 @@ Tests performance monitoring and optimization utilities
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-import time
 
 
 @pytest.mark.unit

@@ -25,7 +25,6 @@ from datetime import datetime
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 import subprocess
-import threading
 from logging.handlers import RotatingFileHandler
 
 
@@ -650,13 +649,13 @@ def show_status(project_root: Path) -> None:
         
         if status.get('latest_report'):
             report = status['latest_report']
-            print(f"\nLatest Health Report:")
+            print("\nLatest Health Report:")
             print(f"  Timestamp: {report['timestamp']}")
             print(f"  Overall Status: {report['overall_status']}")
             print(f"  System: CPU {report['system']['cpu_percent']:.1f}%, "
                   f"Memory {report['system']['memory_percent']:.1f}%, "
                   f"Disk {report['system']['disk_percent']:.1f}%")
-            print(f"  Services:")
+            print("  Services:")
             for service in report['services']:
                 status_symbol = '●'
                 if service['status'] == 'up':
@@ -669,7 +668,7 @@ def show_status(project_root: Path) -> None:
                       f"{service['name']}: {service['status']}")
             
             if report['alerts']:
-                print(f"  Alerts:")
+                print("  Alerts:")
                 for alert in report['alerts']:
                     print(f"    - {alert}")
     else:

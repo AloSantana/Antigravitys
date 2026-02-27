@@ -3,7 +3,6 @@ Agent Management System for Antigravity Workspace
 Dynamically loads and manages custom coding agents
 """
 
-import os
 import json
 import logging
 from typing import Dict, List, Optional, Any

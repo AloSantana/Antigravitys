@@ -370,7 +370,6 @@ def test_get_statistics(manager):
 
 def test_cleanup_old_artifacts(manager):
     """Test cleanup of old artifacts."""
-    import time
     from datetime import datetime, timedelta
     
     # Store an artifact and manually modify its timestamp
@@ -522,8 +521,8 @@ def test_artifact_path_structure(manager):
     code_artifact = manager.store_artifact(b"code", "script.py")
     diff_artifact = manager.store_artifact(b"diff", "changes.diff")
     
-    assert "code/" in code_artifact["path"]
-    assert "diffs/" in diff_artifact["path"]
+    assert "code" in code_artifact["path"].replace("\\", "/")
+    assert "diffs" in diff_artifact["path"].replace("\\", "/")
 
 
 def test_get_total_size(manager):

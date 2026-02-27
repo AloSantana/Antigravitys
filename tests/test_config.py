@@ -11,9 +11,8 @@ Tests:
 
 import os
 import pytest
-import tempfile
 from pathlib import Path
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 from pydantic import ValidationError
 
 from src.config import MCPServerConfig, Settings, settings
@@ -141,16 +140,16 @@ class TestSettings:
         with patch.dict(os.environ, {'GEMINI_API_KEY': 'test_key_do_not_use_in_prod'}, clear=True):
             test_settings = Settings()
             
-            assert test_settings.GEMINI_API_KEY == 'test_key'
-            assert test_settings.GOOGLE_API_KEY == 'test_key'
+            assert test_settings.GEMINI_API_KEY == 'test_key_do_not_use_in_prod'
+            assert test_settings.GOOGLE_API_KEY == 'test_key_do_not_use_in_prod'
     
     def test_settings_api_key_aliasing_google_to_gemini(self):
         """Test that GOOGLE_API_KEY is aliased to GEMINI_API_KEY."""
         with patch.dict(os.environ, {'GOOGLE_API_KEY': 'test_key_do_not_use_in_prod'}, clear=True):
             test_settings = Settings()
             
-            assert test_settings.GOOGLE_API_KEY == 'test_key'
-            assert test_settings.GEMINI_API_KEY == 'test_key'
+            assert test_settings.GOOGLE_API_KEY == 'test_key_do_not_use_in_prod'
+            assert test_settings.GEMINI_API_KEY == 'test_key_do_not_use_in_prod'
     
     def test_settings_api_key_both_set(self):
         """Test when both API keys are set."""
@@ -363,7 +362,6 @@ class TestSettingsIntegration:
     
     def test_global_settings_instance(self):
         """Test that global settings instance is available."""
-        from src.config import settings
         
         assert isinstance(settings, Settings)
         assert hasattr(settings, 'GOOGLE_API_KEY')
@@ -408,7 +406,7 @@ class TestSettingsIntegration:
         )
         
         # Verify all settings
-        assert test_settings.GOOGLE_API_KEY == "test_google_key"
+        assert test_settings.GOOGLE_API_KEY == "test_google_key_do_not_use_in_prod"
         assert test_settings.GEMINI_MODEL_NAME == "gemini-pro"
         assert test_settings.AGENT_NAME == "TestAgent"
         assert test_settings.DEBUG_MODE is True

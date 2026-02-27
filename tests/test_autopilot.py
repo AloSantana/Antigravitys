@@ -14,7 +14,6 @@ from autopilot import (
     AutoPilotPipeline,
     Pipeline,
     PipelineStage,
-    PipelineStatus,
     StageStatus,
     DEFAULT_STAGES,
 )
@@ -30,7 +29,7 @@ class MockOrchestrator:
     async def process_request(self, request: str):
         self.requests.append(request)
         if self.fail_stage and self.fail_stage in request:
-            raise RuntimeError(f"Simulated failure in stage")
+            raise RuntimeError("Simulated failure in stage")
         return {"response": f"Completed: {request[:80]}..."}
 
 
@@ -205,8 +204,8 @@ class TestPipelineCancellation:
         ap = AutoPilotPipeline(orchestrator=mock_orchestrator)
         pid = ap.start("Build a complex machine learning pipeline application")
 
-        # Give it a moment to start
-        await asyncio.sleep(0.05)
+        # Give it a moment to actually start running
+        await asyncio.sleep(0.2)
 
         success = ap.cancel(pid)
         assert success is True

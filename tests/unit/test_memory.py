@@ -5,7 +5,6 @@ Tests the MemoryManager class
 
 import pytest
 import json
-from pathlib import Path
 
 
 @pytest.mark.unit

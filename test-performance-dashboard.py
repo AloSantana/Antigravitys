@@ -5,9 +5,7 @@ Tests all endpoints and functionality
 """
 
 import requests
-import time
 import json
-from typing import Dict, Any
 
 # Configuration
 BACKEND_URL = "http://localhost:8000"
@@ -32,15 +30,15 @@ def test_endpoint(name: str, url: str, expected_keys: list = None) -> bool:
                     print(f"   ❌ Failed: Missing key '{key}'")
                     return False
         
-        print(f"   ✅ Success")
+        print("   ✅ Success")
         print(f"   📊 Response preview: {json.dumps(data, indent=2)[:200]}...")
         return True
         
     except requests.exceptions.Timeout:
-        print(f"   ❌ Failed: Request timeout")
+        print("   ❌ Failed: Request timeout")
         return False
     except requests.exceptions.ConnectionError:
-        print(f"   ❌ Failed: Connection error (is backend running?)")
+        print("   ❌ Failed: Connection error (is backend running?)")
         return False
     except Exception as e:
         print(f"   ❌ Failed: {str(e)}")
@@ -140,9 +138,9 @@ def main():
     
     # Frontend check
     print("\n🌐 Frontend Dashboard Check:")
-    print(f"   Open: http://localhost:3000")
-    print(f"   Then click on: 📊 Performance tab")
-    print(f"   Expected: Real-time charts and metrics updating every 2 seconds")
+    print("   Open: http://localhost:3000")
+    print("   Then click on: 📊 Performance tab")
+    print("   Expected: Real-time charts and metrics updating every 2 seconds")
     
     if passed == total:
         print("\n✨ All tests passed! Performance Dashboard is ready!")

@@ -11,9 +11,7 @@ Tests the structured debug logger functionality including:
 
 import pytest
 import json
-import time
 from pathlib import Path
-from datetime import datetime, timedelta
 import tempfile
 import shutil
 

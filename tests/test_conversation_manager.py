@@ -8,8 +8,6 @@ import pytest
 import sqlite3
 import tempfile
 import os
-from pathlib import Path
-from datetime import datetime
 from backend.conversation_manager import ConversationManager
 
 

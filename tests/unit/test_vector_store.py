@@ -4,7 +4,7 @@ Tests the VectorStore class for ChromaDB operations
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
+from unittest.mock import Mock, patch
 
 
 @pytest.mark.unit

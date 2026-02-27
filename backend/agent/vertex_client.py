@@ -7,7 +7,6 @@ import os
 import asyncio
 import logging
 from typing import Optional, List, Dict, Any
-from functools import lru_cache
 
 try:
     from google.cloud import aiplatform

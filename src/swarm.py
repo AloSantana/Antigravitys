@@ -126,7 +126,7 @@ class SwarmOrchestrator:
         """
         if verbose:
             print(f"\n{'='*60}")
-            print(f"Swarm Execution Started")
+            print("Swarm Execution Started")
             print(f"{'='*60}")
             print(f"Task: {user_task}\n")
         
@@ -200,7 +200,7 @@ class SwarmOrchestrator:
         )
         
         if verbose:
-            print(f"  ✓ Synthesis complete\n")
+            print("  ✓ Synthesis complete\n")
             print(f"{'='*60}")
             print("Swarm Execution Complete")
             print(f"{'='*60}\n")

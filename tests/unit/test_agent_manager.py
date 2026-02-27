@@ -4,8 +4,6 @@ Tests the AgentManager class for agent loading and management
 """
 
 import pytest
-from pathlib import Path
-from unittest.mock import Mock, patch, mock_open
 import json
 
 

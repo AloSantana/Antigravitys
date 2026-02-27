@@ -4,10 +4,9 @@ Measures how well the system handles multiple simultaneous requests
 """
 
 import pytest
-import asyncio
 import time
 import statistics
-from typing import List, Dict
+from typing import Dict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from fastapi.testclient import TestClient
 import sys
@@ -16,7 +15,6 @@ import os
 # Add backend to path
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), '../../backend'))
 
-from main import app
 
 
 class TestConcurrentRequests:

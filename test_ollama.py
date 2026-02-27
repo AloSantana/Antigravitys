@@ -2,7 +2,6 @@
 Quick Ollama connectivity test
 """
 import requests
-import json
 
 print("[TEST] Testing Ollama Connection...")
 
@@ -11,7 +10,7 @@ try:
     response = requests.get("http://localhost:11434/api/tags")
     if response.status_code == 200:
         models = response.json()
-        print(f"[OK] Ollama is running")
+        print("[OK] Ollama is running")
         print(f"Available models: {models}")
     else:
         print(f"[ERROR] Ollama returned status: {response.status_code}")

@@ -11,7 +11,6 @@ Tests all settings management functionality including:
 """
 
 import pytest
-import os
 import json
 from fastapi.testclient import TestClient
 from pathlib import Path

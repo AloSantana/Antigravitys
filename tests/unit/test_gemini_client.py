@@ -5,7 +5,7 @@ Tests the GeminiClient class for Google Gemini API integration
 
 import pytest
 import asyncio
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
+from unittest.mock import Mock, AsyncMock, patch
 
 
 @pytest.mark.unit

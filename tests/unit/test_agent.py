@@ -4,8 +4,7 @@ Tests the GeminiAgent class
 """
 
 import pytest
-from unittest.mock import Mock, patch, MagicMock
-import time
+from unittest.mock import patch
 
 
 @pytest.mark.unit

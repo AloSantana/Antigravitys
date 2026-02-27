@@ -6,7 +6,6 @@ Tests API routes with TestClient
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import Mock, AsyncMock, patch
-import json
 
 
 @pytest.mark.integration

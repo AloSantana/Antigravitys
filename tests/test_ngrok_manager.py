@@ -10,10 +10,9 @@ Tests the ngrok tunnel management functionality including:
 """
 
 import pytest
-import asyncio
 import os
 from pathlib import Path
-from unittest.mock import Mock, patch, AsyncMock
+from unittest.mock import Mock, patch
 
 # Add backend to path
 import sys

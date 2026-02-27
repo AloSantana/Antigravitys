@@ -1,7 +1,6 @@
 import pytest
 from fastapi.testclient import TestClient
 import sys
-import os
 from pathlib import Path
 
 # Add project root to python path

@@ -115,7 +115,7 @@ class NgrokManager:
             self.tunnel_created_at = datetime.now()
             self.is_healthy = True
             
-            logger.info(f"Ngrok tunnel started successfully!")
+            logger.info("Ngrok tunnel started successfully!")
             logger.info(f"  Public URL: {self.public_url}")
             logger.info(f"  Local Port: {self.port}")
             logger.info(f"  Region: {self.region}")
@@ -128,7 +128,7 @@ class NgrokManager:
         except PyngrokError as e:
             error_msg = str(e)
             if "ERR_NGROK_108" in error_msg or "simultaneous" in error_msg:
-                logger.warning(f"Ngrok session limit reached (free plan). Continuing without tunnel.")
+                logger.warning("Ngrok session limit reached (free plan). Continuing without tunnel.")
             else:
                 logger.error(f"Ngrok error: {e}")
             self.is_healthy = False

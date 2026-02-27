@@ -1,0 +1,638 @@
+============================= test session starts =============================
+platform win32 -- Python 3.14.0, pytest-9.0.2, pluggy-1.6.0 -- C:\Python314\python.exe
+cachedir: .pytest_cache
+rootdir: C:\Users\LocalAdminUser\Antigravitys
+configfile: pytest.ini
+testpaths: tests
+plugins: langsmith-0.7.1, asyncio-1.3.0, cov-7.0.0, anyio-4.12.1
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 993 items
+
+tests/config/test_configuration_validation.py::TestEnvironmentConfiguration::test_env_example_exists PASSED [  0%]
+tests/config/test_configuration_validation.py::TestEnvironmentConfiguration::test_env_example_format PASSED [  0%]
+tests/config/test_configuration_validation.py::TestEnvironmentConfiguration::test_env_required_variables PASSED [  0%]
+tests/config/test_configuration_validation.py::TestEnvironmentConfiguration::test_env_no_actual_secrets PASSED [  0%]
+tests/config/test_configuration_validation.py::TestEnvironmentConfiguration::test_referenced_env_vars_in_code_exist_in_example PASSED [  0%]
+tests/config/test_configuration_validation.py::TestMCPConfiguration::test_mcp_json_exists PASSED [  0%]
+tests/config/test_configuration_validation.py::TestMCPConfiguration::test_mcp_json_valid_format PASSED [  0%]
+tests/config/test_configuration_validation.py::TestMCPConfiguration::test_mcp_required_fields PASSED [  0%]
+tests/config/test_configuration_validation.py::TestMCPConfiguration::test_mcp_server_configurations PASSED [  0%]
+tests/config/test_configuration_validation.py::TestMCPConfiguration::test_mcp_environment_variables_match PASSED [  1%]
+tests/config/test_configuration_validation.py::TestMCPConfiguration::test_mcp_core_servers_enabled PASSED [  1%]
+tests/config/test_configuration_validation.py::TestDockerConfiguration::test_docker_compose_exists PASSED [  1%]
+tests/config/test_configuration_validation.py::TestDockerConfiguration::test_docker_compose_valid_yaml PASSED [  1%]
+tests/config/test_configuration_validation.py::TestDockerConfiguration::test_docker_compose_version PASSED [  1%]
+tests/config/test_configuration_validation.py::TestDockerConfiguration::test_docker_compose_required_services PASSED [  1%]
+tests/config/test_configuration_validation.py::TestDockerConfiguration::test_docker_compose_service_configuration PASSED [  1%]
+tests/config/test_configuration_validation.py::TestDockerConfiguration::test_docker_compose_environment_variables PASSED [  1%]
+tests/config/test_configuration_validation.py::TestDockerConfiguration::test_dockerfile_exists PASSED [  1%]
+tests/config/test_configuration_validation.py::TestDockerConfiguration::test_dockerfile_format PASSED [  1%]
+tests/config/test_configuration_validation.py::TestShellScripts::test_shell_scripts_exist PASSED [  2%]
+tests/config/test_configuration_validation.py::TestShellScripts::test_shell_scripts_executable PASSED [  2%]
+tests/config/test_configuration_validation.py::TestShellScripts::test_shell_scripts_shebang PASSED [  2%]
+tests/config/test_configuration_validation.py::TestShellScripts::test_shell_scripts_no_syntax_errors SKIPPED [  2%]
+tests/config/test_configuration_validation.py::TestShellScripts::test_shell_scripts_error_handling PASSED [  2%]
+tests/config/test_configuration_validation.py::TestPythonDependencies::test_requirements_txt_exists PASSED [  2%]
+tests/config/test_configuration_validation.py::TestPythonDependencies::test_requirements_txt_format PASSED [  2%]
+tests/config/test_configuration_validation.py::TestPythonDependencies::test_requirements_txt_parseable PASSED [  2%]
+tests/config/test_configuration_validation.py::TestPythonDependencies::test_no_conflicting_dependencies PASSED [  2%]
+tests/config/test_configuration_validation.py::TestPythonDependencies::test_pytest_configured PASSED [  2%]
+tests/config/test_configuration_validation.py::TestGitConfiguration::test_gitignore_exists PASSED [  3%]
+tests/config/test_configuration_validation.py::TestGitConfiguration::test_gitignore_covers_sensitive_files PASSED [  3%]
+tests/config/test_configuration_validation.py::TestGitConfiguration::test_no_env_file_committed PASSED [  3%]
+tests/config/test_configuration_validation.py::TestCIConfiguration::test_github_workflows_directory_exists PASSED [  3%]
+tests/config/test_configuration_validation.py::TestCIConfiguration::test_test_workflow_exists PASSED [  3%]
+tests/config/test_configuration_validation.py::TestCIConfiguration::test_workflow_valid_yaml PASSED [  3%]
+tests/config/test_configuration_validation.py::TestCIConfiguration::test_workflow_has_required_fields PASSED [  3%]
+tests/config/test_setup_scripts.py::TestInstallScript::test_install_script_exists PASSED [  3%]
+tests/config/test_setup_scripts.py::TestInstallScript::test_install_script_executable PASSED [  3%]
+tests/config/test_setup_scripts.py::TestInstallScript::test_install_script_has_shebang PASSED [  3%]
+tests/config/test_setup_scripts.py::TestInstallScript::test_install_script_error_handling PASSED [  4%]
+tests/config/test_setup_scripts.py::TestInstallScript::test_install_script_checks_dependencies PASSED [  4%]
+tests/config/test_setup_scripts.py::TestInstallScript::test_install_script_no_hardcoded_paths PASSED [  4%]
+tests/config/test_setup_scripts.py::TestInstallScript::test_install_script_installs_dependencies PASSED [  4%]
+tests/config/test_setup_scripts.py::TestInstallScript::test_install_script_syntax SKIPPED [  4%]
+tests/config/test_setup_scripts.py::TestConfigureScript::test_configure_script_exists PASSED [  4%]
+tests/config/test_setup_scripts.py::TestConfigureScript::test_configure_script_executable PASSED [  4%]
+tests/config/test_setup_scripts.py::TestConfigureScript::test_configure_script_has_shebang PASSED [  4%]
+tests/config/test_setup_scripts.py::TestConfigureScript::test_configure_script_handles_env_file PASSED [  4%]
+tests/config/test_setup_scripts.py::TestConfigureScript::test_configure_script_validates_config PASSED [  4%]
+tests/config/test_setup_scripts.py::TestConfigureScript::test_configure_script_syntax SKIPPED [  5%]
+tests/config/test_setup_scripts.py::TestStartScript::test_start_script_exists PASSED [  5%]
+tests/config/test_setup_scripts.py::TestStartScript::test_start_script_executable PASSED [  5%]
+tests/config/test_setup_scripts.py::TestStartScript::test_start_script_has_shebang PASSED [  5%]
+tests/config/test_setup_scripts.py::TestStartScript::test_start_script_starts_services PASSED [  5%]
+tests/config/test_setup_scripts.py::TestStartScript::test_start_script_checks_prerequisites PASSED [  5%]
+tests/config/test_setup_scripts.py::TestStartScript::test_start_script_syntax SKIPPED [  5%]
+tests/config/test_setup_scripts.py::TestStopScript::test_stop_script_exists PASSED [  5%]
+tests/config/test_setup_scripts.py::TestStopScript::test_stop_script_executable PASSED [  5%]
+tests/config/test_setup_scripts.py::TestStopScript::test_stop_script_has_shebang PASSED [  5%]
+tests/config/test_setup_scripts.py::TestStopScript::test_stop_script_stops_services PASSED [  6%]
+tests/config/test_setup_scripts.py::TestStopScript::test_stop_script_graceful_shutdown PASSED [  6%]
+tests/config/test_setup_scripts.py::TestStopScript::test_stop_script_syntax SKIPPED [  6%]
+tests/config/test_setup_scripts.py::TestValidateScript::test_validate_script_executable PASSED [  6%]
+tests/config/test_setup_scripts.py::TestValidateScript::test_validate_script_has_shebang PASSED [  6%]
+tests/config/test_setup_scripts.py::TestValidateScript::test_validate_script_checks_configuration PASSED [  6%]
+tests/config/test_setup_scripts.py::TestValidateScript::test_validate_script_syntax SKIPPED [  6%]
+tests/config/test_setup_scripts.py::TestScriptInteraction::test_scripts_reference_consistent_paths PASSED [  6%]
+tests/config/test_setup_scripts.py::TestScriptInteraction::test_scripts_use_consistent_error_codes PASSED [  6%]
+tests/config/test_setup_scripts.py::TestScriptIdempotency::test_configure_script_can_run_multiple_times PASSED [  6%]
+tests/config/test_setup_scripts.py::TestScriptIdempotency::test_install_script_handles_existing_installation PASSED [  7%]
+tests/config/test_setup_scripts.py::TestScriptDocumentation::test_scripts_have_comments PASSED [  7%]
+tests/config/test_setup_scripts.py::TestScriptDocumentation::test_scripts_have_usage_info PASSED [  7%]
+tests/e2e/test_complete_workflow.py::TestCompleteWorkflow::test_upload_and_query_workflow PASSED [  7%]
+tests/e2e/test_complete_workflow.py::TestCompleteWorkflow::test_system_health_monitoring PASSED [  7%]
+tests/e2e/test_complete_workflow.py::TestCompleteWorkflow::test_concurrent_user_requests PASSED [  7%]
+tests/integration/test_api_endpoints.py::TestAPIEndpoints::test_root_endpoint PASSED [  7%]
+tests/integration/test_api_endpoints.py::TestAPIEndpoints::test_health_endpoint PASSED [  7%]
+tests/integration/test_api_endpoints.py::TestAPIEndpoints::test_files_endpoint PASSED [  7%]
+tests/integration/test_api_endpoints.py::TestAPIEndpoints::test_upload_single_file PASSED [  7%]
+tests/integration/test_api_endpoints.py::TestAPIEndpoints::test_upload_multiple_files PASSED [  8%]
+tests/integration/test_api_endpoints.py::TestAPIEndpoints::test_ask_agent_endpoint PASSED [  8%]
+tests/integration/test_api_endpoints.py::TestAPIEndpoints::test_ask_agent_complex_query PASSED [  8%]
+tests/integration/test_api_endpoints.py::TestAPIEndpoints::test_ask_agent_empty_query PASSED [  8%]
+tests/integration/test_api_endpoints.py::TestAPIEndpoints::test_cors_headers PASSED [  8%]
+tests/integration/test_api_endpoints.py::TestAPIEndpoints::test_api_versioning PASSED [  8%]
+tests/integration/test_api_endpoints.py::TestAPIEndpoints::test_concurrent_requests PASSED [  8%]
+tests/integration/test_api_endpoints.py::TestAPIEndpoints::test_upload_with_subdirectory PASSED [  8%]
+tests/integration/test_api_endpoints.py::TestAPIEndpoints::test_error_handling PASSED [  8%]
+tests/integration/test_api_endpoints.py::TestAPIEndpoints::test_all_get_endpoints[/-GET] PASSED [  8%]
+tests/integration/test_api_endpoints.py::TestAPIEndpoints::test_all_get_endpoints[/health-GET] PASSED [  9%]
+tests/integration/test_api_endpoints.py::TestAPIEndpoints::test_all_get_endpoints[/files-GET] PASSED [  9%]
+tests/integration/test_api_endpoints.py::TestAPIEndpoints::test_agent_ask_preserves_formatting PASSED [  9%]
+tests/integration/test_api_endpoints.py::TestPerformanceEndpoints::test_performance_health_endpoint PASSED [  9%]
+tests/integration/test_api_endpoints.py::TestPerformanceEndpoints::test_performance_metrics_endpoint PASSED [  9%]
+tests/integration/test_api_endpoints.py::TestPerformanceEndpoints::test_performance_summary_endpoint PASSED [  9%]
+tests/integration/test_api_endpoints.py::TestPerformanceEndpoints::test_performance_analysis_endpoint PASSED [  9%]
+tests/integration/test_api_endpoints.py::TestPerformanceEndpoints::test_performance_report_endpoint PASSED [  9%]
+tests/integration/test_file_watcher.py::TestFileWatcherIntegration::test_watcher_detects_new_folder PASSED [  9%]
+tests/integration/test_file_watcher.py::TestFileWatcherIntegration::test_watcher_debouncing PASSED [  9%]
+tests/integration/test_file_watcher.py::TestFileWatcherIntegration::test_watcher_processes_after_debounce PASSED [ 10%]
+tests/integration/test_rag_pipeline.py::TestRAGPipeline::test_complete_rag_workflow PASSED [ 10%]
+tests/integration/test_rag_pipeline.py::TestRAGPipeline::test_rag_with_orchestrator PASSED [ 10%]
+tests/integration/test_rag_pipeline.py::TestRAGPipeline::test_rag_handles_empty_results PASSED [ 10%]
+tests/integration/test_rag_pipeline.py::TestRAGPipeline::test_rag_with_large_documents PASSED [ 10%]
+tests/integration/test_rag_pipeline.py::TestRAGPipeline::test_rag_concurrent_ingestion PASSED [ 10%]
+tests/integration/test_rag_pipeline.py::TestAgentOrchestration::test_orchestrator_routing_decision PASSED [ 10%]
+tests/integration/test_rag_pipeline.py::TestAgentOrchestration::test_orchestrator_fallback_mechanism PASSED [ 10%]
+tests/performance/test_api_response_times.py::TestAPIResponseTimes::test_health_check_response_time PASSED [ 10%]
+tests/performance/test_api_response_times.py::TestAPIResponseTimes::test_root_endpoint_response_time PASSED [ 10%]
+tests/performance/test_api_response_times.py::TestAPIResponseTimes::test_files_endpoint_response_time PASSED [ 11%]
+tests/performance/test_api_response_times.py::TestAPIResponseTimes::test_agent_stats_response_time PASSED [ 11%]
+tests/performance/test_api_response_times.py::TestAPIResponseTimes::test_performance_metrics_response_time PASSED [ 11%]
+tests/performance/test_api_response_times.py::TestAPIResponseTimes::test_cache_warming_improves_response_time PASSED [ 11%]
+tests/performance/test_api_response_times.py::TestAPIResponseTimes::test_response_time_consistency FAILED [ 11%]
+tests/performance/test_api_response_times.py::TestEndToEndPerformance::test_complete_workflow_performance PASSED [ 11%]
+tests/performance/test_cache_efficiency.py::TestCacheEfficiency::test_cache_hit_rate_simple_queries PASSED [ 11%]
+tests/performance/test_cache_efficiency.py::TestCacheEfficiency::test_cache_speedup SKIPPED [ 11%]
+tests/performance/test_cache_efficiency.py::TestCacheEfficiency::test_cache_size_management PASSED [ 11%]
+tests/performance/test_cache_efficiency.py::TestCacheEfficiency::test_cache_ttl SKIPPED [ 11%]
+tests/performance/test_cache_efficiency.py::TestCacheEfficiency::test_cache_warming PASSED [ 12%]
+tests/performance/test_cache_efficiency.py::TestCacheEfficiency::test_vector_store_cache PASSED [ 12%]
+tests/performance/test_cache_efficiency.py::TestCacheEfficiency::test_combined_cache_efficiency PASSED [ 12%]
+tests/performance/test_cache_efficiency.py::TestCacheEfficiency::test_cache_clear_functionality PASSED [ 12%]
+tests/performance/test_concurrent_requests.py::TestConcurrentRequests::test_low_concurrency_health_check PASSED [ 12%]
+tests/performance/test_concurrent_requests.py::TestConcurrentRequests::test_medium_concurrency_health_check PASSED [ 12%]
+tests/performance/test_concurrent_requests.py::TestConcurrentRequests::test_high_concurrency_health_check PASSED [ 12%]
+tests/performance/test_concurrent_requests.py::TestConcurrentRequests::test_concurrent_mixed_endpoints PASSED [ 12%]
+tests/performance/test_concurrent_requests.py::TestConcurrentRequests::test_sustained_load PASSED [ 12%]
+tests/performance/test_concurrent_requests.py::TestConcurrentRequests::test_throughput PASSED [ 12%]
+tests/performance/test_memory_usage.py::TestMemoryUsage::test_baseline_memory_usage PASSED [ 13%]
+tests/performance/test_memory_usage.py::TestMemoryUsage::test_memory_usage_during_requests PASSED [ 13%]
+tests/performance/test_memory_usage.py::TestMemoryUsage::test_memory_usage_with_cache PASSED [ 13%]
+tests/performance/test_memory_usage.py::TestMemoryUsage::test_memory_leak_detection PASSED [ 13%]
+tests/performance/test_memory_usage.py::TestMemoryUsage::test_memory_cleanup_after_cache_clear PASSED [ 13%]
+tests/performance/test_memory_usage.py::TestMemoryUsage::test_memory_under_concurrent_load PASSED [ 13%]
+tests/performance/test_memory_usage.py::TestMemoryUsage::test_system_memory_health PASSED [ 13%]
+tests/test_agent.py::test_agent_initialization PASSED                    [ 13%]
+tests/test_agent.py::test_agent_tools_integration PASSED                 [ 13%]
+tests/test_agent_coordination.py::TestAgentSessions::test_create_agent_session PASSED [ 13%]
+tests/test_agent_coordination.py::TestAgentSessions::test_get_agent_session PASSED [ 14%]
+tests/test_agent_coordination.py::TestAgentSessions::test_list_active_sessions PASSED [ 14%]
+tests/test_agent_coordination.py::TestAgentSessions::test_end_agent_session PASSED [ 14%]
+tests/test_agent_coordination.py::TestAgentSessions::test_end_nonexistent_session PASSED [ 14%]
+tests/test_agent_coordination.py::TestAgentHandoffs::test_handoff_agent PASSED [ 14%]
+tests/test_agent_coordination.py::TestAgentHandoffs::test_get_handoff_history PASSED [ 14%]
+tests/test_agent_coordination.py::TestAgentHandoffs::test_get_handoff_history_filtered PASSED [ 14%]
+tests/test_agent_coordination.py::TestAgentHandoffs::test_get_handoff_history_with_limit PASSED [ 14%]
+tests/test_agent_coordination.py::TestSharedContext::test_update_shared_context PASSED [ 14%]
+tests/test_agent_coordination.py::TestSharedContext::test_get_shared_context_all PASSED [ 15%]
+tests/test_agent_coordination.py::TestSharedContext::test_get_nonexistent_context_key PASSED [ 15%]
+tests/test_agent_coordination.py::TestAgentRouting::test_route_to_best_agent_code_review PASSED [ 15%]
+tests/test_agent_coordination.py::TestAgentRouting::test_route_to_best_agent_implementation PASSED [ 15%]
+tests/test_agent_coordination.py::TestAgentRouting::test_route_to_best_agent_debugging PASSED [ 15%]
+tests/test_agent_coordination.py::TestAgentRouting::test_route_to_best_agent_testing PASSED [ 15%]
+tests/test_agent_coordination.py::TestAgentRouting::test_route_to_best_agent_architecture PASSED [ 15%]
+tests/test_agent_coordination.py::TestAgentRouting::test_route_with_excluded_agents PASSED [ 15%]
+tests/test_agent_coordination.py::TestAgentRouting::test_route_default_to_jules PASSED [ 15%]
+tests/test_agent_coordination.py::TestCollaborativeProcessing::test_collaborative_process_sequential PASSED [ 15%]
+tests/test_agent_coordination.py::TestCollaborativeProcessing::test_collaborative_process_parallel PASSED [ 16%]
+tests/test_agent_coordination.py::TestAgentStats::test_get_agent_stats PASSED [ 16%]
+tests/test_agent_coordination.py::TestAgentPriorities::test_jules_has_highest_priority PASSED [ 16%]
+tests/test_agent_coordination.py::TestAgentPriorities::test_all_agents_have_priorities PASSED [ 16%]
+tests/test_agent_coordination.py::TestDataClasses::test_agent_session_creation PASSED [ 16%]
+tests/test_agent_coordination.py::TestDataClasses::test_agent_handoff_creation PASSED [ 16%]
+tests/test_agent_coordination.py::TestEdgeCases::test_multiple_sessions_same_agent PASSED [ 16%]
+tests/test_agent_coordination.py::TestEdgeCases::test_handoff_to_same_agent PASSED [ 16%]
+tests/test_agent_coordination.py::TestEdgeCases::test_empty_context PASSED [ 16%]
+tests/test_artifact_api.py::test_create_artifact PASSED                  [ 16%]
+tests/test_artifact_api.py::test_create_artifact_minimal PASSED          [ 17%]
+tests/test_artifact_api.py::test_create_artifact_invalid_base64 PASSED   [ 17%]
+tests/test_artifact_api.py::test_create_artifact_file_too_large PASSED   [ 17%]
+tests/test_artifact_api.py::test_get_artifact PASSED                     [ 17%]
+tests/test_artifact_api.py::test_get_artifact_not_found PASSED           [ 17%]
+tests/test_artifact_api.py::test_list_artifacts_empty PASSED             [ 17%]
+tests/test_artifact_api.py::test_list_artifacts PASSED                   [ 17%]
+tests/test_artifact_api.py::test_list_artifacts_pagination PASSED        [ 17%]
+tests/test_artifact_api.py::test_list_artifacts_filter_by_type PASSED    [ 17%]
+tests/test_artifact_api.py::test_list_artifacts_filter_by_agent PASSED   [ 17%]
+tests/test_artifact_api.py::test_download_artifact PASSED                [ 18%]
+tests/test_artifact_api.py::test_download_artifact_not_found PASSED      [ 18%]
+tests/test_artifact_api.py::test_preview_artifact_text PASSED            [ 18%]
+tests/test_artifact_api.py::test_preview_artifact_not_found PASSED       [ 18%]
+tests/test_artifact_api.py::test_delete_artifact PASSED                  [ 18%]
+tests/test_artifact_api.py::test_delete_artifact_not_found PASSED        [ 18%]
+tests/test_artifact_api.py::test_search_artifacts PASSED                 [ 18%]
+tests/test_artifact_api.py::test_search_artifacts_short_query PASSED     [ 18%]
+tests/test_artifact_api.py::test_search_artifacts_by_description PASSED  [ 18%]
+tests/test_artifact_api.py::test_get_artifact_stats PASSED               [ 18%]
+tests/test_artifact_api.py::test_cleanup_artifacts PASSED                [ 19%]
+tests/test_artifact_api.py::test_cleanup_artifacts_invalid_days PASSED   [ 19%]
+tests/test_artifact_api.py::test_artifact_workflow PASSED                [ 19%]
+tests/test_artifact_api.py::test_multiple_artifacts_same_filename PASSED [ 19%]
+tests/test_artifact_api.py::test_artifact_type_detection SKIPPED (Tr...) [ 19%]
+tests/test_artifact_api.py::test_rate_limiting_artifact_creation PASSED  [ 19%]
+tests/test_artifact_api.py::test_unicode_in_artifact SKIPPED (Trigge...) [ 19%]
+tests/test_artifact_manager.py::test_init_storage PASSED                 [ 19%]
+tests/test_artifact_manager.py::test_detect_artifact_type PASSED         [ 19%]
+tests/test_artifact_manager.py::test_detect_artifact_type_test_files PASSED [ 19%]
+tests/test_artifact_manager.py::test_store_artifact PASSED               [ 20%]
+tests/test_artifact_manager.py::test_store_artifact_auto_detect_type PASSED [ 20%]
+tests/test_artifact_manager.py::test_store_artifact_explicit_type PASSED [ 20%]
+tests/test_artifact_manager.py::test_store_artifact_file_too_large PASSED [ 20%]
+tests/test_artifact_manager.py::test_store_artifact_storage_limit PASSED [ 20%]
+tests/test_artifact_manager.py::test_get_artifact PASSED                 [ 20%]
+tests/test_artifact_manager.py::test_get_artifact_not_found PASSED       [ 20%]
+tests/test_artifact_manager.py::test_read_artifact_content PASSED        [ 20%]
+tests/test_artifact_manager.py::test_read_artifact_content_not_found PASSED [ 20%]
+tests/test_artifact_manager.py::test_list_artifacts_empty PASSED         [ 20%]
+tests/test_artifact_manager.py::test_list_artifacts PASSED               [ 21%]
+tests/test_artifact_manager.py::test_list_artifacts_by_type PASSED       [ 21%]
+tests/test_artifact_manager.py::test_list_artifacts_by_agent PASSED      [ 21%]
+tests/test_artifact_manager.py::test_list_artifacts_pagination PASSED    [ 21%]
+tests/test_artifact_manager.py::test_list_artifacts_sorting PASSED       [ 21%]
+tests/test_artifact_manager.py::test_delete_artifact PASSED              [ 21%]
+tests/test_artifact_manager.py::test_delete_artifact_not_found PASSED    [ 21%]
+tests/test_artifact_manager.py::test_delete_artifact_removes_file PASSED [ 21%]
+tests/test_artifact_manager.py::test_search_artifacts_by_filename PASSED [ 21%]
+tests/test_artifact_manager.py::test_search_artifacts_by_description PASSED [ 21%]
+tests/test_artifact_manager.py::test_search_artifacts_case_insensitive PASSED [ 22%]
+tests/test_artifact_manager.py::test_get_statistics_empty PASSED         [ 22%]
+tests/test_artifact_manager.py::test_get_statistics PASSED               [ 22%]
+tests/test_artifact_manager.py::test_cleanup_old_artifacts PASSED        [ 22%]
+tests/test_artifact_manager.py::test_export_artifact_preview_text PASSED [ 22%]
+tests/test_artifact_manager.py::test_export_artifact_preview_code PASSED [ 22%]
+tests/test_artifact_manager.py::test_export_artifact_preview_truncated PASSED [ 22%]
+tests/test_artifact_manager.py::test_export_artifact_preview_image PASSED [ 22%]
+tests/test_artifact_manager.py::test_export_artifact_preview_binary PASSED [ 22%]
+tests/test_artifact_manager.py::test_export_artifact_preview_not_found PASSED [ 22%]
+tests/test_artifact_manager.py::test_mime_type_detection PASSED          [ 23%]
+tests/test_artifact_manager.py::test_concurrent_artifact_storage PASSED  [ 23%]
+tests/test_artifact_manager.py::test_special_characters_in_metadata PASSED [ 23%]
+tests/test_artifact_manager.py::test_unicode_content PASSED              [ 23%]
+tests/test_artifact_manager.py::test_artifact_path_structure PASSED      [ 23%]
+tests/test_artifact_manager.py::test_get_total_size PASSED               [ 23%]
+tests/test_artifact_manager.py::test_multiple_artifacts_same_filename PASSED [ 23%]
+tests/test_auto_issue_finder.py::TestStaticAnalyzer::test_find_syntax_error PASSED [ 23%]
+tests/test_auto_issue_finder.py::TestStaticAnalyzer::test_find_bare_except PASSED [ 23%]
+tests/test_auto_issue_finder.py::TestStaticAnalyzer::test_find_star_import PASSED [ 23%]
+tests/test_auto_issue_finder.py::TestStaticAnalyzer::test_find_hardcoded_password PASSED [ 24%]
+tests/test_auto_issue_finder.py::TestStaticAnalyzer::test_find_eval_usage PASSED [ 24%]
+tests/test_auto_issue_finder.py::TestStaticAnalyzer::test_find_missing_docstrings PASSED [ 24%]
+tests/test_auto_issue_finder.py::TestStaticAnalyzer::test_ignore_private_functions PASSED [ 24%]
+tests/test_auto_issue_finder.py::TestStaticAnalyzer::test_valid_code PASSED [ 24%]
+tests/test_auto_issue_finder.py::TestShellScriptLinter::test_missing_shebang PASSED [ 24%]
+tests/test_auto_issue_finder.py::TestShellScriptLinter::test_unquoted_variable PASSED [ 24%]
+tests/test_auto_issue_finder.py::TestShellScriptLinter::test_dangerous_command PASSED [ 24%]
+tests/test_auto_issue_finder.py::TestShellScriptLinter::test_valid_script PASSED [ 24%]
+tests/test_auto_issue_finder.py::TestConfigValidator::test_missing_env_example PASSED [ 24%]
+tests/test_auto_issue_finder.py::TestConfigValidator::test_missing_mcp_json PASSED [ 25%]
+tests/test_auto_issue_finder.py::TestConfigValidator::test_invalid_json PASSED [ 25%]
+tests/test_auto_issue_finder.py::TestConfigValidator::test_missing_requirements PASSED [ 25%]
+tests/test_auto_issue_finder.py::TestConfigValidator::test_unpinned_requirements PASSED [ 25%]
+tests/test_auto_issue_finder.py::TestDependencyChecker::test_invalid_requirement_format PASSED [ 25%]
+tests/test_auto_issue_finder.py::TestRuntimeHealthChecker::test_non_executable_script SKIPPED [ 25%]
+tests/test_auto_issue_finder.py::TestRuntimeHealthChecker::test_missing_directory PASSED [ 25%]
+tests/test_auto_issue_finder.py::TestDockerValidator::test_missing_dockerfile PASSED [ 25%]
+tests/test_auto_issue_finder.py::TestDockerValidator::test_missing_from_statement PASSED [ 25%]
+tests/test_auto_issue_finder.py::TestDockerValidator::test_root_user_warning PASSED [ 25%]
+tests/test_auto_issue_finder.py::TestDockerValidator::test_missing_dockerignore PASSED [ 26%]
+tests/test_auto_issue_finder.py::TestAutoFixer::test_add_shebang PASSED  [ 26%]
+tests/test_auto_issue_finder.py::TestAutoFixer::test_make_executable PASSED [ 26%]
+tests/test_auto_issue_finder.py::TestAutoFixer::test_create_directory PASSED [ 26%]
+tests/test_auto_issue_finder.py::TestAutoFixer::test_create_dockerignore PASSED [ 26%]
+tests/test_auto_issue_finder.py::TestDiagnosticReport::test_add_issue PASSED [ 26%]
+tests/test_auto_issue_finder.py::TestDiagnosticReport::test_get_summary PASSED [ 26%]
+tests/test_auto_issue_finder.py::TestDiagnosticReport::test_to_dict PASSED [ 26%]
+tests/test_auto_issue_finder.py::TestReportGenerator::test_generate_json PASSED [ 26%]
+tests/test_auto_issue_finder.py::TestReportGenerator::test_generate_markdown PASSED [ 26%]
+tests/test_auto_issue_finder.py::TestReportGenerator::test_generate_terminal PASSED [ 27%]
+tests/test_auto_issue_finder.py::TestAutoIssueFinder::test_run_all_checks PASSED [ 27%]
+tests/test_auto_issue_finder.py::TestAutoIssueFinder::test_run_specific_checks PASSED [ 27%]
+tests/test_auto_issue_finder.py::TestAutoIssueFinder::test_auto_fix_mode PASSED [ 27%]
+tests/test_auto_issue_finder.py::test_cli_help PASSED                    [ 27%]
+tests/test_auto_issue_finder.py::test_cli_output_formats PASSED          [ 27%]
+tests/test_autopilot.py::TestPipelineCreation::test_start_returns_pipeline_id PASSED [ 27%]
+tests/test_autopilot.py::TestPipelineCreation::test_start_creates_default_stages PASSED [ 27%]
+tests/test_autopilot.py::TestPipelineCreation::test_start_with_custom_stages PASSED [ 27%]
+tests/test_autopilot.py::TestPipelineCreation::test_stage_names_match_defaults PASSED [ 27%]
+tests/test_autopilot.py::TestPipelineCreation::test_pipeline_has_goal PASSED [ 28%]
+tests/test_autopilot.py::TestPipelineStatus::test_get_status_returns_dict PASSED [ 28%]
+tests/test_autopilot.py::TestPipelineStatus::test_get_status_unknown_id_returns_none PASSED [ 28%]
+tests/test_autopilot.py::TestPipelineStatus::test_initial_progress_is_zero PASSED [ 28%]
+tests/test_autopilot.py::TestPipelineStatus::test_stage_structure PASSED [ 28%]
+tests/test_autopilot.py::TestPipelineExecution::test_pipeline_completes_all_stages PASSED [ 28%]
+tests/test_autopilot.py::TestPipelineExecution::test_stages_run_sequentially PASSED [ 28%]
+tests/test_autopilot.py::TestPipelineExecution::test_orchestrator_receives_requests PASSED [ 28%]
+tests/test_autopilot.py::TestPipelineExecution::test_pipeline_without_orchestrator_uses_fallback PASSED [ 28%]
+tests/test_autopilot.py::TestPipelineExecution::test_stage_failure_continues_pipeline PASSED [ 29%]
+tests/test_autopilot.py::TestPipelineCancellation::test_cancel_running_pipeline FAILED [ 29%]
+tests/test_autopilot.py::TestPipelineCancellation::test_cancel_nonexistent_returns_false PASSED [ 29%]
+tests/test_autopilot.py::TestPipelineHistory::test_list_empty PASSED     [ 29%]
+tests/test_autopilot.py::TestPipelineHistory::test_list_returns_created_pipelines PASSED [ 29%]
+tests/test_autopilot.py::TestPipelineHistory::test_list_respects_limit PASSED [ 29%]
+tests/test_autopilot.py::TestPipelineHistory::test_list_most_recent_first PASSED [ 29%]
+tests/test_autopilot.py::TestPipelineDataClasses::test_pipeline_stage_to_dict PASSED [ 29%]
+tests/test_autopilot.py::TestPipelineDataClasses::test_pipeline_stage_duration PASSED [ 29%]
+tests/test_autopilot.py::TestPipelineDataClasses::test_pipeline_to_dict PASSED [ 29%]
+tests/test_autopilot.py::TestPipelineDataClasses::test_pipeline_progress_calculation PASSED [ 30%]
+tests/test_config.py::TestMCPServerConfig::test_mcp_server_config_defaults PASSED [ 30%]
+tests/test_config.py::TestMCPServerConfig::test_mcp_server_config_stdio PASSED [ 30%]
+tests/test_config.py::TestMCPServerConfig::test_mcp_server_config_http PASSED [ 30%]
+tests/test_config.py::TestMCPServerConfig::test_mcp_server_config_sse PASSED [ 30%]
+tests/test_config.py::TestMCPServerConfig::test_mcp_server_config_validation PASSED [ 30%]
+tests/test_config.py::TestMCPServerConfig::test_mcp_server_config_from_dict PASSED [ 30%]
+tests/test_config.py::TestSettings::test_settings_defaults PASSED        [ 30%]
+tests/test_config.py::TestSettings::test_settings_from_env PASSED        [ 30%]
+tests/test_config.py::TestSettings::test_settings_api_key_aliasing_gemini_to_google FAILED [ 30%]
+tests/test_config.py::TestSettings::test_settings_api_key_aliasing_google_to_gemini FAILED [ 31%]
+tests/test_config.py::TestSettings::test_settings_api_key_both_set PASSED [ 31%]
+tests/test_config.py::TestSettings::test_settings_openai_config PASSED   [ 31%]
+tests/test_config.py::TestSettings::test_settings_memory_config PASSED   [ 31%]
+tests/test_config.py::TestSettings::test_settings_mcp_config PASSED      [ 31%]
+tests/test_config.py::TestSettings::test_settings_sandbox_config PASSED  [ 31%]
+tests/test_config.py::TestPathResolution::test_resolve_path PASSED       [ 31%]
+tests/test_config.py::TestPathResolution::test_project_root_path PASSED  [ 31%]
+tests/test_config.py::TestPathResolution::test_memory_file_path PASSED   [ 31%]
+tests/test_config.py::TestPathResolution::test_artifacts_path PASSED     [ 31%]
+tests/test_config.py::TestPathResolution::test_resolve_path_absolute PASSED [ 32%]
+tests/test_config.py::TestPathResolution::test_project_root_defaults_to_cwd PASSED [ 32%]
+tests/test_config.py::TestPathResolution::test_path_resolution_with_nested_dirs PASSED [ 32%]
+tests/test_config.py::TestEnvironmentVariableLoading::test_load_from_env_file PASSED [ 32%]
+tests/test_config.py::TestEnvironmentVariableLoading::test_env_vars_override_defaults PASSED [ 32%]
+tests/test_config.py::TestEnvironmentVariableLoading::test_type_coercion PASSED [ 32%]
+tests/test_config.py::TestEnvironmentVariableLoading::test_extra_fields_ignored PASSED [ 32%]
+tests/test_config.py::TestSettingsIntegration::test_global_settings_instance PASSED [ 32%]
+tests/test_config.py::TestSettingsIntegration::test_settings_with_all_options FAILED [ 32%]
+
+================================== FAILURES ===================================
+_____________ TestAPIResponseTimes.test_response_time_consistency _____________
+tests\performance\test_api_response_times.py:208: in test_response_time_consistency
+    assert cv < 0.5, \
+E   AssertionError: Response times too variable: CV=59.70%
+E   assert 0.5969719157652308 < 0.5
+----------------------------- Captured log setup ------------------------------
+WARNING  rag.store:store.py:52 chromadb module not available - running in resilience mode
+WARNING  rag.store:store.py:52 chromadb module not available - running in resilience mode
+---------------------------- Captured stdout call -----------------------------
+
+≡ƒôÅ Testing Response Time Consistency...
+  Mean: 4.65ms
+  StdDev: 2.78ms
+  Coefficient of Variation: 59.70%
+____________ TestPipelineCancellation.test_cancel_running_pipeline ____________
+tests\test_autopilot.py:211: in test_cancel_running_pipeline
+    assert success is True
+E   assert False is True
+________ TestSettings.test_settings_api_key_aliasing_gemini_to_google _________
+tests\test_config.py:143: in test_settings_api_key_aliasing_gemini_to_google
+    assert test_settings.GEMINI_API_KEY == 'test_key'
+E   AssertionError: assert 'test_key_do_not_use_in_prod' == 'test_key'
+E     
+E     - test_key
+E     + test_key_do_not_use_in_prod
+________ TestSettings.test_settings_api_key_aliasing_google_to_gemini _________
+tests\test_config.py:151: in test_settings_api_key_aliasing_google_to_gemini
+    assert test_settings.GOOGLE_API_KEY == 'test_key'
+E   AssertionError: assert 'test_key_do_not_use_in_prod' == 'test_key'
+E     
+E     - test_key
+E     + test_key_do_not_use_in_prod
+___________ TestSettingsIntegration.test_settings_with_all_options ____________
+tests\test_config.py:409: in test_settings_with_all_options
+    assert test_settings.GOOGLE_API_KEY == "test_google_key"
+E   AssertionError: assert 'test_google_...t_use_in_prod' == 'test_google_key'
+E     
+E     - test_google_key
+E     + test_google_key_do_not_use_in_prod
+============================== warnings summary ===============================
+..\AppData\Roaming\Python\Python314\site-packages\google\genai\types.py:43
+  C:\Users\LocalAdminUser\AppData\Roaming\Python\Python314\site-packages\google\genai\types.py:43: DeprecationWarning: '_UnionGenericAlias' is deprecated and slated for removal in Python 3.17
+    VersionedUnionType = Union[builtin_types.UnionType, _UnionGenericAlias]
+
+..\AppData\Roaming\Python\Python314\site-packages\chromadb\config.py:20
+  C:\Users\LocalAdminUser\AppData\Roaming\Python\Python314\site-packages\chromadb\config.py:20: UserWarning: Core Pydantic V1 functionality isn't compatible with Python 3.14 or greater.
+    from pydantic.v1 import BaseSettings
+
+..\AppData\Roaming\Python\Python314\site-packages\slowapi\extension.py:717: 142 warnings
+  C:\Users\LocalAdminUser\AppData\Roaming\Python\Python314\site-packages\slowapi\extension.py:717: DeprecationWarning: 'asyncio.iscoroutinefunction' is deprecated and slated for removal in Python 3.16; use inspect.iscoroutinefunction() instead
+    if asyncio.iscoroutinefunction(func):
+
+backend\utils\performance.py:772
+backend\utils\performance.py:772
+tests/e2e/test_complete_workflow.py::TestCompleteWorkflow::test_system_health_monitoring
+tests/integration/test_api_endpoints.py::TestPerformanceEndpoints::test_performance_health_endpoint
+tests/integration/test_api_endpoints.py::TestPerformanceEndpoints::test_performance_metrics_endpoint
+tests/integration/test_api_endpoints.py::TestPerformanceEndpoints::test_performance_summary_endpoint
+tests/integration/test_api_endpoints.py::TestPerformanceEndpoints::test_performance_analysis_endpoint
+tests/integration/test_api_endpoints.py::TestPerformanceEndpoints::test_performance_report_endpoint
+  C:\Users\LocalAdminUser\Antigravitys\backend\utils\performance.py:772: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("startup")
+
+..\..\..\Python314\Lib\site-packages\fastapi\applications.py:4576: 4 warnings
+tests/e2e/test_complete_workflow.py: 2 warnings
+tests/integration/test_api_endpoints.py: 10 warnings
+  C:\Python314\Lib\site-packages\fastapi\applications.py:4576: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    return self.router.on_event(event_type)
+
+backend\utils\performance.py:777
+backend\utils\performance.py:777
+tests/e2e/test_complete_workflow.py::TestCompleteWorkflow::test_system_health_monitoring
+tests/integration/test_api_endpoints.py::TestPerformanceEndpoints::test_performance_health_endpoint
+tests/integration/test_api_endpoints.py::TestPerformanceEndpoints::test_performance_metrics_endpoint
+tests/integration/test_api_endpoints.py::TestPerformanceEndpoints::test_performance_summary_endpoint
+tests/integration/test_api_endpoints.py::TestPerformanceEndpoints::test_performance_analysis_endpoint
+tests/integration/test_api_endpoints.py::TestPerformanceEndpoints::test_performance_report_endpoint
+  C:\Users\LocalAdminUser\Antigravitys\backend\utils\performance.py:777: DeprecationWarning: 
+          on_event is deprecated, use lifespan event handlers instead.
+  
+          Read more about it in the
+          [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+          
+    @app.on_event("shutdown")
+
+tests/integration/test_rag_pipeline.py: 4 warnings
+tests/performance/test_api_response_times.py: 8 warnings
+tests/performance/test_cache_efficiency.py: 8 warnings
+tests/performance/test_concurrent_requests.py: 6 warnings
+tests/performance/test_memory_usage.py: 6 warnings
+tests/test_agent_coordination.py: 27 warnings
+  C:\Users\LocalAdminUser\AppData\Roaming\Python\Python314\site-packages\vertexai\generative_models\_generative_models.py:433: UserWarning: This feature is deprecated as of June 24, 2025 and will be removed on June 24, 2026. For details, see https://cloud.google.com/vertex-ai/generative-ai/docs/deprecations/genai-vertexai-sdk.
+    warning_logs.show_deprecation_warning()
+
+tests/performance/test_api_response_times.py::TestAPIResponseTimes::test_health_check_response_time
+  C:\Python314\Lib\ast.py:46: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43E6F87C0>
+    return compile(source, filename, mode, flags,
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_api_response_times.py::TestAPIResponseTimes::test_agent_stats_response_time
+  C:\Users\LocalAdminUser\Antigravitys\backend\main.py:533: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43DC1B4C0>
+    @app.get("/agent/stats")
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_api_response_times.py::TestAPIResponseTimes::test_agent_stats_response_time
+  C:\Users\LocalAdminUser\Antigravitys\backend\main.py:533: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43DC1BF10>
+    @app.get("/agent/stats")
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_api_response_times.py::TestAPIResponseTimes::test_agent_stats_response_time
+  C:\Users\LocalAdminUser\Antigravitys\backend\main.py:533: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43FBA8D60>
+    @app.get("/agent/stats")
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_api_response_times.py::TestAPIResponseTimes::test_cache_warming_improves_response_time
+  C:\Python314\Lib\dis.py:800: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43E6FB4C0>
+    cache_info.append((name, size, data))
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_api_response_times.py::TestAPIResponseTimes::test_cache_warming_improves_response_time
+  C:\Python314\Lib\dis.py:800: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43FBA87C0>
+    cache_info.append((name, size, data))
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_cache_efficiency.py::TestCacheEfficiency::test_cache_hit_rate_simple_queries
+  C:\Users\LocalAdminUser\AppData\Roaming\Python\Python314\site-packages\httpx\_models.py:152: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43FBAAF20>
+    self._list = list(headers._list)
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_cache_efficiency.py::TestCacheEfficiency::test_cache_hit_rate_simple_queries
+  C:\Users\LocalAdminUser\AppData\Roaming\Python\Python314\site-packages\httpx\_models.py:152: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43FBAB6A0>
+    self._list = list(headers._list)
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_cache_efficiency.py::TestCacheEfficiency::test_cache_size_management
+  C:\Python314\Lib\asyncio\events.py:41: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43FD918A0>
+    def __init__(self, callback, args, loop, context=None):
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_cache_efficiency.py::TestCacheEfficiency::test_cache_size_management
+  C:\Python314\Lib\asyncio\events.py:41: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43FD94D60>
+    def __init__(self, callback, args, loop, context=None):
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_cache_efficiency.py::TestCacheEfficiency::test_cache_ttl
+  C:\Python314\Lib\functools.py:35: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43FD94A90>
+    def update_wrapper(wrapper,
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_cache_efficiency.py::TestCacheEfficiency::test_combined_cache_efficiency
+  C:\Python314\Lib\site-packages\starlette\_exception_handler.py:23: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43FD93C40>
+    def wrap_app_handling_exceptions(app: ASGIApp, conn: Request | WebSocket) -> ASGIApp:
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_cache_efficiency.py::TestCacheEfficiency::test_combined_cache_efficiency
+  C:\Python314\Lib\site-packages\starlette\_exception_handler.py:23: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43FE894E0>
+    def wrap_app_handling_exceptions(app: ASGIApp, conn: Request | WebSocket) -> ASGIApp:
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_cache_efficiency.py::TestCacheEfficiency::test_combined_cache_efficiency
+  C:\Python314\Lib\site-packages\starlette\_exception_handler.py:23: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43FE88D60>
+    def wrap_app_handling_exceptions(app: ASGIApp, conn: Request | WebSocket) -> ASGIApp:
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_cache_efficiency.py::TestCacheEfficiency::test_cache_clear_functionality
+  C:\Python314\Lib\site-packages\starlette\responses.py:34: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43FD93880>
+    def __init__(
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_concurrent_requests.py::TestConcurrentRequests::test_medium_concurrency_health_check
+  C:\Python314\Lib\asyncio\base_events.py:2064: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43FD90A90>
+    def get_debug(self):
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_concurrent_requests.py::TestConcurrentRequests::test_medium_concurrency_health_check
+  C:\Python314\Lib\asyncio\base_events.py:2064: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43DC1AD40>
+    def get_debug(self):
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_concurrent_requests.py::TestConcurrentRequests::test_high_concurrency_health_check
+  C:\Python314\Lib\functools.py:54: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43FE23010>
+    pass
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_concurrent_requests.py::TestConcurrentRequests::test_concurrent_mixed_endpoints
+  C:\Python314\Lib\asyncio\base_events.py:817: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43FE213F0>
+    def call_soon(self, callback, *args, context=None):
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_concurrent_requests.py::TestConcurrentRequests::test_sustained_load
+  C:\Python314\Lib\concurrent\futures\_base.py:322: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43FE20130>
+    def __init__(self):
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_concurrent_requests.py::TestConcurrentRequests::test_throughput
+  C:\Python314\Lib\site-packages\starlette\_exception_handler.py:31: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43FE55210>
+    async def wrapped_app(scope: Scope, receive: Receive, send: Send) -> None:
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_memory_usage.py::TestMemoryUsage::test_memory_usage_during_requests
+  C:\Python314\Lib\site-packages\starlette\_exception_handler.py:31: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43FD92980>
+    async def wrapped_app(scope: Scope, receive: Receive, send: Send) -> None:
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_memory_usage.py::TestMemoryUsage::test_memory_usage_during_requests
+  C:\Python314\Lib\site-packages\starlette\_exception_handler.py:31: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43FD925C0>
+    async def wrapped_app(scope: Scope, receive: Receive, send: Send) -> None:
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_memory_usage.py::TestMemoryUsage::test_memory_usage_with_cache
+  C:\Python314\Lib\site-packages\starlette\_exception_handler.py:23: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43FD90B80>
+    def wrap_app_handling_exceptions(app: ASGIApp, conn: Request | WebSocket) -> ASGIApp:
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_memory_usage.py::TestMemoryUsage::test_memory_leak_detection
+  C:\Python314\Lib\site-packages\starlette\datastructures.py:258: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43FEBAF20>
+    def __init__(
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_memory_usage.py::TestMemoryUsage::test_memory_cleanup_after_cache_clear
+  C:\Python314\Lib\site-packages\starlette\testclient.py:217: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43FE8B010>
+    def handle_request(self, request: httpx.Request) -> httpx.Response:
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/performance/test_memory_usage.py::TestMemoryUsage::test_memory_under_concurrent_load
+  C:\Python314\Lib\threading.py:301: ResourceWarning: unclosed database in <sqlite3.Connection object at 0x000001B43FE572E0>
+    if hasattr(lock, '_release_save'):
+  Enable tracemalloc to get traceback where the object was allocated.
+  See https://docs.pytest.org/en/stable/how-to/capture-warnings.html#resource-warnings for more info.
+
+tests/test_artifact_api.py: 28 warnings
+tests/test_artifact_manager.py: 574 warnings
+  C:\Users\LocalAdminUser\Antigravitys\backend\artifact_manager.py:178: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    timestamp = datetime.utcnow().isoformat()
+
+tests/test_artifact_api.py::test_cleanup_artifacts
+tests/test_artifact_manager.py::test_cleanup_old_artifacts
+  C:\Users\LocalAdminUser\Antigravitys\backend\artifact_manager.py:432: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    cutoff_date = datetime.utcnow() - timedelta(days=days)
+
+tests/test_artifact_manager.py::test_cleanup_old_artifacts
+  C:\Users\LocalAdminUser\Antigravitys\tests\test_artifact_manager.py:380: DeprecationWarning: datetime.datetime.utcnow() is deprecated and scheduled for removal in a future version. Use timezone-aware objects to represent datetimes in UTC: datetime.datetime.now(datetime.UTC).
+    old_date = (datetime.utcnow() - timedelta(days=60)).isoformat()
+
+-- Docs: https://docs.pytest.org/en/stable/how-to/capture-warnings.html
+=========================== short test summary info ===========================
+SKIPPED [1] tests\config\test_configuration_validation.py:509: Skipping bash syntax check on Windows
+SKIPPED [1] tests\config\test_setup_scripts.py:130: Skipping bash syntax check on Windows
+SKIPPED [1] tests\config\test_setup_scripts.py:205: Skipping bash syntax check on Windows
+SKIPPED [1] tests\config\test_setup_scripts.py:289: Skipping bash syntax check on Windows
+SKIPPED [1] tests\config\test_setup_scripts.py:385: Skipping bash syntax check on Windows
+SKIPPED [1] tests\config\test_setup_scripts.py:458: Skipping bash syntax check on Windows
+SKIPPED [1] tests\performance\test_cache_efficiency.py:109: LLM not available
+SKIPPED [1] tests\performance\test_cache_efficiency.py:212: LLM not available
+SKIPPED [1] tests\test_artifact_api.py:457: Triggers rate-limiting in test environment
+SKIPPED [1] tests\test_artifact_api.py:491: Triggers rate-limiting in test environment
+SKIPPED [1] tests\test_auto_issue_finder.py:336: Windows does not use POSIX executable bits in the same way
+FAILED tests/performance/test_api_response_times.py::TestAPIResponseTimes::test_response_time_consistency
+FAILED tests/test_autopilot.py::TestPipelineCancellation::test_cancel_running_pipeline
+FAILED tests/test_config.py::TestSettings::test_settings_api_key_aliasing_gemini_to_google
+FAILED tests/test_config.py::TestSettings::test_settings_api_key_aliasing_google_to_gemini
+FAILED tests/test_config.py::TestSettingsIntegration::test_settings_with_all_options
+!!!!!!!!!!!!!!!!!!!!!!!!!! stopping after 5 failures !!!!!!!!!!!!!!!!!!!!!!!!!!
+===== 5 failed, 310 passed, 11 skipped, 867 warnings in 120.19s (0:02:00) =====

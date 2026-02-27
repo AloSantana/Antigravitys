@@ -19,11 +19,10 @@ import os
 import re
 import subprocess
 import sys
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Set, Tuple
-import traceback
+from typing import List, Dict, Any, Optional, Set
 
 
 class Severity(Enum):
@@ -992,7 +991,7 @@ class ReportGenerator:
                         if issue.suggestion:
                             md += f"- *Suggestion:* {issue.suggestion}\n"
                         if issue.fixed:
-                            md += f"- ✓ *Fixed*\n"
+                            md += "- ✓ *Fixed*\n"
                         md += "\n"
         
         return md
@@ -1031,7 +1030,7 @@ class ReportGenerator:
                 if issue.suggestion:
                     output.append(f"  💡 {issue.suggestion}")
                 if issue.fixed:
-                    output.append(f"  ✓ Fixed")
+                    output.append("  ✓ Fixed")
                 output.append("")
         
         return '\n'.join(output)

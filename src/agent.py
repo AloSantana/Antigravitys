@@ -1,12 +1,10 @@
-import os
 import re
-import time
 import json
 import asyncio
 import importlib
 import inspect
 from pathlib import Path
-from typing import List, Dict, Any, Optional, Callable
+from typing import Dict, Any, Optional, Callable
 
 from src.config import settings
 from src.memory import MemoryManager
@@ -201,7 +199,7 @@ class GeminiAgent:
         Uses the Deep Think prompt pattern from .antigravity/rules.md
         """
         thought_parts = [
-            f"\n🤔 <thought>",
+            "\n🤔 <thought>",
             f"Task Analysis: {task}",
             "",
             "Analyzing requirements:",
@@ -379,14 +377,14 @@ This will show us what tools are available.
         print(f"\n🧠 Reflecting on {len(history)} past interactions...")
         
         if len(history) > 10:
-            print(f"   Memory is growing - consider summarization")
+            print("   Memory is growing - consider summarization")
         
         # Future: Add more sophisticated reflection logic
         # - Analyze success/failure patterns
         # - Identify frequently used tools
         # - Learn from mistakes
         
-        print(f"   ✓ Reflection complete\n")
+        print("   ✓ Reflection complete\n")
 
     def run(self, task: str):
         """
@@ -411,7 +409,7 @@ This will show us what tools are available.
             self.reflect()
             
             print(f"{'='*60}")
-            print(f"✓ Task Complete")
+            print("✓ Task Complete")
             print(f"{'='*60}\n")
 
     def shutdown(self):

@@ -16,7 +16,7 @@ import json
 import sys
 import os
 from pathlib import Path
-from typing import Optional, Dict, Any
+from typing import Optional
 
 # Add parent directory to path for imports
 sys.path.insert(0, str(Path(__file__).parent.parent))
@@ -42,7 +42,7 @@ class GeminiCLI:
 
     async def chat(self, prompt: str, format: str = "plain") -> None:
         """Chat with Gemini AI."""
-        print(f"🤖 Gemini AI Processing...")
+        print("🤖 Gemini AI Processing...")
         print(f"📝 Prompt: {prompt[:100]}{'...' if len(prompt) > 100 else ''}\n")
 
         response = await self.client.generate(prompt)
@@ -67,7 +67,7 @@ class GeminiCLI:
 
     async def embed(self, text: str, format: str = "plain") -> None:
         """Generate embeddings for text."""
-        print(f"🔢 Generating embeddings...")
+        print("🔢 Generating embeddings...")
         print(f"📝 Text: {text[:100]}{'...' if len(text) > 100 else ''}\n")
 
         embedding = await self.client.embed(text)
@@ -119,7 +119,7 @@ File: {file_path}
         if agents is None:
             agents = ["jules", "rapid-implementer"]
 
-        print(f"🤝 Multi-Agent Collaboration")
+        print("🤝 Multi-Agent Collaboration")
         print(f"📋 Task: {task}")
         print(f"👥 Agents: {', '.join(agents)}\n")
 

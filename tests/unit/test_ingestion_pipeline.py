@@ -4,9 +4,7 @@ Tests the IngestionPipeline class for file processing and ingestion
 """
 
 import pytest
-import asyncio
-from pathlib import Path
-from unittest.mock import Mock, AsyncMock, patch, mock_open
+from unittest.mock import AsyncMock, patch
 
 
 @pytest.mark.unit

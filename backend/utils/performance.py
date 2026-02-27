@@ -760,7 +760,6 @@ def add_performance_endpoints(app):
     app.include_router(router)
     
     # Background task to capture metrics periodically
-    import asyncio
     
     async def capture_metrics_task():
         while True:

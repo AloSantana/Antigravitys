@@ -3,9 +3,8 @@ import os
 import time
 import hashlib
 from pathlib import Path
-from typing import List, Dict, Any, Optional
+from typing import List, Dict, Any
 from collections import OrderedDict
-from functools import lru_cache
 
 logger = logging.getLogger(__name__)
 

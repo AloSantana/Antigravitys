@@ -8,13 +8,11 @@ with secure storage and validation capabilities.
 import os
 import json
 import logging
-from typing import Dict, Any, List, Optional, Set
+from typing import Dict, Any, List, Set
 from pathlib import Path
 from datetime import datetime
 from cryptography.fernet import Fernet
-import base64
-import hashlib
-from dotenv import load_dotenv, set_key, unset_key
+from dotenv import load_dotenv, set_key
 
 logger = logging.getLogger(__name__)
 

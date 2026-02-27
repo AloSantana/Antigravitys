@@ -6,7 +6,6 @@ Tests full system integration
 import pytest
 from fastapi.testclient import TestClient
 from unittest.mock import patch, Mock, AsyncMock
-from pathlib import Path
 
 
 @pytest.mark.e2e

@@ -6,10 +6,9 @@ Manages storage and retrieval of generated artifacts (code, diffs, tests, screen
 
 import json
 import logging
-import shutil
 from datetime import datetime
 from pathlib import Path
-from typing import List, Dict, Any, Optional, BinaryIO
+from typing import List, Dict, Any, Optional
 import uuid
 import mimetypes
 import base64

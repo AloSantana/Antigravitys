@@ -1,8 +1,5 @@
-import os
 import asyncio
 import logging
-from functools import lru_cache
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -62,9 +59,9 @@ class GeminiClient:
             error_msg = str(e)
             # Provide helpful error messages
             if "quota" in error_msg.lower():
-                return f"Gemini Error: API quota exceeded. Please check your usage limits."
+                return "Gemini Error: API quota exceeded. Please check your usage limits."
             elif "api key" in error_msg.lower():
-                return f"Gemini Error: Invalid API key. Please check your configuration."
+                return "Gemini Error: Invalid API key. Please check your configuration."
             else:
                 return f"Gemini Error: {error_msg}"
     
@@ -103,7 +100,7 @@ class GeminiClient:
         except Exception as e:
             error_msg = str(e)
             if "quota" in error_msg.lower():
-                print(f"Gemini Embedding Error: API quota exceeded")
+                print("Gemini Embedding Error: API quota exceeded")
             else:
                 print(f"Gemini Embedding Error: {error_msg}")
             return []

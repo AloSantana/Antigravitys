@@ -1,4 +1,4 @@
-from fastapi import FastAPI, WebSocket, BackgroundTasks, WebSocketDisconnect, HTTPException, Request, Query
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, HTTPException, Request, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse, JSONResponse
@@ -20,7 +20,7 @@ from watcher import Watcher
 from utils.performance import add_performance_endpoints
 from utils.remote_config import get_remote_config
 from utils.ngrok_manager import get_ngrok_manager
-from utils.platform_detect import get_platform, normalize_path, get_platform_info
+from utils.platform_detect import get_platform_info
 from security import (
     get_allowed_origins, 
     validate_required_env_vars,
@@ -446,7 +446,7 @@ async def get_files(request: Request):
     """
     return get_file_structure(watcher.watch_dir)
 
-from fastapi import UploadFile, File, HTTPException, Request
+from fastapi import UploadFile, File, Request
 import shutil
 
 @app.post("/upload")
@@ -1367,7 +1367,7 @@ async def create_artifact(request: Request, data: ArtifactCreate):
         import base64
         try:
             content = base64.b64decode(data.content)
-        except Exception as e:
+        except Exception:
             raise HTTPException(
                 status_code=400,
                 detail="Invalid base64 content"

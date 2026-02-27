@@ -15,7 +15,7 @@ import re
 import platform
 import subprocess
 from pathlib import Path
-from typing import Dict, List, Set
+from typing import List
 
 import pytest
 import yaml

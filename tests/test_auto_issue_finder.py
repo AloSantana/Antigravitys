@@ -331,6 +331,9 @@ class TestRuntimeHealthChecker:
     
     def test_non_executable_script(self, temp_project):
         """Test detection of non-executable scripts."""
+        import sys
+        if sys.platform == "win32":
+            pytest.skip("Windows does not use POSIX executable bits in the same way")
         script = temp_project / 'test.sh'
         script.write_text('#!/bin/bash\necho "test"\n')
         # Don't make it executable

@@ -13,9 +13,7 @@ Tests:
 
 import pytest
 import json
-import asyncio
-from pathlib import Path
-from unittest.mock import patch, MagicMock, AsyncMock, mock_open
+from unittest.mock import patch, MagicMock, AsyncMock
 
 from src.mcp_client import (
     MCPTool,

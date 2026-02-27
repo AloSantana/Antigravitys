@@ -11,12 +11,10 @@ Tests:
 """
 
 import pytest
-import asyncio
 from datetime import datetime
-from unittest.mock import patch, MagicMock, AsyncMock
+from unittest.mock import patch
 
 from src.swarm import Message, MessageBus, SwarmOrchestrator
-from src.agents.base_agent import BaseAgent
 from src.agents.router_agent import RouterAgent
 from src.agents.coder_agent import CoderAgent
 from src.agents.reviewer_agent import ReviewerAgent

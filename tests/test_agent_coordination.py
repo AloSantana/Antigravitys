@@ -3,7 +3,6 @@ Tests for dual-agent coordination and Jules integration.
 """
 
 import pytest
-import asyncio
 import time
 from backend.agent.orchestrator import Orchestrator, AgentSession, AgentHandoff
 

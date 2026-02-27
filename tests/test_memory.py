@@ -9,12 +9,8 @@ Tests:
 - Memory operations (add, get, clear, update)
 """
 
-import os
 import json
 import pytest
-import tempfile
-from pathlib import Path
-from unittest.mock import patch, MagicMock
 
 from src.memory import MemoryManager
 

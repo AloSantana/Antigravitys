@@ -6,8 +6,8 @@ Tests the LocalClient class for Ollama integration
 import pytest
 import asyncio
 import aiohttp
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
-from aiohttp import ClientError, ClientTimeout
+from unittest.mock import AsyncMock, patch
+from aiohttp import ClientTimeout
 
 
 @pytest.mark.unit

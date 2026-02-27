@@ -7,7 +7,7 @@ Provides safe code execution via sandbox.
 import asyncio
 from typing import Optional, Dict, Any
 
-from src.sandbox import get_sandbox, ExecutionResult
+from src.sandbox import get_sandbox
 
 
 async def run_python_code(

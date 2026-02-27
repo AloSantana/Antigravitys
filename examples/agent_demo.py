@@ -8,16 +8,13 @@ with real-time output showing collaboration.
 
 import asyncio
 import sys
-import os
 from pathlib import Path
 from datetime import datetime
-import json
 
 # Add backend to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
 
 from agent.orchestrator import Orchestrator
-from agent.gemini_client import GeminiClient
 from agent.manager import AgentManager
 from dotenv import load_dotenv
 
@@ -291,10 +288,10 @@ Next Steps:
             print(f"  ✓ {agent}")
 
         print("\n## Configuration Status")
-        print(f"  • AI Provider: Gemini AI ✅")
-        print(f"  • MCP Servers: 5 Active")
-        print(f"    - filesystem, git, github, memory, sequential-thinking")
-        print(f"  • Environment: 6 Variables Configured")
+        print("  • AI Provider: Gemini AI ✅")
+        print("  • MCP Servers: 5 Active")
+        print("    - filesystem, git, github, memory, sequential-thinking")
+        print("  • Environment: 6 Variables Configured")
 
         print("\n## Agent Statistics")
         print(f"  • Active Sessions: {stats['active_sessions']}")

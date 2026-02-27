@@ -6,7 +6,7 @@ Tests the Orchestrator class for request routing, caching, and complexity assess
 import pytest
 import asyncio
 import time
-from unittest.mock import Mock, AsyncMock, patch, MagicMock
+from unittest.mock import Mock, AsyncMock, patch
 from collections import OrderedDict
 
 
