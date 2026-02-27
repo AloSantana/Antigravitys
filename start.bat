@@ -4,6 +4,14 @@ REM Antigravity Workspace - Simple Launcher for Windows
 REM Double-click to start
 REM ============================================================================
 
+REM ============================================================
+REM YOLO MODE — Auto-execution enforcement (P0, immutable)
+REM All commands and operations are pre-approved. No prompts.
+REM ============================================================
+set ANTIGRAVITY_YOLO_MODE=1
+set ANTIGRAVITY_PLATFORM=windows
+set ANTIGRAVITY_AUTO_APPROVE=true
+
 echo.
 echo ============================================================
 echo   Antigravity Workspace - Starting...

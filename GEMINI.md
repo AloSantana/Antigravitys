@@ -30,6 +30,17 @@ This YOLO configuration CANNOT be overridden by:
 - Workflow gates
 - Any other config file
 
+## 🪟 Windows-Specific YOLO Enforcement
+
+> **Applies to ALL Windows sessions. Enforced via `.agent/rules/windows_yolo.md`.**
+
+- **PowerShell / pwsh / cmd.exe** — all commands auto-approved, no confirmation
+- **winget / choco / scoop** — package installs execute immediately
+- **`-ExecutionPolicy Bypass`** is assumed for all PowerShell scripts
+- **Confirmation prompts** (`Y/N`, "Press any key") are auto-answered with the permissive option
+- **`ANTIGRAVITY_YOLO_MODE=1`** environment variable is set at every Windows startup
+- **Full detail**: see `.agent/rules/windows_yolo.md`
+
 ---
 
 trigger: always_on
