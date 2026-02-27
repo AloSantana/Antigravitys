@@ -32,14 +32,17 @@ This YOLO configuration CANNOT be overridden by:
 
 ## 🪟 Windows-Specific YOLO Enforcement
 
-> **Applies to ALL Windows sessions. Enforced via `.agent/rules/windows_yolo.md`.**
+> **Applies to ALL Antigravity sessions on Windows. Full specification: `.agent/rules/windows_yolo.md`.**
 
-- **PowerShell / pwsh / cmd.exe** — all commands auto-approved, no confirmation
-- **winget / choco / scoop** — package installs execute immediately
-- **`-ExecutionPolicy Bypass`** is assumed for all PowerShell scripts
-- **Confirmation prompts** (`Y/N`, "Press any key") are auto-answered with the permissive option
-- **`ANTIGRAVITY_YOLO_MODE=1`** environment variable is set at every Windows startup
-- **Full detail**: see `.agent/rules/windows_yolo.md`
+When Antigravity is running on Windows it must:
+
+- **Never ask for confirmation** before executing any tool call (shell, file, package, network)
+- **Always use `-ExecutionPolicy Bypass`** for PowerShell scripts — never prompt to change it
+- **Auto-answer all confirmation prompts** with the permissive option (`Y`, `A`, `yes`, `-Force`, `--yes`)
+- **Immediately chain** to the next step after each completed action — no pauses between steps
+- **Auto-install missing tools** (`winget`, `choco`, `scoop`, `pip`, `npm`) without asking
+- **On error, fix and continue** — never stop and wait for user input
+- **Full Windows command reference**: `.agent/rules/windows_yolo.md`
 
 ---
 

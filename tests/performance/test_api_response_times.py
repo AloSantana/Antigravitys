@@ -157,25 +157,26 @@ class TestAPIResponseTimes:
         # Clear cache first
         client.post("/agent/clear-cache")
         
-        # Mock slow response for cold start
+        # Mock slow response for cold start.
+        # Patch _delegate_to_gemini because auto-mode uses Gemini for low-complexity requests.
         from unittest.mock import patch
         async def slow_response(*args, **kwargs):
             import asyncio
             await asyncio.sleep(0.05)  # 50ms delay
-            return {"response": "Paris", "source": "Local"}
+            return {"response": "Paris", "source": "Gemini"}
             
-        # Use patch on the Orchestrator's delegate method
-        # Note: We patch the method on the class because the instance is already created in the app
-        with patch("agent.orchestrator.Orchestrator._delegate_to_local", side_effect=slow_response):
+        # Patch the Gemini delegate on the class so the already-created orchestrator instance
+        # also uses the patched version (method resolution goes through the class at call time).
+        with patch("agent.orchestrator.Orchestrator._delegate_to_gemini", side_effect=slow_response):
             # Measure cold response (first request)
-            # The patch ensures this takes at least 50ms
+            # The patch ensures this takes at least 50ms before being cached
             cold_start = time.perf_counter()
             response1 = client.post("/agent/ask", params={"query": "Capital of France?"})
             cold_time = (time.perf_counter() - cold_start) * 1000
             
             # Measure warm response (cached)
-            # This should hit the cache within Orchestrator.process_request 
-            # BEFORE calling _delegate_to_local, so it won't sleep
+            # This hits the cache inside Orchestrator.process_request
+            # BEFORE _delegate_to_gemini is reached, so it won't sleep
             warm_start = time.perf_counter()
             response2 = client.post("/agent/ask", params={"query": "Capital of France?"})
             warm_time = (time.perf_counter() - warm_start) * 1000
@@ -185,8 +186,8 @@ class TestAPIResponseTimes:
         speedup = cold_time / warm_time if warm_time > 0.1 else 0
         print(f"  Speedup: {speedup:.2f}x")
         
-        # Warm should be significantly faster (at least 2x)
-        # We use a safe margin since cold is ~50ms+overhead and warm is ~1-5ms
+        # Warm should be significantly faster (at least 2x).
+        # Cold path sleeps 50ms; warm path returns from cache in <5ms.
         assert warm_time < cold_time / 2, \
             f"Cache not providing enough speedup: {speedup:.2f}x"
         

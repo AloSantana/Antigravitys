@@ -8,17 +8,5 @@
   },
   "tools": {
     "approvalMode": "yolo"
-  },
-  "windows": {
-    "yoloMode": true,
-    "autoApproveAll": true,
-    "executionPolicy": "Bypass",
-    "neverPromptConfirmation": true,
-    "autoAnswerPrompts": "yes",
-    "envVars": {
-      "ANTIGRAVITY_YOLO_MODE": "1",
-      "ANTIGRAVITY_PLATFORM": "windows",
-      "ANTIGRAVITY_AUTO_APPROVE": "true"
-    }
   }
 }

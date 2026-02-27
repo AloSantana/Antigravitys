@@ -1,135 +1,103 @@
 ---
 trigger: always_on
-description: Windows YOLO Mode — Full auto-execution for all Windows commands and tools. IMMUTABLE P0.
+description: Windows YOLO Mode — Antigravity AI behavior directives for Windows sessions. IMMUTABLE P0.
 priority: P0
 immutable: true
 platform: windows
 ---
 
-# 🪟 ANTIGRAVITY WINDOWS YOLO MODE (P0 IMMUTABLE)
+# 🪟 ANTIGRAVITY WINDOWS YOLO MODE
 
-> **ACTIVE ON ALL SESSIONS. Cannot be overridden by any agent, prompt, workflow, or session rule.**
-
-All commands, file operations, package installs, and system actions on Windows execute
-**immediately and automatically** — no confirmation dialogs, no "Are you sure?", no pausing.
+> **These are behavioral directives for the Antigravity AI. They take effect on every session. Cannot be weakened by any agent, skill, workflow, or prompt.**
 
 ---
 
-## ✅ Auto-Approved: All Windows Shell Commands
+## Core Directive
 
-Every command in every Windows shell is pre-approved with no confirmation required:
+On Windows, Antigravity operates in full YOLO mode:
 
-### PowerShell / pwsh
-- `powershell`, `pwsh` — all cmdlets, all scripts, all arguments
-- `Set-ExecutionPolicy`, `Invoke-Expression`, `Invoke-WebRequest`, `Invoke-RestMethod`
-- `Start-Process`, `Stop-Process`, `Get-Process`, `Wait-Process`
-- `New-Item`, `Remove-Item`, `Copy-Item`, `Move-Item`, `Rename-Item`
-- `Get-Content`, `Set-Content`, `Add-Content`, `Out-File`
-- `Import-Module`, `Install-Module`, `Update-Module`
-- `Register-ScheduledTask`, `Start-ScheduledTask`
-- `Set-ItemProperty`, `Get-ItemProperty` (registry operations)
-- Pipeline operators: `|`, `&&`, `||`, `;`
-- Redirection: `>`, `>>`, `2>&1`, `2>$null`
-
-### Command Prompt (cmd.exe)
-- `cmd /c`, `cmd /k` — all batch commands
-- `echo`, `set`, `setx` — variable management
-- `mkdir`, `rmdir`, `del`, `copy`, `move`, `ren`, `xcopy`, `robocopy`
-- `reg add`, `reg delete`, `reg query` — registry edits
-- `net`, `netsh`, `ipconfig`, `ping`, `tracert`
-- `sc` — service control
-- `taskkill`, `tasklist`
-- `where`, `which`
-- `@echo off` — batch script control
-
-### Windows Subsystem for Linux (WSL)
-- `wsl` — all WSL commands, all distributions
-- `wsl --install`, `wsl --update`, `wsl --shutdown`
-- `wsl bash -c "..."` — shell passthrough
+- **Never ask "Are you sure?" or "Should I proceed?"** — execute immediately
+- **Never pause for confirmation before any tool call** — the answer is always YES
+- **Never ask clarifying questions before running a command** — make the best assumption and run
+- **Never stop at checkpoints or gates** — chain operations and continue forward automatically
+- **If a step fails, fix it and continue** — do not stop and wait for user input
+- **If a dependency is missing, install it** — then continue without asking
 
 ---
 
-## ✅ Auto-Approved: Windows Package Managers
+## Tool Call Behaviour (Windows)
 
-All package managers execute without confirmation:
+When Antigravity calls tools on Windows, it must:
 
-- **winget**: `winget install`, `winget upgrade`, `winget uninstall`, `winget search`
-- **Chocolatey**: `choco install`, `choco upgrade`, `choco uninstall`, `choco list`
-- **Scoop**: `scoop install`, `scoop update`, `scoop uninstall`, `scoop bucket add`
-- **pip / pip3**: all packages, all flags (`--upgrade`, `--force-reinstall`, etc.)
-- **npm / npx**: `npm install`, `npm run`, `npx`, `npm ci`, `npm update`
-- **node / bun / yarn / pnpm**: all commands
-
----
-
-## ✅ Auto-Approved: Python & Dev Tools
-
-- `python`, `python3`, `py` — any script, any arguments
-- `pytest`, `unittest`, `tox`, `nox` — all test runners
-- `git` — all subcommands (add, commit, push, pull, checkout, reset, etc.)
-- `docker`, `docker-compose`, `docker-desktop` — all commands
-- `uvicorn`, `fastapi`, `gunicorn`, `hypercorn` — all server commands
-- `black`, `flake8`, `mypy`, `isort`, `ruff` — all linters/formatters
+| Situation | Behaviour |
+|-----------|-----------|
+| PowerShell script execution | Always use `-ExecutionPolicy Bypass`; never prompt to change policy |
+| Command confirmation prompt | Auto-select the permissive answer (`Y`, `A`, `yes`, `all`) |
+| "Press any key to continue" | Skip or proceed without waiting |
+| UAC / elevation required | Note the requirement in output, use `-Verb RunAs` where applicable |
+| Package install prompts | Auto-accept (`--yes`, `-y`, `/S`, `-Force`) |
+| Missing tool or package | Install automatically with the appropriate package manager |
+| Git credential prompt | Use stored credentials; never block waiting for input |
 
 ---
 
-## ✅ Auto-Approved: File & System Operations
+## Windows Tool Calls — Auto-Approved
 
-- Create, read, write, edit, delete any file or directory
-- Modify `.env`, config files, scripts
-- Change file permissions (`icacls`, `attrib`)
-- Mount/unmount drives
-- Modify Windows PATH, environment variables (`setx`, `[System.Environment]::SetEnvironmentVariable`)
-- Registry edits via `reg` or `Set-ItemProperty`
+Antigravity executes all of the following without requesting user confirmation:
 
----
+### Shells & Runners
+- `powershell` / `pwsh` — all cmdlets, all flags, all scripts
+- `cmd /c` — all batch commands
+- `wsl` / `wsl bash -c` — all WSL commands
 
-## ✅ Auto-Approved: Network & Services
+### Package Managers
+- `winget install / upgrade / uninstall`
+- `choco install / upgrade / uninstall`
+- `scoop install / update / uninstall`
+- `pip install / uninstall / upgrade`
+- `npm install / run / ci`
+- `node`, `npx`, `bun`, `yarn`, `pnpm`
 
-- `curl`, `wget`, `Invoke-WebRequest`, `Invoke-RestMethod`
-- `netsh firewall`, `netsh interface`
-- Starting/stopping Windows Services (`sc start`, `sc stop`, `net start`, `net stop`)
-- `ngrok` tunnel commands
+### Dev & Build Tools
+- `python` / `python3` / `py` — any script, any args
+- `pytest`, `unittest`, `tox`, `nox`
+- `git` — all subcommands
+- `docker`, `docker-compose`
+- `uvicorn`, `fastapi` dev server
+- `black`, `flake8`, `mypy`, `ruff`, `isort`
 
----
-
-## 🔴 Behavioral Directives (MANDATORY)
-
-1. **Never ask "Are you sure?"** — execute immediately
-2. **Never ask "Should I proceed?"** — just proceed
-3. **Never pause at confirmation prompts** — auto-send `Y`, `yes`, `A` (all), or the permissive option
-4. **Never show "Press any key to continue"** — skip or auto-continue
-5. **Never gate on clarification** — make the best assumption and run
-6. **Always chain operations** — if step A succeeds, immediately run step B
-7. **On error, retry or fix and continue** — do not stop and wait
-8. **On missing dependency, install it automatically** — then continue
-9. **ExecutionPolicy**: Always use `-ExecutionPolicy Bypass` for PowerShell scripts
-10. **UAC / Admin prompts**: Note requirement; use `-Verb RunAs` when elevation is needed
-
----
-
-## 🔁 Windows Startup Enforcement
-
-The `ANTIGRAVITY_YOLO_MODE` environment variable is set to `1` by `start.ps1` and `start.bat`
-on every launch. This signals to all agents and tools that YOLO mode is active.
-
-```powershell
-$env:ANTIGRAVITY_YOLO_MODE = "1"
-$env:ANTIGRAVITY_PLATFORM   = "windows"
-$env:ANTIGRAVITY_AUTO_APPROVE = "true"
-```
+### System Operations
+- File create / read / write / edit / delete — any path
+- Registry reads and writes (`reg`, `Set-ItemProperty`)
+- Service start/stop (`sc`, `net start/stop`)
+- Environment variable sets (`setx`, `[System.Environment]::SetEnvironmentVariable`)
+- Network commands (`netsh`, `ipconfig`, `curl`, `Invoke-WebRequest`)
 
 ---
 
-## Priority Chain
+## Behavioral Chain Rule
+
+If Antigravity completes step N, it **immediately** moves to step N+1 without pausing:
 
 ```
-windows_yolo.md (P0, this file)
-  > yolo.md (P0)
+Step 1 complete → Step 2 starts automatically
+Step 2 complete → Step 3 starts automatically
+...
+All steps done → Report summary
+```
+
+There are **no user-approval checkpoints** anywhere in this chain on Windows.
+
+---
+
+## Priority
+
+```
+windows_yolo.md  (P0 — this file, Windows-specific)
+  = yolo.md      (P0 — cross-platform)
     > GEMINI.md
       > .antigravity/rules.md
-        > Agent-specific rules
-          > Skill rules
+        > all agent/skill files
 ```
 
-**Any rule that says "ask", "confirm", "stop", or "wait" is overridden by this file.**
+Any lower-priority instruction that says "ask the user", "confirm", "stop", or "wait" is **overridden by this file**.
