@@ -265,6 +265,56 @@ These servers bridge different AI models/providers into your MCP environment —
 
 ---
 
+## 🤖 OpenCode & Multi-Agent Optimized Servers
+
+These servers fill critical gaps for **OpenCode/Crush terminal workflows** and **multi-agent swarm coordination**. All verified production-ready, March 2026.
+
+### Task Orchestration
+
+| # | Server | Package / Repo | Description | Language | Type |
+|---|--------|----------------|-------------|----------|------|
+| 113 | **Taskmaster AI** | `task-master-ai` | AI-driven task management: parse PRDs into task trees, coordinate multi-agent sprints via `next_task` / `set_task_status` loops — de-facto standard for autonomous coding agents | TS | 🏠 |
+| 114 | **Linear** | `linear-mcp-server` | Full Linear issue/sprint management — agents create bugs, update sprint status, and coordinate via `list_issues` / `create_issue` / `update_issue` | TS | ☁️ |
+| 115 | **Atlassian** | `mcp-atlassian` | Deep Jira + Confluence — JQL issue queries, sprint updates, wiki search and page creation for documentation-driven multi-agent workflows | Python | ☁️ |
+
+### Vector Memory & RAG
+
+| # | Server | Package / Repo | Description | Language | Type |
+|---|--------|----------------|-------------|----------|------|
+| 116 | **Chroma MCP** | `chroma-mcp` | Official ChromaDB vector store — semantic search over codebase & docs, embedded (zero-infra) or remote; complements Memory MCP for semantic recall | Python | 🏠☁️ |
+| 117 | **Qdrant MCP** | `mcp-server-qdrant` | Production vector DB with hybrid dense+sparse search and payload filters — agent-namespaced memory isolation, local docker or Qdrant Cloud | Python | 🏠☁️ |
+| 118 | **Pinecone MCP** | `@pinecone-database/mcp` | Fully managed serverless vector search — zero-ops cloud RAG with namespace isolation per agent; `upsert_records` handles chunking+embedding automatically | TS | ☁️ |
+| 119 | **Tavily MCP** | `@tavily/mcp` | AI-native search engine purpose-built for agents — pre-cleaned LLM-ready results, `tavily_extract` for URL-to-markdown conversion, batch queries for RAG pipelines | TS | ☁️ |
+| 120 | **Graphlit MCP** | `@graphlit/mcp-server-graphlit` | Full knowledge pipeline: ingest URLs/files/PDFs → auto-chunk/embed → `query_contents` for RAG answers; project-scoped collections for each agent | TS | ☁️ |
+
+### Persistent Agent Databases
+
+| # | Server | Package / Repo | Description | Language | Type |
+|---|--------|----------------|-------------|----------|------|
+| 121 | **Neon MCP** | `@neondatabase/mcp-server-neon` | Serverless Postgres with DB branching — agents create ephemeral branches for safe schema experiments, then merge; official Neon server | TS | ☁️ |
+| 122 | **Upstash MCP** | `@upstash/mcp-server` | Redis (cross-session agent state, distributed locks) + QStash (async agent-to-agent message queue with retry) — official Upstash server | TS | ☁️ |
+| 123 | **Turso MCP** | `@turso/mcp` | Edge SQLite (LibSQL) — one database per agent (500 free DBs), SQLite-compatible schema, <2ms global reads, persists between sessions unlike local SQLite | TS | ☁️ |
+
+### Multi-Model Routing
+
+| # | Server | Package / Repo | Description | Language | Type |
+|---|--------|----------------|-------------|----------|------|
+| 124 | **OpenRouter MCP** | `openrouter-mcp` | Unified access to 200+ AI models (Claude, Gemini, GPT-4o, Llama, Mistral, DeepSeek) via one API key; `route_by_capability` for cost-optimized agent model selection | TS | ☁️ |
+
+### Code Execution Sandboxes
+
+| # | Server | Package / Repo | Description | Language | Type |
+|---|--------|----------------|-------------|----------|------|
+| 125 | **Daytona MCP** | `@daytona/mcp` | Persistent dev environment sandboxes — unlike E2B (ephemeral), Daytona workspaces survive between sessions; self-hostable; `daytona_workspace_create` from any Git repo in 30s | TS | 🏠☁️ |
+
+### Knowledge Management
+
+| # | Server | Package / Repo | Description | Language | Type |
+|---|--------|----------------|-------------|----------|------|
+| 126 | **Notion MCP (Official)** | `@notionhq/notion-mcp-server` | Official Notion server (not WayStation proxy) — full API access, `query_database` for structured task boards, `create_page` for auto-generated ADRs and session docs | TS | ☁️ |
+
+---
+
 ## Priority Servers for Antigravity / Gemini CLI / OpenCode Integration
 
 The following 20 servers provide the best foundation for seamless agent-to-agent and multi-agent chat integration:
@@ -293,6 +343,18 @@ Priority B — Add for enhanced agent workflows:
  18. metatool-app      — GUI to manage all MCP servers
  19. pluggedin-mcp-proxy — Combine multiple servers
  20. exa               — AI-native search
+
+Priority C — Add for OpenCode + multi-agent optimized workflows:
+ 21. taskmaster-ai     — Task orchestration for multi-agent sprints (P0)
+ 22. chroma-mcp        — Semantic vector memory / codebase RAG (P0)
+ 23. tavily            — AI-optimized web search for agent RAG pipelines (P0)
+ 24. neon              — Serverless Postgres with DB branching for agents (P1)
+ 25. openrouter        — 200+ model access, cost-optimized routing (P1)
+ 26. upstash           — Redis state + QStash async message queue (P1)
+ 27. qdrant            — Production vector DB, agent-namespaced memory (P1)
+ 28. linear            — Sprint + issue tracking for agent coordination (P2)
+ 29. notion            — Official Notion knowledge ops + auto-documentation (P2)
+ 30. daytona           — Persistent sandboxes for multi-session agent work (P2)
 ```
 
 ---
