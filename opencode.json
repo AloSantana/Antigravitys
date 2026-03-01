@@ -2,6 +2,7 @@
   "$schema": "https://opencode.ai/config.json",
   "permission": "allow",
   "mcpServers": {
+
     "taskmaster-ai": {
       "type": "stdio",
       "command": "npx",
@@ -11,11 +12,13 @@
         "OPENAI_API_KEY": "${OPENAI_API_KEY}"
       }
     },
+
     "chroma": {
       "type": "stdio",
       "command": "uvx",
       "args": ["chroma-mcp", "--mode", "embedded", "--data-dir", "./.chroma"]
     },
+
     "tavily": {
       "type": "stdio",
       "command": "npx",
@@ -24,6 +27,34 @@
         "TAVILY_API_KEY": "${TAVILY_API_KEY}"
       }
     },
+
+    "brave-search": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@brave/brave-search-mcp"],
+      "env": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      }
+    },
+
+    "exa": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "exa-mcp-server"],
+      "env": {
+        "EXA_API_KEY": "${EXA_API_KEY}"
+      }
+    },
+
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"],
+      "env": {
+        "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
+      }
+    },
+
     "neon": {
       "type": "stdio",
       "command": "npx",
@@ -32,6 +63,7 @@
         "NEON_API_KEY": "${NEON_API_KEY}"
       }
     },
+
     "openrouter": {
       "type": "stdio",
       "command": "npx",
@@ -40,6 +72,7 @@
         "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}"
       }
     },
+
     "upstash": {
       "type": "stdio",
       "command": "npx",
@@ -50,6 +83,7 @@
         "QSTASH_TOKEN": "${QSTASH_TOKEN}"
       }
     },
+
     "qdrant": {
       "type": "stdio",
       "command": "uvx",
@@ -61,22 +95,7 @@
         "EMBEDDING_PROVIDER": "fastembed"
       }
     },
-    "linear": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "linear-mcp-server"],
-      "env": {
-        "LINEAR_API_KEY": "${LINEAR_API_KEY}"
-      }
-    },
-    "notion": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@notionhq/notion-mcp-server"],
-      "env": {
-        "NOTION_API_KEY": "${NOTION_API_KEY}"
-      }
-    },
+
     "daytona": {
       "type": "stdio",
       "command": "npx",
@@ -85,6 +104,103 @@
         "DAYTONA_API_KEY": "${DAYTONA_API_KEY}",
         "DAYTONA_SERVER_URL": "${DAYTONA_SERVER_URL}"
       }
+    },
+
+    "n8n": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@n8n/mcp-server"],
+      "env": {
+        "N8N_API_KEY": "${N8N_API_KEY}",
+        "N8N_BASE_URL": "${N8N_BASE_URL}"
+      }
+    },
+
+    "linear": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "linear-mcp-server"],
+      "env": {
+        "LINEAR_API_KEY": "${LINEAR_API_KEY}"
+      }
+    },
+
+    "notion": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@notionhq/notion-mcp-server"],
+      "env": {
+        "NOTION_API_KEY": "${NOTION_API_KEY}"
+      }
+    },
+
+    "filesystem": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-filesystem", "."]
+    },
+
+    "git": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-git", "--repository", "."]
+    },
+
+    "github": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@github/mcp-server"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+
+    "memory": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-memory"]
+    },
+
+    "sequential-thinking": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+    },
+
+    "fetch": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-fetch"]
+    },
+
+    "time": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-time"]
+    },
+
+    "sqlite": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@modelcontextprotocol/server-sqlite", "--db-path", "./data.db"]
+    },
+
+    "playwright": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp"]
+    },
+
+    "mermaid": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@narasimhaponnada/mermaid-mcp-server"]
+    },
+
+    "docker": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "mcp-server-docker"]
     }
   }
 }
