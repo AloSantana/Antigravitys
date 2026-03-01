@@ -16,31 +16,34 @@ class TestSettings:
         """Test Settings with default values."""
         from src.config import Settings
         
-        settings = Settings()
-        
-        assert settings.GOOGLE_API_KEY == ""
-        assert settings.GEMINI_MODEL_NAME == "gemini-2.0-flash-exp"
-        assert settings.AGENT_NAME == "AntigravityAgent"
-        assert settings.DEBUG_MODE is False
-        assert settings.MEMORY_FILE == "agent_memory.json"
+        with patch.dict(os.environ, {}, clear=True):
+            settings = Settings(_env_file=None)
+            
+            assert settings.GOOGLE_API_KEY == ""
+            assert settings.GEMINI_MODEL_NAME == "gemini-2.0-flash-exp"
+            assert settings.AGENT_NAME == "AntigravityAgent"
+            assert settings.DEBUG_MODE is False
+            assert settings.MEMORY_FILE == "agent_memory.json"
     
     def test_custom_settings(self):
         """Test Settings with custom values."""
         from src.config import Settings
         
-        settings = Settings(
-            GOOGLE_API_KEY="custom_key_do_not_use_in_prod",
-            GEMINI_MODEL_NAME="custom-model",
-            AGENT_NAME="CustomAgent",
-            DEBUG_MODE=True,
-            MEMORY_FILE="custom_memory.json"
-        )
-        
-        assert settings.GOOGLE_API_KEY == "custom_key"
-        assert settings.GEMINI_MODEL_NAME == "custom-model"
-        assert settings.AGENT_NAME == "CustomAgent"
-        assert settings.DEBUG_MODE is True
-        assert settings.MEMORY_FILE == "custom_memory.json"
+        with patch.dict(os.environ, {}, clear=True):
+            settings = Settings(
+                GOOGLE_API_KEY="custom_key_do_not_use_in_prod",
+                GEMINI_MODEL_NAME="custom-model",
+                AGENT_NAME="CustomAgent",
+                DEBUG_MODE=True,
+                MEMORY_FILE="custom_memory.json",
+                _env_file=None
+            )
+            
+            assert settings.GOOGLE_API_KEY == "custom_key_do_not_use_in_prod"
+            assert settings.GEMINI_MODEL_NAME == "custom-model"
+            assert settings.AGENT_NAME == "CustomAgent"
+            assert settings.DEBUG_MODE is True
+            assert settings.MEMORY_FILE == "custom_memory.json"
     
     def test_settings_from_env(self, temp_dir):
         """Test Settings loads from environment variables."""
@@ -124,10 +127,11 @@ MEMORY_FILE=env_memory.json
         """Test behavior with empty API key."""
         from src.config import Settings
         
-        settings = Settings(GOOGLE_API_KEY="")
-        
-        assert settings.GOOGLE_API_KEY == ""
-        # Should not raise error
+        with patch.dict(os.environ, {}, clear=True):
+            settings = Settings(GOOGLE_API_KEY="", _env_file=None)
+            
+            assert settings.GOOGLE_API_KEY == ""
+            # Should not raise error
     
     def test_settings_extra_ignored(self):
         """Test that extra fields are ignored."""

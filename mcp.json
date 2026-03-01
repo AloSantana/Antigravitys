@@ -1,250 +1,362 @@
 {
   "mcpServers": {
-
     "filesystem": {
+      "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "."],
-      "enabled": true
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "."
+      ],
+      "enabled": false,
+      "description": "File system operations"
     },
-
     "git": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-git", "--repository", "."],
-      "enabled": true
+      "transport": "stdio",
+      "command": "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+      "args": [
+        "mcp-server-git",
+        "--repository",
+        "."
+      ],
+      "enabled": false
     },
-
     "memory": {
+      "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-memory"],
-      "enabled": true
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "enabled": false,
+      "description": "Persistent agent memory"
     },
-
     "sequential-thinking": {
+      "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"],
-      "enabled": true
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "enabled": false,
+      "description": "Step-by-step reasoning"
     },
-
     "fetch": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-fetch"],
-      "enabled": true
+      "transport": "stdio",
+      "command": "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+      "args": [
+        "mcp-server-fetch"
+      ],
+      "enabled": false
     },
-
     "time": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-time"],
-      "enabled": true
+      "transport": "stdio",
+      "command": "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+      "args": [
+        "mcp-server-time"
+      ],
+      "enabled": false
     },
-
     "sqlite": {
+      "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sqlite", "--db-path", "./data.db"],
-      "enabled": true
+      "args": [
+        "-y",
+        "mcp-sqlite",
+        "--db-path",
+        "./data.db"
+      ],
+      "enabled": false,
+      "description": "SQLite database operations"
     },
-
     "context7": {
+      "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp"],
+      "args": [
+        "-y",
+        "@upstash/context7-mcp"
+      ],
       "env": {
-        "CONTEXT7_API_KEY": "ctx7sk-4b22e736-9f97-457b-a4ba-e2761a25b510"
+        "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
       },
-      "enabled": true
+      "enabled": false,
+      "description": "Up-to-date library documentation"
     },
-
     "brave-search": {
+      "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "@brave/brave-search-mcp"],
+      "args": [
+        "-y",
+        "@brave/brave-search-mcp-server"
+      ],
       "env": {
-        "BRAVE_API_KEY": "BSAQ0gsYuaYuEZHayb_Ek1pnl1l2RiW"
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
       },
-      "enabled": true
+      "enabled": false,
+      "description": "Web search using Brave Search API"
     },
-
     "exa": {
+      "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "exa-mcp-server"],
+      "args": [
+        "-y",
+        "exa-mcp-server"
+      ],
       "env": {
-        "EXA_API_KEY": "6cdf50f2-7ff7-4461-bb07-1a987509305d"
+        "EXA_API_KEY": "${EXA_API_KEY}"
       },
-      "enabled": true
+      "enabled": false,
+      "description": "Neural semantic search"
     },
-
     "tavily": {
+      "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "@tavily/mcp"],
+      "args": [
+        "-y",
+        "tavily-mcp"
+      ],
       "env": {
-        "TAVILY_API_KEY": "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"
+        "TAVILY_API_KEY": "${TAVILY_API_KEY}"
       },
-      "enabled": true
+      "enabled": false,
+      "description": "AI-optimized web search"
     },
-
     "playwright": {
+      "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "@playwright/mcp"],
-      "enabled": true
+      "args": [
+        "-y",
+        "@playwright/mcp"
+      ],
+      "enabled": false,
+      "description": "Browser automation with Playwright"
     },
-
     "puppeteer": {
+      "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "@anthropic/server-puppeteer"],
-      "enabled": true
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-puppeteer"
+      ],
+      "enabled": false
     },
-
     "docker": {
+      "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "mcp-server-docker"],
-      "enabled": true
+      "args": [
+        "-y",
+        "mcp-server-docker"
+      ],
+      "enabled": false
     },
-
     "mermaid": {
+      "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "@narasimhaponnada/mermaid-mcp-server"],
-      "enabled": true
+      "args": [
+        "-y",
+        "@narasimhaponnada/mermaid-mcp-server"
+      ],
+      "enabled": false
     },
-
     "yt-dlp": {
+      "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "mcp-server-yt-dlp"],
-      "enabled": true
+      "args": [
+        "-y",
+        "@kevinwatt/yt-dlp-mcp"
+      ],
+      "enabled": false
     },
-
     "python-analysis": {
-      "command": "python",
-      "args": ["-m", "mcp_server_python_analysis"],
+      "transport": "stdio",
+      "command": "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+      "args": [
+        "python-lsp-mcp"
+      ],
       "env": {
         "PROJECT_PATH": "."
       },
-      "enabled": true
+      "enabled": false
     },
-
     "github": {
+      "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "@github/mcp-server"],
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
       "env": {
         "GITHUB_TOKEN": "${GITHUB_TOKEN}"
       },
-      "enabled": true
+      "enabled": false
     },
-
     "upstash": {
+      "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "@upstash/mcp-server"],
+      "args": [
+        "-y",
+        "@upstash/mcp-server"
+      ],
       "env": {
-        "UPSTASH_REDIS_REST_URL": "https://07d04f4a-70c3-4dd4-a468-e8faac67bf3e.upstash.io",
-        "UPSTASH_REDIS_REST_TOKEN": "AdoCAAIncDJiMjdiYjVhZTJjMTQ0Mjk2OGQyYjI0ZGU4NjlmZWM4YnAyNTU4MTA"
+        "UPSTASH_EMAIL": "${UPSTASH_EMAIL}",
+        "UPSTASH_API_KEY": "${UPSTASH_API_KEY}"
       },
-      "enabled": true
+      "enabled": false
     },
-
     "qdrant": {
-      "command": "uvx",
-      "args": ["mcp-server-qdrant"],
+      "transport": "stdio",
+      "command": "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+      "args": [
+        "mcp-server-qdrant"
+      ],
       "env": {
         "QDRANT_URL": "https://b7cf7be5-1417-49ae-abe2-1fe712ba393b.europe-west3-0.gcp.cloud.qdrant.io",
         "QDRANT_API_KEY": "${QDRANT_API_KEY}",
         "COLLECTION_NAME": "antigravity-agent-memory",
         "EMBEDDING_PROVIDER": "fastembed"
       },
-      "enabled": true
+      "enabled": false
     },
-
     "daytona": {
-      "command": "npx",
-      "args": ["-y", "@daytona/mcp"],
+      "transport": "stdio",
+      "command": "C:\\Users\\primo\\AppData\\Roaming\\bin\\daytona\\daytona.exe",
+      "args": [
+        "mcp",
+        "start"
+      ],
       "env": {
-        "DAYTONA_API_KEY": "dtn_68b7b34b0ba64c6c06aa397f984a159f7be718f79782ffe914251dfd07043a10",
+        "DAYTONA_API_KEY": "${DAYTONA_API_KEY}",
         "DAYTONA_SERVER_URL": "https://app.daytona.io/api"
       },
-      "enabled": true
+      "enabled": false
     },
-
     "n8n": {
+      "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "@n8n/mcp-server"],
+      "args": [
+        "-y",
+        "n8n-mcp"
+      ],
       "env": {
         "N8N_API_KEY": "${N8N_API_KEY}",
         "N8N_BASE_URL": "${N8N_BASE_URL}"
       },
-      "enabled": true
+      "enabled": false
     },
-
     "postgres": {
+      "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "mcp-server-postgres"],
+      "args": [
+        "-y",
+        "postgresql-mcp"
+      ],
       "env": {
         "POSTGRES_CONNECTION_STRING": "${POSTGRES_CONNECTION_STRING}"
       },
-      "enabled": true
+      "enabled": false
     },
-
     "firecrawl": {
+      "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "firecrawl-mcp"],
+      "args": [
+        "-y",
+        "firecrawl-mcp"
+      ],
       "env": {
         "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
       },
-      "enabled": true
+      "enabled": false
     },
-
     "agentops": {
+      "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "agentops-mcp"],
+      "args": [
+        "-y",
+        "agentops-mcp"
+      ],
       "env": {
         "AGENTOPS_API_KEY": "${AGENTOPS_API_KEY}"
       },
-      "enabled": true
+      "enabled": false
     },
-
     "chroma": {
-      "command": "uvx",
-      "args": ["chroma-mcp", "--mode", "embedded", "--data-dir", "./.chroma"],
-      "enabled": true
+      "transport": "stdio",
+      "command": "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+      "args": [
+        "chroma-mcp",
+        "--mode",
+        "embedded",
+        "--data-dir",
+        "./.chroma"
+      ],
+      "enabled": false
     },
-
     "taskmaster-ai": {
+      "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "--package=task-master-ai", "task-master-ai"],
+      "args": [
+        "-y",
+        "--package=task-master-ai",
+        "task-master-ai"
+      ],
       "env": {
-        "GEMINI_API_KEY": "AIzaSyAEZ6ttFSsd3W8Xv5As3AHIwWCeaFQ90qk"
+        "GEMINI_API_KEY": "${GEMINI_API_KEY}"
       },
-      "enabled": true
+      "enabled": false
     },
-
     "neon": {
+      "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "@neondatabase/mcp-server-neon"],
+      "args": [
+        "-y",
+        "@neondatabase/mcp-server-neon"
+      ],
       "env": {
         "NEON_API_KEY": "${NEON_API_KEY}"
       },
-      "enabled": true
+      "enabled": false
     },
-
     "openrouter": {
+      "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "openrouter-mcp"],
+      "args": [
+        "-y",
+        "openrouter-mcp"
+      ],
       "env": {
         "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}"
       },
-      "enabled": true
+      "enabled": false
     },
-
     "linear": {
+      "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "linear-mcp-server"],
+      "args": [
+        "-y",
+        "linear-mcp-server"
+      ],
       "env": {
         "LINEAR_API_KEY": "${LINEAR_API_KEY}"
       },
-      "enabled": true
+      "enabled": false
     },
-
     "notion": {
+      "transport": "stdio",
       "command": "npx",
-      "args": ["-y", "@notionhq/notion-mcp-server"],
+      "args": [
+        "-y",
+        "@notionhq/notion-mcp-server"
+      ],
       "env": {
         "NOTION_API_KEY": "${NOTION_API_KEY}"
       },
-      "enabled": true
+      "enabled": false
+    },
+    "docker-agent-gateway": {
+      "transport": "sse",
+      "url": "http://localhost:3000/api/control/stream",
+      "enabled": true,
+      "description": "Docker Open Agent Gateway (sandboxed.sh/docker-mcp multiplexer)"
     }
   }
 }

@@ -214,6 +214,14 @@
       "env": {
         "NOTION_API_KEY": "${NOTION_API_KEY}"
       }
+    },
+
+    "sandboxed-sh": {
+      "command": "python",
+      "args": ["-m", "src.mcp_client_sandboxed_sh"],
+      "env": {
+        "SANDBOXED_SH_URL": "http://localhost:3000"
+      }
     }
   }
 }

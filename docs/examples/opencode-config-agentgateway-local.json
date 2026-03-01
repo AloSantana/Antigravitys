@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "agentgateway": {
+        "type": "http",
+        "url": "http://localhost:15000/mcp/http",
+        "enabled": true,
+        "description": "AgentGateway running locally on port 15000"
+      }
+    }
+  }
+}

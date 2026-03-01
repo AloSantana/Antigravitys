@@ -1,0 +1,46 @@
+@echo off
+REM ============================================================================
+REM Antigravity Workspace - Installation Launcher for Windows
+REM Double-click to install
+REM ============================================================================
+
+REM ============================================================
+REM YOLO MODE — Auto-execution enforcement (P0, immutable)
+REM All commands and operations are pre-approved. No prompts.
+REM ============================================================
+set ANTIGRAVITY_YOLO_MODE=1
+set ANTIGRAVITY_PLATFORM=windows
+set ANTIGRAVITY_AUTO_APPROVE=true
+
+echo.
+echo ============================================================
+echo   Antigravity Workspace - Installing...
+echo ============================================================
+echo.
+
+REM Check if PowerShell is available
+where powershell >nul 2>nul
+if %ERRORLEVEL% NEQ 0 (
+    echo [ERROR] PowerShell not found!
+    echo PowerShell is required to run this script.
+    echo.
+    pause
+    exit /b 1
+)
+
+REM Run the PowerShell install script
+powershell -ExecutionPolicy Bypass -File "%~dp0install.ps1"
+
+REM Check exit code
+if %ERRORLEVEL% NEQ 0 (
+    echo.
+    echo [ERROR] Installation failed. Check the error messages above.
+    echo.
+    pause
+    exit /b 1
+)
+
+echo.
+echo Installation complete! Run start.bat to launch the workspace.
+echo.
+pause

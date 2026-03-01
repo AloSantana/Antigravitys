@@ -4,125 +4,205 @@
   "mcp": {
     "filesystem": {
       "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-filesystem", "."],
-      "enabled": true
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "."
+      ],
+      "enabled": false
     },
     "git": {
       "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-git", "--repository", "."],
-      "enabled": true
+      "command": [
+        "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+        "mcp-server-git",
+        "--repository",
+        "."
+      ],
+      "enabled": false
     },
     "memory": {
       "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-memory"],
-      "enabled": true
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
+      "enabled": false
     },
     "sequential-thinking": {
       "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
-      "enabled": true
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
+      "enabled": false
     },
     "fetch": {
       "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-fetch"],
-      "enabled": true
+      "command": [
+        "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+        "mcp-server-fetch"
+      ],
+      "enabled": false
     },
     "time": {
       "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-time"],
-      "enabled": true
+      "command": [
+        "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+        "mcp-server-time"
+      ],
+      "enabled": false
     },
     "sqlite": {
       "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-sqlite", "--db-path", "./data.db"],
-      "enabled": true
+      "command": [
+        "npx",
+        "-y",
+        "mcp-sqlite",
+        "--db-path",
+        "./data.db"
+      ],
+      "enabled": false
     },
     "context7": {
       "type": "local",
-      "command": ["npx", "-y", "@upstash/context7-mcp"],
-      "enabled": true,
+      "command": [
+        "npx",
+        "-y",
+        "@upstash/context7-mcp"
+      ],
+      "enabled": false,
       "environment": {
-        "CONTEXT7_API_KEY": "ctx7sk-4b22e736-9f97-457b-a4ba-e2761a25b510"
+        "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
       }
     },
     "brave-search": {
       "type": "local",
-      "command": ["npx", "-y", "@brave/brave-search-mcp"],
-      "enabled": true,
+      "command": [
+        "npx",
+        "-y",
+        "@brave/brave-search-mcp-server"
+      ],
+      "enabled": false,
       "environment": {
-        "BRAVE_API_KEY": "BSAQ0gsYuaYuEZHayb_Ek1pnl1l2RiW"
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
       }
     },
     "exa": {
       "type": "local",
-      "command": ["npx", "-y", "exa-mcp-server"],
-      "enabled": true,
+      "command": [
+        "npx",
+        "-y",
+        "exa-mcp-server"
+      ],
+      "enabled": false,
       "environment": {
-        "EXA_API_KEY": "6cdf50f2-7ff7-4461-bb07-1a987509305d"
+        "EXA_API_KEY": "${EXA_API_KEY}"
       }
     },
     "tavily": {
       "type": "local",
-      "command": ["npx", "-y", "@tavily/mcp"],
-      "enabled": true,
+      "command": [
+        "npx",
+        "-y",
+        "tavily-mcp"
+      ],
+      "enabled": false,
       "environment": {
-        "TAVILY_API_KEY": "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"
+        "TAVILY_API_KEY": "${TAVILY_API_KEY}"
       }
     },
     "playwright": {
       "type": "local",
-      "command": ["npx", "-y", "@playwright/mcp"],
-      "enabled": true
+      "command": [
+        "npx",
+        "-y",
+        "@playwright/mcp"
+      ],
+      "enabled": false
     },
     "puppeteer": {
       "type": "local",
-      "command": ["npx", "-y", "@anthropic/server-puppeteer"],
-      "enabled": true
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-puppeteer"
+      ],
+      "enabled": false
     },
     "docker": {
       "type": "local",
-      "command": ["npx", "-y", "mcp-server-docker"],
-      "enabled": true
+      "command": [
+        "npx",
+        "-y",
+        "mcp-server-docker"
+      ],
+      "enabled": false
     },
     "mermaid": {
       "type": "local",
-      "command": ["npx", "-y", "@narasimhaponnada/mermaid-mcp-server"],
-      "enabled": true
+      "command": [
+        "npx",
+        "-y",
+        "@narasimhaponnada/mermaid-mcp-server"
+      ],
+      "enabled": false
     },
     "yt-dlp": {
       "type": "local",
-      "command": ["npx", "-y", "mcp-server-yt-dlp"],
-      "enabled": true
+      "command": [
+        "npx",
+        "-y",
+        "@kevinwatt/yt-dlp-mcp"
+      ],
+      "enabled": false
     },
     "python-analysis": {
       "type": "local",
-      "command": ["python", "-m", "mcp_server_python_analysis"],
-      "enabled": true,
+      "command": [
+        "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+        "python-lsp-mcp"
+      ],
+      "enabled": false,
       "environment": {
         "PROJECT_PATH": "."
       }
     },
     "github": {
       "type": "local",
-      "command": ["npx", "-y", "@github/mcp-server"],
-      "enabled": true,
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "enabled": false,
       "environment": {
         "GITHUB_TOKEN": "${GITHUB_TOKEN}"
       }
     },
     "upstash": {
       "type": "local",
-      "command": ["npx", "-y", "@upstash/mcp-server"],
-      "enabled": true,
+      "command": [
+        "npx",
+        "-y",
+        "@upstash/mcp-server"
+      ],
+      "enabled": false,
       "environment": {
-        "UPSTASH_REDIS_REST_URL": "https://07d04f4a-70c3-4dd4-a468-e8faac67bf3e.upstash.io",
-        "UPSTASH_REDIS_REST_TOKEN": "AdoCAAIncDJiMjdiYjVhZTJjMTQ0Mjk2OGQyYjI0ZGU4NjlmZWM4YnAyNTU4MTA"
+        "UPSTASH_EMAIL": "${UPSTASH_EMAIL}",
+        "UPSTASH_API_KEY": "${UPSTASH_API_KEY}"
       }
     },
     "qdrant": {
       "type": "local",
-      "command": ["uvx", "mcp-server-qdrant"],
-      "enabled": true,
+      "command": [
+        "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+        "mcp-server-qdrant"
+      ],
+      "enabled": false,
       "environment": {
         "QDRANT_URL": "https://b7cf7be5-1417-49ae-abe2-1fe712ba393b.europe-west3-0.gcp.cloud.qdrant.io",
         "QDRANT_API_KEY": "${QDRANT_API_KEY}",
@@ -132,17 +212,25 @@
     },
     "daytona": {
       "type": "local",
-      "command": ["npx", "-y", "@daytona/mcp"],
-      "enabled": true,
+      "command": [
+        "C:\\Users\\primo\\AppData\\Roaming\\bin\\daytona\\daytona.exe",
+        "mcp",
+        "start"
+      ],
+      "enabled": false,
       "environment": {
-        "DAYTONA_API_KEY": "dtn_68b7b34b0ba64c6c06aa397f984a159f7be718f79782ffe914251dfd07043a10",
+        "DAYTONA_API_KEY": "${DAYTONA_API_KEY}",
         "DAYTONA_SERVER_URL": "https://app.daytona.io/api"
       }
     },
     "n8n": {
       "type": "local",
-      "command": ["npx", "-y", "@n8n/mcp-server"],
-      "enabled": true,
+      "command": [
+        "npx",
+        "-y",
+        "n8n-mcp"
+      ],
+      "enabled": false,
       "environment": {
         "N8N_API_KEY": "${N8N_API_KEY}",
         "N8N_BASE_URL": "${N8N_BASE_URL}"
@@ -150,72 +238,118 @@
     },
     "postgres": {
       "type": "local",
-      "command": ["npx", "-y", "mcp-server-postgres"],
-      "enabled": true,
+      "command": [
+        "npx",
+        "-y",
+        "postgresql-mcp"
+      ],
+      "enabled": false,
       "environment": {
         "POSTGRES_CONNECTION_STRING": "${POSTGRES_CONNECTION_STRING}"
       }
     },
     "firecrawl": {
       "type": "local",
-      "command": ["npx", "-y", "firecrawl-mcp"],
-      "enabled": true,
+      "command": [
+        "npx",
+        "-y",
+        "firecrawl-mcp"
+      ],
+      "enabled": false,
       "environment": {
         "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
       }
     },
     "agentops": {
       "type": "local",
-      "command": ["npx", "-y", "agentops-mcp"],
-      "enabled": true,
+      "command": [
+        "npx",
+        "-y",
+        "agentops-mcp"
+      ],
+      "enabled": false,
       "environment": {
         "AGENTOPS_API_KEY": "${AGENTOPS_API_KEY}"
       }
     },
     "chroma": {
       "type": "local",
-      "command": ["uvx", "chroma-mcp", "--mode", "embedded", "--data-dir", "./.chroma"],
-      "enabled": true
+      "command": [
+        "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+        "chroma-mcp",
+        "--mode",
+        "embedded",
+        "--data-dir",
+        "./.chroma"
+      ],
+      "enabled": false
     },
     "taskmaster-ai": {
       "type": "local",
-      "command": ["npx", "-y", "--package=task-master-ai", "task-master-ai"],
-      "enabled": true,
+      "command": [
+        "npx",
+        "-y",
+        "--package=task-master-ai",
+        "task-master-ai"
+      ],
+      "enabled": false,
       "environment": {
-        "GEMINI_API_KEY": "AIzaSyAEZ6ttFSsd3W8Xv5As3AHIwWCeaFQ90qk"
+        "GEMINI_API_KEY": "${GEMINI_API_KEY}"
       }
     },
     "neon": {
       "type": "local",
-      "command": ["npx", "-y", "@neondatabase/mcp-server-neon"],
-      "enabled": true,
+      "command": [
+        "npx",
+        "-y",
+        "@neondatabase/mcp-server-neon"
+      ],
+      "enabled": false,
       "environment": {
         "NEON_API_KEY": "${NEON_API_KEY}"
       }
     },
     "openrouter": {
       "type": "local",
-      "command": ["npx", "-y", "openrouter-mcp"],
-      "enabled": true,
+      "command": [
+        "npx",
+        "-y",
+        "openrouter-mcp"
+      ],
+      "enabled": false,
       "environment": {
         "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}"
       }
     },
     "linear": {
       "type": "local",
-      "command": ["npx", "-y", "linear-mcp-server"],
-      "enabled": true,
+      "command": [
+        "npx",
+        "-y",
+        "linear-mcp-server"
+      ],
+      "enabled": false,
       "environment": {
         "LINEAR_API_KEY": "${LINEAR_API_KEY}"
       }
     },
     "notion": {
       "type": "local",
-      "command": ["npx", "-y", "@notionhq/notion-mcp-server"],
-      "enabled": true,
+      "command": [
+        "npx",
+        "-y",
+        "@notionhq/notion-mcp-server"
+      ],
+      "enabled": false,
       "environment": {
         "NOTION_API_KEY": "${NOTION_API_KEY}"
       }
+    },
+    "docker-agent-gateway": {
+      "type": "sse",
+      "url": "http://localhost:3000/api/control/stream",
+      "enabled": true,
+      "description": "Docker Open Agent Gateway (sandboxed.sh/docker-mcp multiplexer)"
     }
   }
 }

@@ -5,7 +5,7 @@ import logging
 import psutil
 from typing import List, Tuple, Optional
 from pathlib import Path
-from backend.agent.local_client import LocalClient
+from agent.local_client import LocalClient
 from .store import VectorStore
 
 logger = logging.getLogger(__name__)

@@ -98,7 +98,7 @@ class AgentManager:
             
             # Parse metadata section
             metadata_section = re.search(
-                r'## Agent Metadata\s*(.*?)\s*##',
+                r'## Agent Metadata\s*(.*?)(?=\n##|\Z)',
                 content,
                 re.DOTALL
             )
@@ -108,14 +108,14 @@ class AgentManager:
                 
                 # Extract fields
                 for field in ['Name', 'Type', 'Expertise', 'Priority']:
-                    pattern = rf'-\s*\*\*{field}\*\*:\s*(.+?)(?:\n|$)'
+                    pattern = rf'-\s*\*\*{field}\*\*:[ \t]*(.+?)(?:\n|$)'
                     match = re.search(pattern, meta_text)
                     if match:
                         metadata[field.lower()] = match.group(1).strip()
             
             # Extract description from Purpose section
             purpose_section = re.search(
-                r'## Purpose\s*(.*?)\s*##',
+                r'## Purpose\s*(.*?)(?=\n##|\Z)',
                 content,
                 re.DOTALL
             )
@@ -124,7 +124,7 @@ class AgentManager:
             
             # Extract capabilities from Core Responsibilities
             resp_section = re.search(
-                r'## Core Responsibilities\s*(.*?)\s*##',
+                r'## Core Responsibilities\s*(.*?)(?=\n##|\Z)',
                 content,
                 re.DOTALL
             )
@@ -135,7 +135,7 @@ class AgentManager:
             
             # Extract tools from Available Tools
             tools_section = re.search(
-                r'## Available Tools\s*(.*?)\s*##',
+                r'## Available Tools\s*(.*?)(?=\n##|\Z)',
                 content,
                 re.DOTALL
             )
@@ -351,7 +351,7 @@ class AgentManager:
                     'loaded': agent_loaded
                 })
         
-        scored.sort(key=lambda x: x['confidence'], reverse=True)
+        scored.sort(key=lambda x: (x['confidence'], x['loaded']), reverse=True)
         return scored
 
     def suggest_agents(self, task_description: str, limit: int = 3, 

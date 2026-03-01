@@ -1,0 +1,13 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "mcp": {
+    "servers": {
+      "agentgateway": {
+        "type": "http",
+        "url": "http://agentgateway:15000/mcp/http",
+        "enabled": true,
+        "description": "AgentGateway running in Docker Compose network"
+      }
+    }
+  }
+}

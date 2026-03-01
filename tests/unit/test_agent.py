@@ -4,7 +4,7 @@ Tests the GeminiAgent class
 """
 
 import pytest
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
 
 
 @pytest.mark.unit
@@ -34,59 +34,70 @@ class TestGeminiAgent:
             
             result = agent.think("Test task")
             
-            assert result == "Plan formulated."
+            assert "<thought>" in result
+            assert "Task Analysis" in result
     
-    def test_act_method(self, mock_settings, mock_memory_manager):
+    @pytest.mark.asyncio
+    async def test_act_method(self, mock_settings):
         """Test the act method."""
+        mock_mem = MagicMock()
+        mock_mem.get_context_window.return_value = []
+        mock_mem.get_history.return_value = []
+
         with patch('src.agent.settings', mock_settings), \
-             patch('src.agent.MemoryManager', return_value=mock_memory_manager), \
+             patch('src.agent.MemoryManager', return_value=mock_mem), \
              patch('time.sleep'):
             from src.agent import GeminiAgent
             
             agent = GeminiAgent()
-            agent.memory = mock_memory_manager
+            agent.memory = mock_mem
             
-            result = agent.act("Test task")
+            result = await agent.act("Test task")
             
-            # Should add entries to memory
-            assert mock_memory_manager.add_entry.call_count == 2
-            assert "completed" in result.lower()
+            # Should add entries to memory (user input + assistant response)
+            assert mock_mem.add_entry.call_count == 2
+            assert "Test task" in result
     
-    def test_reflect_method(self, mock_settings, mock_memory_manager):
+    def test_reflect_method(self, mock_settings):
         """Test the reflect method."""
+        mock_mem = MagicMock()
+        mock_mem.get_history.return_value = [
+            {"role": "user", "content": "Task 1"},
+            {"role": "assistant", "content": "Response 1"}
+        ]
+
         with patch('src.agent.settings', mock_settings), \
-             patch('src.agent.MemoryManager', return_value=mock_memory_manager):
+             patch('src.agent.MemoryManager', return_value=mock_mem):
             from src.agent import GeminiAgent
             
             agent = GeminiAgent()
-            agent.memory = mock_memory_manager
-            mock_memory_manager.get_history.return_value = [
-                {"role": "user", "content": "Task 1"},
-                {"role": "assistant", "content": "Response 1"}
-            ]
+            agent.memory = mock_mem
             
             # Should not raise error
             agent.reflect()
             
-            mock_memory_manager.get_history.assert_called_once()
+            mock_mem.get_history.assert_called_once()
     
-    def test_run_method(self, mock_settings, mock_memory_manager):
+    def test_run_method(self, mock_settings):
         """Test the run method (full workflow)."""
+        mock_mem = MagicMock()
+        mock_mem.get_context_window.return_value = []
+        mock_mem.get_history.return_value = []
+
         with patch('src.agent.settings', mock_settings), \
-             patch('src.agent.MemoryManager', return_value=mock_memory_manager), \
+             patch('src.agent.MemoryManager', return_value=mock_mem), \
              patch('time.sleep'):
             from src.agent import GeminiAgent
             
             agent = GeminiAgent()
-            agent.memory = mock_memory_manager
-            mock_memory_manager.get_history.return_value = []
+            agent.memory = mock_mem
             
             # Should execute full workflow
             agent.run("Test task")
             
             # Verify memory operations
-            assert mock_memory_manager.add_entry.call_count >= 2
-            assert mock_memory_manager.get_history.called
+            assert mock_mem.add_entry.call_count >= 2
+            assert mock_mem.get_history.called
     
     def test_agent_with_different_settings(self):
         """Test agent with various settings configurations."""
