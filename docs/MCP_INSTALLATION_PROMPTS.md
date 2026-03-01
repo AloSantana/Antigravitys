@@ -719,5 +719,786 @@ Save and verify all servers are accessible from OpenCode/Crush.
 
 ---
 
+---
+
+## 🤖 OpenCode & Multi-Agent Optimized MCP Servers
+
+> Top 10 MCP servers specifically optimized for OpenCode/Crush terminal workflows and multi-agent coordination. Each prompt is fully self-contained — paste into any AI coding assistant to install and configure from scratch.
+
+---
+
+### 1. Taskmaster AI — Multi-Agent Task Orchestration
+
+```
+You are setting up the Taskmaster AI MCP server for this Antigravity project. This is the most important MCP server for multi-agent workflows — it replaces ad-hoc task state with a persistent, queryable task backlog.
+
+INSTALL AND CONFIGURE:
+
+Step 1 — Verify npx access:
+  npx --yes task-master-ai --version
+  (Expected: version number printed; if error check Node 18+ with: node --version)
+
+Step 2 — Add to .github/copilot/mcp.json under "mcpServers":
+  "taskmaster-ai": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "--package=task-master-ai", "task-master-ai"],
+    "env": {
+      "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}",
+      "OPENAI_API_KEY": "${OPENAI_API_KEY}"
+    },
+    "tools": ["get_tasks", "next_task", "set_task_status", "add_task", "expand_task", "analyze_project_complexity", "update_task", "get_task"]
+  }
+
+Step 3 — Add to opencode.json mcpServers section (OpenCode/Crush format):
+  "taskmaster-ai": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "--package=task-master-ai", "task-master-ai"],
+    "env": {
+      "ANTHROPIC_API_KEY": "REPLACE_WITH_ANTHROPIC_KEY",
+      "OPENAI_API_KEY": "REPLACE_WITH_OPENAI_KEY"
+    }
+  }
+
+Step 4 — Add to .env file (at least one AI key required):
+  ANTHROPIC_API_KEY=sk-ant-...    # Preferred — used for task parsing
+  OPENAI_API_KEY=sk-...           # Fallback if Anthropic unavailable
+
+Step 5 — Create initial task list from this project's README:
+  Use the get_tasks tool to check if any tasks exist.
+  If empty, use add_task to create 3 sample tasks:
+  - "Set up MCP servers" (priority: high)
+  - "Test multi-agent swarm" (priority: medium)  
+  - "Document agent workflows" (priority: low)
+
+Step 6 — Verify the multi-agent loop works:
+  Call next_task to get the highest-priority unblocked task.
+  Call set_task_status to mark it "in-progress".
+  Call set_task_status again to mark it "done".
+  Call next_task again — it should return the next task.
+
+The full autonomous agent loop is: RouterAgent calls next_task → delegates to CoderAgent → CoderAgent calls set_task_status("done") → loop continues until all tasks complete.
+```
+
+---
+
+### 2. Chroma MCP — Semantic Vector Memory for Agents
+
+```
+You are setting up the Chroma MCP server for semantic codebase search and agent RAG memory. This fills the critical vector search gap — the existing Memory MCP handles structured knowledge graphs, Chroma handles semantic recall over unstructured content.
+
+INSTALL AND CONFIGURE:
+
+Step 1 — Install via pip/uvx (Python server):
+  pip install chroma-mcp
+  OR (no install needed with uvx):
+  uvx chroma-mcp --help
+  (Expected: help text shown; if missing Python: python --version must be 3.10+)
+
+Step 2 — Add to .github/copilot/mcp.json under "mcpServers":
+  "chroma": {
+    "type": "stdio",
+    "command": "uvx",
+    "args": ["chroma-mcp", "--mode", "embedded", "--data-dir", "./.chroma"],
+    "tools": ["chroma_create_collection", "chroma_add_documents", "chroma_query_documents", "chroma_get_document", "chroma_list_collections", "chroma_delete_collection"]
+  }
+
+Step 3 — Add to opencode.json mcpServers section:
+  "chroma": {
+    "type": "stdio",
+    "command": "uvx",
+    "args": ["chroma-mcp", "--mode", "embedded", "--data-dir", "./.chroma"]
+  }
+
+  NOTE: Embedded mode stores data in ./.chroma directory — add ".chroma/" to .gitignore
+
+Step 4 — Add .chroma/ to .gitignore:
+  echo ".chroma/" >> .gitignore
+
+Step 5 — Test semantic indexing:
+  Use chroma_create_collection with name "codebase" to create a collection.
+  Use chroma_add_documents to add 3 documents:
+    - doc1: id="readme", content="This is the Antigravity AI workspace", metadata={"type": "docs"}
+    - doc2: id="backend", content="FastAPI Python backend with agent orchestration", metadata={"type": "code"}
+    - doc3: id="mcp", content="MCP servers for AI agent capabilities", metadata={"type": "config"}
+  Use chroma_query_documents with query="agent memory" to verify semantic search works.
+  Expected: doc1 and doc3 should rank highest.
+
+Step 6 — For remote ChromaDB (optional):
+  Change args to: ["chroma-mcp", "--mode", "http"]
+  Add env: {"CHROMA_HOST": "localhost", "CHROMA_PORT": "8000"}
+  Start ChromaDB: docker run -p 8000:8000 chromadb/chroma
+
+Verify: chroma_list_collections returns the "codebase" collection. Semantic search works for agent RAG memory.
+```
+
+---
+
+### 3. Tavily MCP — AI-Optimized Search for Agent RAG Pipelines
+
+```
+You are setting up the Tavily MCP server for AI-optimized web search. Unlike Brave Search (real-time news) or Exa (neural discovery), Tavily returns pre-cleaned, LLM-ready content specifically designed for RAG pipelines and agent context injection.
+
+INSTALL AND CONFIGURE:
+
+Step 1 — Get a free Tavily API key:
+  Go to: https://app.tavily.com → Sign up → Copy API key (starts with tvly-)
+  Free tier: 1,000 searches/month — sufficient for development use
+
+Step 2 — Verify package:
+  npx -y @tavily/mcp --help
+  (Expected: help text; requires Node 18+)
+
+Step 3 — Add to .github/copilot/mcp.json under "mcpServers":
+  "tavily": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@tavily/mcp"],
+    "env": {
+      "TAVILY_API_KEY": "${TAVILY_API_KEY}"
+    },
+    "tools": ["tavily_search", "tavily_extract"]
+  }
+
+Step 4 — Add to opencode.json mcpServers section:
+  "tavily": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@tavily/mcp"],
+    "env": {
+      "TAVILY_API_KEY": "REPLACE_WITH_TAVILY_KEY"
+    }
+  }
+
+Step 5 — Add to .env:
+  TAVILY_API_KEY=tvly-...
+
+Step 6 — Test both key tools:
+  a) Search: Use tavily_search with query="MCP server stdio transport protocol 2025"
+     Expected: 5-10 structured results with clean snippets (not raw HTML)
+  b) Extract: Use tavily_extract with url="https://modelcontextprotocol.io/docs"
+     Expected: Clean markdown content from the MCP docs page
+
+Step 7 — Compare with Brave/Exa to understand positioning:
+  - tavily_search: best for factual lookups, returns pre-processed content
+  - brave_web_search: best for real-time news and local results
+  - exa search: best for neural/semantic discovery of similar content
+
+Verify: Both tavily_search and tavily_extract return clean, LLM-ready text (not HTML) that can be directly passed as context to agents.
+```
+
+---
+
+### 4. Neon MCP — Serverless Postgres with Database Branching
+
+```
+You are setting up the Neon MCP server for serverless Postgres with agent-safe database branching. The key differentiator from standard Postgres MCP: agents can fork a database branch, run destructive migrations safely, then merge or discard.
+
+INSTALL AND CONFIGURE:
+
+Step 1 — Get a free Neon API key:
+  Go to: https://console.neon.tech → Account Settings → API Keys → Create
+  Free tier: 10 projects, 3GB storage — sufficient for multi-agent state
+
+Step 2 — Verify package:
+  npx -y @neondatabase/mcp-server-neon --help
+
+Step 3 — Add to .github/copilot/mcp.json under "mcpServers":
+  "neon": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@neondatabase/mcp-server-neon"],
+    "env": {
+      "NEON_API_KEY": "${NEON_API_KEY}"
+    },
+    "tools": ["neon_run_sql", "neon_create_project", "neon_create_branch", "neon_describe_table_schema", "neon_list_projects", "neon_delete_branch"]
+  }
+
+Step 4 — Add to opencode.json mcpServers section:
+  "neon": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@neondatabase/mcp-server-neon"],
+    "env": {
+      "NEON_API_KEY": "REPLACE_WITH_NEON_KEY"
+    }
+  }
+
+Step 5 — Add to .env:
+  NEON_API_KEY=...
+
+Step 6 — Create and test a project:
+  a) Call neon_list_projects — should show any existing projects
+  b) Call neon_create_project with name="antigravity-agents" — creates a new Postgres cluster
+  c) Note the project_id from the response
+  d) Call neon_run_sql:
+     project_id: <from step c>
+     sql: "CREATE TABLE agent_state (id SERIAL PRIMARY KEY, agent_name TEXT, task TEXT, status TEXT, created_at TIMESTAMP DEFAULT NOW());"
+  e) Call neon_run_sql: "INSERT INTO agent_state (agent_name, task, status) VALUES ('coder-agent', 'implement auth', 'in-progress');"
+  f) Call neon_run_sql: "SELECT * FROM agent_state;" — verify row exists
+
+Step 7 — Test the critical branching feature:
+  a) Call neon_create_branch with project_id=<id> name="agent-experiment"
+  b) On the branch, run a destructive migration:
+     neon_run_sql with branch_id=<branch_id>: "DROP TABLE agent_state;" (safe — only affects the branch!)
+  c) Verify main branch still has data: neon_run_sql without branch_id: "SELECT * FROM agent_state;"
+  d) Call neon_delete_branch to clean up the test branch
+
+Verify: The agent_state table exists on the main branch. Branching creates isolated contexts. The branching workflow enables agents to test schema changes safely before applying to production.
+```
+
+---
+
+### 5. OpenRouter MCP — 200+ Model Access for Multi-Agent Routing
+
+```
+You are setting up the OpenRouter MCP server for unified access to 200+ AI models. This enables heterogeneous multi-agent setups where different agents use different models optimized for their tasks (RouterAgent: fast Gemini Flash; CoderAgent: Claude 3.5 Sonnet; ReviewerAgent: GPT-4o).
+
+INSTALL AND CONFIGURE:
+
+Step 1 — Get a free OpenRouter API key:
+  Go to: https://openrouter.ai/keys → Create Key
+  Free models available (no credit card for many models)
+  Top models for agents: anthropic/claude-3.5-sonnet, google/gemini-2.5-pro, openai/gpt-4o, meta-llama/llama-3.3-70b-instruct (free)
+
+Step 2 — Verify package:
+  npx -y openrouter-mcp --help
+
+Step 3 — Add to .github/copilot/mcp.json under "mcpServers":
+  "openrouter": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "openrouter-mcp"],
+    "env": {
+      "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}"
+    },
+    "tools": ["chat_completion", "list_models", "get_model_info"]
+  }
+
+Step 4 — Add to opencode.json mcpServers section:
+  "openrouter": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "openrouter-mcp"],
+    "env": {
+      "OPENROUTER_API_KEY": "REPLACE_WITH_OPENROUTER_KEY"
+    }
+  }
+
+Step 5 — Add to .env:
+  OPENROUTER_API_KEY=sk-or-v1-...
+
+Step 6 — Test model listing and routing:
+  a) Call list_models — should return 200+ available models with pricing
+  b) Find a free model: look for models with "free" in the ID or pricing=$0
+  c) Call chat_completion:
+     model: "meta-llama/llama-3.3-70b-instruct:free"
+     messages: [{"role": "user", "content": "List 3 best practices for multi-agent AI systems. Be brief."}]
+  d) Verify response is coherent and returned in under 10 seconds
+
+Step 7 — Set up multi-agent model routing strategy:
+  Add to .env for role-based model selection:
+  AGENT_ROUTER_MODEL=google/gemini-flash-1.5         # Fast, cheap for routing
+  AGENT_CODER_MODEL=anthropic/claude-3.5-sonnet      # Best for code generation
+  AGENT_REVIEWER_MODEL=openai/gpt-4o                 # Best for analysis
+  AGENT_RESEARCHER_MODEL=meta-llama/llama-3.3-70b-instruct:free  # Free, good for research
+
+  In the SwarmOrchestrator, agents can call openrouter chat_completion with their assigned model rather than hardcoded Gemini/Anthropic keys — enabling cost optimization and fallback logic.
+
+Verify: chat_completion with a free model returns a valid response. list_models shows available models with cost info. The routing strategy is documented in .env.
+```
+
+---
+
+### 6. Upstash MCP — Redis Cache + QStash Message Queue for Agents
+
+```
+You are setting up the Upstash MCP server for cross-session agent state (Redis) and async agent-to-agent messaging (QStash). This enables coordination patterns impossible with the in-process Memory MCP.
+
+INSTALL AND CONFIGURE:
+
+Step 1 — Create free Upstash account:
+  Go to: https://console.upstash.com → Sign up
+  Create a Redis database: Console → Redis → Create Database
+    - Name: "antigravity-agents"
+    - Region: closest to your location
+    - Free tier: 10k commands/day
+  Create a QStash account: Console → QStash → Get Started
+    - Free tier: 500 messages/day
+
+Step 2 — Get credentials:
+  Redis: REST URL and REST Token (from database details page)
+  QStash: Token from QStash dashboard
+
+Step 3 — Add to .github/copilot/mcp.json under "mcpServers":
+  "upstash": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@upstash/mcp-server"],
+    "env": {
+      "UPSTASH_REDIS_REST_URL": "${UPSTASH_REDIS_REST_URL}",
+      "UPSTASH_REDIS_REST_TOKEN": "${UPSTASH_REDIS_REST_TOKEN}",
+      "QSTASH_TOKEN": "${QSTASH_TOKEN}"
+    },
+    "tools": ["redis_get", "redis_set", "redis_del", "redis_hset", "redis_hget", "qstash_publish", "qstash_list_queues"]
+  }
+
+Step 4 — Add to opencode.json mcpServers section:
+  "upstash": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@upstash/mcp-server"],
+    "env": {
+      "UPSTASH_REDIS_REST_URL": "REPLACE_WITH_URL",
+      "UPSTASH_REDIS_REST_TOKEN": "REPLACE_WITH_TOKEN",
+      "QSTASH_TOKEN": "REPLACE_WITH_QSTASH_TOKEN"
+    }
+  }
+
+Step 5 — Add to .env:
+  UPSTASH_REDIS_REST_URL=https://xxx.upstash.io
+  UPSTASH_REDIS_REST_TOKEN=AX...
+  QSTASH_TOKEN=eyJ...
+
+Step 6 — Test Redis for agent state:
+  a) Call redis_set: key="current-task", value="implement authentication", ex=3600
+  b) Call redis_get: key="current-task" → Expected: "implement authentication"
+  c) Test distributed locking: redis_set key="agent-lock:auth.py" value="coder-agent-1" ex=60 nx=true
+  d) Try locking again: redis_set key="agent-lock:auth.py" value="coder-agent-2" ex=60 nx=true
+     Expected: null (lock already held — prevents concurrent file editing!)
+  e) Call redis_del: key="agent-lock:auth.py" to release the lock
+
+Step 7 — Test QStash for async messaging:
+  a) Call qstash_publish:
+     url: "https://httpbin.org/post"
+     body: {"task": "review-auth-code", "agent": "reviewer-agent", "file": "backend/auth.py"}
+     Expected: Returns messageId
+  b) Call qstash_list_queues to see pending messages
+
+Verify: Redis get/set persists between tool calls. Distributed locking prevents concurrent agent file access. QStash publishes messages that can trigger agent endpoints.
+```
+
+---
+
+### 7. Qdrant MCP — Production Vector Database for Agent Memory
+
+```
+You are setting up the Qdrant MCP server as a production vector database for semantic agent memory. Choose Qdrant over Chroma when you need: advanced filtering on metadata, hybrid (dense + sparse) search, or production-scale deployments.
+
+INSTALL AND CONFIGURE:
+
+Step 1 — Choose deployment mode:
+  Option A (Local Docker, recommended for dev):
+    docker run -d -p 6333:6333 qdrant/qdrant
+    QDRANT_URL=http://localhost:6333
+    No API key needed.
+  Option B (Qdrant Cloud, free tier):
+    Go to: https://cloud.qdrant.io → Create Cluster (free: 1GB)
+    Get URL (ends in :6333) and API Key from dashboard
+
+Step 2 — Install Python package:
+  pip install mcp-server-qdrant
+  OR: uvx mcp-server-qdrant --help
+
+Step 3 — Add to .github/copilot/mcp.json under "mcpServers":
+  "qdrant": {
+    "type": "stdio",
+    "command": "uvx",
+    "args": ["mcp-server-qdrant"],
+    "env": {
+      "QDRANT_URL": "${QDRANT_URL}",
+      "QDRANT_API_KEY": "${QDRANT_API_KEY}",
+      "COLLECTION_NAME": "antigravity-agent-memory",
+      "EMBEDDING_PROVIDER": "fastembed"
+    },
+    "tools": ["qdrant-store", "qdrant-find"]
+  }
+
+Step 4 — Add to opencode.json mcpServers section:
+  "qdrant": {
+    "type": "stdio",
+    "command": "uvx",
+    "args": ["mcp-server-qdrant"],
+    "env": {
+      "QDRANT_URL": "http://localhost:6333",
+      "COLLECTION_NAME": "antigravity-agent-memory",
+      "EMBEDDING_PROVIDER": "fastembed"
+    }
+  }
+
+Step 5 — Add to .env:
+  QDRANT_URL=http://localhost:6333
+  QDRANT_API_KEY=                       # Leave empty for local Docker
+  EMBEDDING_PROVIDER=fastembed          # Local embeddings, no API cost
+
+Step 6 — Test semantic storage and retrieval:
+  a) Call qdrant-store:
+     information: "The Antigravity backend uses FastAPI with async endpoints. Authentication is JWT-based with Pydantic models for validation."
+     metadata: {"agent": "coder-agent", "file": "backend/main.py", "timestamp": "2026-03-01"}
+  b) Call qdrant-store again:
+     information: "The MCP server configuration is stored in .github/copilot/mcp.json and .agent/mcp_config.json"
+     metadata: {"agent": "coder-agent", "file": ".github/copilot/mcp.json"}
+  c) Call qdrant-find:
+     query: "authentication implementation"
+     Expected: First stored document should rank highest
+  d) Call qdrant-find:
+     query: "MCP configuration files"
+     Expected: Second stored document should rank highest
+
+Step 7 — Agent memory isolation pattern:
+  For multi-agent setups, use different COLLECTION_NAME per agent:
+  - coder-agent: COLLECTION_NAME=coder-memory
+  - reviewer-agent: COLLECTION_NAME=reviewer-memory
+  - shared: COLLECTION_NAME=shared-memory
+  All agents can read shared-memory but write only to their own collection.
+
+Verify: qdrant-store saves documents. qdrant-find returns semantically relevant results. The fastembed provider works without any API key.
+```
+
+---
+
+### 8. Linear MCP — Sprint & Issue Tracking for Agent Coordination
+
+```
+You are setting up the Linear MCP server for issue tracking and sprint management in multi-agent workflows. Agents create bugs they find, update issue status as code lands, and coordinate work via sprint boards.
+
+INSTALL AND CONFIGURE:
+
+Step 1 — Get Linear API key (free for personal use):
+  Go to: https://linear.app → Settings → API → Personal API Keys → Create key
+  Name: "Antigravity Agents"
+  Scopes: read, write (for issue creation/updates)
+
+Step 2 — Verify package:
+  npx -y linear-mcp-server --help
+
+Step 3 — Add to .github/copilot/mcp.json under "mcpServers":
+  "linear": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "linear-mcp-server"],
+    "env": {
+      "LINEAR_API_KEY": "${LINEAR_API_KEY}"
+    },
+    "tools": ["list_issues", "create_issue", "update_issue", "search_issues", "list_projects", "get_issue"]
+  }
+
+Step 4 — Add to opencode.json mcpServers section:
+  "linear": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "linear-mcp-server"],
+    "env": {
+      "LINEAR_API_KEY": "REPLACE_WITH_LINEAR_KEY"
+    }
+  }
+
+Step 5 — Add to .env:
+  LINEAR_API_KEY=lin_api_...
+
+Step 6 — Test core operations:
+  a) Call list_projects → shows all Linear projects (create one in Linear UI first if empty)
+  b) Call create_issue:
+     title: "Implement Taskmaster AI MCP integration"
+     description: "Add task-master-ai MCP server for multi-agent task orchestration. See docs/MCP_INSTALLATION_PROMPTS.md for setup instructions."
+     priority: 2 (high)
+     Note the issue ID from the response (e.g., "ENG-42")
+  c) Call get_issue with the ID from step b → verify details
+  d) Call update_issue: set status to "In Progress"
+  e) Call search_issues: query="MCP" → should return the created issue
+  f) Call update_issue: set status to "Done" to close the test issue
+
+Step 7 — Multi-agent integration pattern:
+  ReviewerAgent workflow:
+    1. list_issues (status="Backlog", assignee=me) → get assigned work
+    2. update_issue (status="In Progress") → signal work started
+    3. [perform code review]
+    4. create_issue (if bug found): title="Bug: {description}", priority=urgent
+    5. update_issue (status="Done") → close completed ticket
+
+Verify: list_issues returns project issues. create_issue creates a real ticket visible in Linear UI. update_issue changes status. search_issues finds issues by keyword.
+```
+
+---
+
+### 9. Notion MCP (Official) — Knowledge Base & Auto-Documentation
+
+```
+You are setting up the official Notion MCP server (@notionhq/notion-mcp-server). This is the direct official server — NOT via WayStation proxy. Agents use it to read project knowledge bases and auto-generate documentation.
+
+INSTALL AND CONFIGURE:
+
+Step 1 — Create a Notion Integration:
+  Go to: https://www.notion.so/my-integrations → New Integration
+  Name: "Antigravity Agents"
+  Capabilities: Read content, Update content, Insert content
+  Copy the "Internal Integration Token" (starts with secret_)
+
+Step 2 — Share pages with the integration:
+  In Notion, open any page you want agents to access.
+  Click ··· menu → Connections → Connect to "Antigravity Agents"
+  IMPORTANT: Agents can ONLY access pages explicitly shared with the integration
+
+Step 3 — Verify package:
+  npx -y @notionhq/notion-mcp-server --help
+
+Step 4 — Add to .github/copilot/mcp.json under "mcpServers":
+  "notion": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@notionhq/notion-mcp-server"],
+    "env": {
+      "NOTION_API_KEY": "${NOTION_API_KEY}"
+    },
+    "tools": ["search", "retrieve_page", "create_page", "update_page", "query_database", "append_blocks"]
+  }
+
+Step 5 — Add to opencode.json mcpServers section:
+  "notion": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@notionhq/notion-mcp-server"],
+    "env": {
+      "NOTION_API_KEY": "REPLACE_WITH_NOTION_KEY"
+    }
+  }
+
+Step 6 — Add to .env:
+  NOTION_API_KEY=secret_...
+
+Step 7 — Test all key operations:
+  a) Call search: query="Antigravity" → should return shared pages containing that word
+  b) Create a test page: call create_page:
+     parent: {"type": "workspace"}  
+     title: "Agent Session Log — 2026-03-01"
+     content: "# Agent Session\n\nThis page was created by the Antigravity MCP agent.\n\n## Tasks Completed\n- Set up Notion MCP server\n- Verified read/write access"
+  c) Note the page ID from the response
+  d) Call retrieve_page with the ID → verify content matches
+  e) Call append_blocks to add a note: "## Status\nAll MCP servers configured successfully."
+  f) Call update_page to change the title: "Agent Session Log — 2026-03-01 ✅"
+
+Step 8 — Auto-documentation workflow:
+  After each major coding session, the RouterAgent should call create_page with:
+  - Session summary (what was built)
+  - Architecture decisions made
+  - Open questions for next session
+  This creates an automatic "engineering log" in Notion from every agent session.
+
+Verify: search finds shared pages. create_page creates a real page visible in Notion. retrieve_page reads content. append_blocks adds to existing pages.
+```
+
+---
+
+### 10. Daytona MCP — Persistent Sandboxes for Multi-Session Agent Work
+
+```
+You are setting up the Daytona MCP server for persistent development environment sandboxes. Unlike E2B (ephemeral — resets each execution), Daytona workspaces survive between sessions. A CoderAgent's environment with installed dependencies and in-progress files persists until you explicitly stop it.
+
+INSTALL AND CONFIGURE:
+
+Step 1 — Choose deployment:
+  Option A (Daytona Cloud, recommended):
+    Sign up: https://app.daytona.io → Create account
+    Get API key: Profile → API Keys → Generate
+  Option B (Self-hosted, fully private):
+    docker run -d --name daytona-server \
+      -p 3986:3986 \
+      daytonaio/daytona-server
+    API_KEY=none, SERVER_URL=http://localhost:3986
+
+Step 2 — Install Daytona CLI (needed for workspace bootstrap):
+  # macOS/Linux:
+  curl -sfL https://download.daytona.io/daytona/install.sh | sh
+  # Windows: see https://www.daytona.io/docs/installation/installation
+  daytona version
+
+Step 3 — Add to .github/copilot/mcp.json under "mcpServers":
+  "daytona": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@daytona/mcp"],
+    "env": {
+      "DAYTONA_API_KEY": "${DAYTONA_API_KEY}",
+      "DAYTONA_SERVER_URL": "${DAYTONA_SERVER_URL}"
+    },
+    "tools": ["daytona_workspace_create", "daytona_code_execute", "daytona_file_write", "daytona_file_read", "daytona_workspace_stop", "daytona_workspace_list"]
+  }
+
+Step 4 — Add to opencode.json mcpServers section:
+  "daytona": {
+    "type": "stdio",
+    "command": "npx",
+    "args": ["-y", "@daytona/mcp"],
+    "env": {
+      "DAYTONA_API_KEY": "REPLACE_WITH_DAYTONA_KEY",
+      "DAYTONA_SERVER_URL": "https://app.daytona.io"
+    }
+  }
+
+Step 5 — Add to .env:
+  DAYTONA_API_KEY=dt-...
+  DAYTONA_SERVER_URL=https://app.daytona.io
+
+Step 6 — Create and test a workspace:
+  a) Call daytona_workspace_create:
+     repository_url: "https://github.com/AloSantana/Antigravitys"
+     name: "antigravity-dev"
+     Expected: Returns workspace_id after ~30 seconds
+  b) Call daytona_workspace_list → should show "antigravity-dev" workspace
+  c) Call daytona_code_execute:
+     workspace_id: <from step a>
+     command: "python --version && pip list | grep fastapi"
+     Expected: Python version + FastAPI if installed
+  d) Call daytona_file_write:
+     workspace_id: <from step a>
+     path: "/workspace/test-agent-output.txt"
+     content: "This file was created by an AI agent via Daytona MCP"
+  e) Call daytona_file_read:
+     workspace_id: <from step a>
+     path: "/workspace/test-agent-output.txt"
+     Expected: The text written in step d
+
+Step 7 — Multi-agent workflow with persistent environments:
+  CoderAgent pattern:
+    1. daytona_workspace_create (once per feature branch)
+    2. daytona_code_execute: "git checkout -b feature/new-auth"
+    3. daytona_file_write: write generated code files
+    4. daytona_code_execute: "pytest tests/ -v" to run tests
+    5. daytona_code_execute: "git commit -am 'feat: implement auth'" to commit
+    6. daytona_workspace_stop when feature is complete (preserves state)
+    7. Next session: workspace resumes with all changes intact
+
+  KEY DIFFERENCE from E2B: E2B resets between calls. Daytona workspace in step 6 still has all your agent's installed packages, git history, and file changes when you come back tomorrow.
+
+Verify: daytona_workspace_create returns a workspace_id. daytona_code_execute runs commands in the sandbox. daytona_file_write and daytona_file_read work for agent-generated code persistence.
+```
+
+---
+
+## Complete opencode.json with All 10 New Servers
+
+```
+Configure the opencode.json file in this project to include all 10 new OpenCode-optimized MCP servers. Read the current .opencode.json or opencode.json file, then add the mcpServers configuration.
+
+TARGET STATE of opencode.json:
+{
+  "$schema": "https://opencode.ai/config.json",
+  "permission": "allow",
+  "mcpServers": {
+    "taskmaster-ai": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "--package=task-master-ai", "task-master-ai"],
+      "env": {
+        "ANTHROPIC_API_KEY": "${ANTHROPIC_API_KEY}",
+        "OPENAI_API_KEY": "${OPENAI_API_KEY}"
+      }
+    },
+    "chroma": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["chroma-mcp", "--mode", "embedded", "--data-dir", "./.chroma"]
+    },
+    "tavily": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@tavily/mcp"],
+      "env": {
+        "TAVILY_API_KEY": "${TAVILY_API_KEY}"
+      }
+    },
+    "neon": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@neondatabase/mcp-server-neon"],
+      "env": {
+        "NEON_API_KEY": "${NEON_API_KEY}"
+      }
+    },
+    "openrouter": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "openrouter-mcp"],
+      "env": {
+        "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}"
+      }
+    },
+    "upstash": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/mcp-server"],
+      "env": {
+        "UPSTASH_REDIS_REST_URL": "${UPSTASH_REDIS_REST_URL}",
+        "UPSTASH_REDIS_REST_TOKEN": "${UPSTASH_REDIS_REST_TOKEN}",
+        "QSTASH_TOKEN": "${QSTASH_TOKEN}"
+      }
+    },
+    "qdrant": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["mcp-server-qdrant"],
+      "env": {
+        "QDRANT_URL": "${QDRANT_URL}",
+        "QDRANT_API_KEY": "${QDRANT_API_KEY}",
+        "COLLECTION_NAME": "antigravity-agent-memory",
+        "EMBEDDING_PROVIDER": "fastembed"
+      }
+    },
+    "linear": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "linear-mcp-server"],
+      "env": {
+        "LINEAR_API_KEY": "${LINEAR_API_KEY}"
+      }
+    },
+    "notion": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@notionhq/notion-mcp-server"],
+      "env": {
+        "NOTION_API_KEY": "${NOTION_API_KEY}"
+      }
+    },
+    "daytona": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@daytona/mcp"],
+      "env": {
+        "DAYTONA_API_KEY": "${DAYTONA_API_KEY}",
+        "DAYTONA_SERVER_URL": "${DAYTONA_SERVER_URL}"
+      }
+    }
+  }
+}
+
+Steps to apply:
+1. Read the current opencode.json file
+2. Replace its entire contents with the TARGET STATE above
+3. Verify the JSON is valid
+4. Run: node -e "JSON.parse(require('fs').readFileSync('opencode.json', 'utf8')); console.log('JSON valid ✅')"
+
+After updating opencode.json, also add the new environment variables to .env.example:
+  # === OpenCode & Multi-Agent MCP Servers ===
+  ANTHROPIC_API_KEY=sk-ant-...              # Taskmaster AI (required)
+  TAVILY_API_KEY=tvly-...                    # Tavily AI search
+  NEON_API_KEY=...                           # Neon serverless Postgres
+  OPENROUTER_API_KEY=sk-or-v1-...           # OpenRouter multi-model
+  UPSTASH_REDIS_REST_URL=https://...         # Upstash Redis
+  UPSTASH_REDIS_REST_TOKEN=AX...            # Upstash Redis token
+  QSTASH_TOKEN=eyJ...                        # Upstash QStash queue
+  QDRANT_URL=http://localhost:6333           # Qdrant vector DB
+  QDRANT_API_KEY=                            # Leave empty for local Qdrant
+  LINEAR_API_KEY=lin_api_...                 # Linear issue tracking
+  NOTION_API_KEY=secret_...                  # Notion knowledge base
+  DAYTONA_API_KEY=dt-...                     # Daytona dev sandboxes
+  DAYTONA_SERVER_URL=https://app.daytona.io # Daytona server URL
+
+Report: Confirm opencode.json is valid JSON with 10 new mcpServers entries. Confirm .env.example has the new variables.
+```
+
+---
+
 *These prompts are optimized for Antigravity Workspace Template — March 2026*
 *Sources: Official MCP documentation, GitHub repositories, community testing*
