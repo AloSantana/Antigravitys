@@ -58,5 +58,5 @@ HEALTHCHECK --interval=30s --timeout=3s --start-period=40s --retries=3 \
 # Expose port
 EXPOSE 8000
 
-# Run the backend
-CMD ["python", "backend/main.py"]
+# Run the backend from its own directory so module imports are unambiguous
+CMD ["sh", "-c", "cd /app/backend && exec python main.py"]

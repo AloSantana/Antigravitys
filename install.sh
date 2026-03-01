@@ -833,7 +833,7 @@ EOF
         
         # Test if backend can at least parse
         print_status "Testing backend startup..."
-        if python3 -c "import sys; sys.path.insert(0, 'backend'); from main import app; print('Backend OK')" 2>&1 | tee -a "$LOG_FILE"; then
+        if python3 -c "import sys; sys.path.insert(0, '${SCRIPT_DIR}/backend'); from main import app; print('Backend OK')" 2>&1 | tee -a "$LOG_FILE"; then
             print_success "Backend module loads successfully"
         else
             print_warning "Backend module has issues - check logs"

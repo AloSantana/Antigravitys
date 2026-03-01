@@ -1,9 +1,9 @@
 """
-Convenience entrypoint so `python agent.py` works from the repo root.
+Convenience entrypoint so `python run_agent.py` works from the repo root.
 
 Usage:
-    python agent.py "Your task here"
-    python agent.py  # Uses default task from AGENT_TASK env var
+    python run_agent.py "Your task here"
+    python run_agent.py  # Uses default task from AGENT_TASK env var
 """
 
 import os
