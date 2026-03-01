@@ -1,250 +1,219 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "permission": "allow",
-  "mcpServers": {
-
+  "mcp": {
     "filesystem": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-filesystem", "."]
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-filesystem", "."],
+      "enabled": true
     },
-
     "git": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-git", "--repository", "."]
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-git", "--repository", "."],
+      "enabled": true
     },
-
     "memory": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-memory"]
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-memory"],
+      "enabled": true
     },
-
     "sequential-thinking": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "enabled": true
     },
-
     "fetch": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-fetch"]
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-fetch"],
+      "enabled": true
     },
-
     "time": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-time"]
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-time"],
+      "enabled": true
     },
-
     "sqlite": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sqlite", "--db-path", "./data.db"]
+      "type": "local",
+      "command": ["npx", "-y", "@modelcontextprotocol/server-sqlite", "--db-path", "./data.db"],
+      "enabled": true
     },
-
     "context7": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@upstash/context7-mcp"],
-      "env": {
+      "type": "local",
+      "command": ["npx", "-y", "@upstash/context7-mcp"],
+      "enabled": true,
+      "environment": {
         "CONTEXT7_API_KEY": "ctx7sk-4b22e736-9f97-457b-a4ba-e2761a25b510"
       }
     },
-
     "brave-search": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@brave/brave-search-mcp"],
-      "env": {
+      "type": "local",
+      "command": ["npx", "-y", "@brave/brave-search-mcp"],
+      "enabled": true,
+      "environment": {
         "BRAVE_API_KEY": "BSAQ0gsYuaYuEZHayb_Ek1pnl1l2RiW"
       }
     },
-
     "exa": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "exa-mcp-server"],
-      "env": {
+      "type": "local",
+      "command": ["npx", "-y", "exa-mcp-server"],
+      "enabled": true,
+      "environment": {
         "EXA_API_KEY": "6cdf50f2-7ff7-4461-bb07-1a987509305d"
       }
     },
-
     "tavily": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@tavily/mcp"],
-      "env": {
+      "type": "local",
+      "command": ["npx", "-y", "@tavily/mcp"],
+      "enabled": true,
+      "environment": {
         "TAVILY_API_KEY": "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"
       }
     },
-
     "playwright": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@playwright/mcp"]
+      "type": "local",
+      "command": ["npx", "-y", "@playwright/mcp"],
+      "enabled": true
     },
-
     "puppeteer": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@anthropic/server-puppeteer"]
+      "type": "local",
+      "command": ["npx", "-y", "@anthropic/server-puppeteer"],
+      "enabled": true
     },
-
     "docker": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "mcp-server-docker"]
+      "type": "local",
+      "command": ["npx", "-y", "mcp-server-docker"],
+      "enabled": true
     },
-
     "mermaid": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@narasimhaponnada/mermaid-mcp-server"]
+      "type": "local",
+      "command": ["npx", "-y", "@narasimhaponnada/mermaid-mcp-server"],
+      "enabled": true
     },
-
     "yt-dlp": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "mcp-server-yt-dlp"]
+      "type": "local",
+      "command": ["npx", "-y", "mcp-server-yt-dlp"],
+      "enabled": true
     },
-
     "python-analysis": {
-      "type": "stdio",
-      "command": "python",
-      "args": ["-m", "mcp_server_python_analysis"],
-      "env": {
+      "type": "local",
+      "command": ["python", "-m", "mcp_server_python_analysis"],
+      "enabled": true,
+      "environment": {
         "PROJECT_PATH": "."
       }
     },
-
     "github": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@github/mcp-server"],
-      "env": {
+      "type": "local",
+      "command": ["npx", "-y", "@github/mcp-server"],
+      "enabled": true,
+      "environment": {
         "GITHUB_TOKEN": "${GITHUB_TOKEN}"
       }
     },
-
     "upstash": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@upstash/mcp-server"],
-      "env": {
+      "type": "local",
+      "command": ["npx", "-y", "@upstash/mcp-server"],
+      "enabled": true,
+      "environment": {
         "UPSTASH_REDIS_REST_URL": "https://07d04f4a-70c3-4dd4-a468-e8faac67bf3e.upstash.io",
         "UPSTASH_REDIS_REST_TOKEN": "AdoCAAIncDJiMjdiYjVhZTJjMTQ0Mjk2OGQyYjI0ZGU4NjlmZWM4YnAyNTU4MTA"
       }
     },
-
     "qdrant": {
-      "type": "stdio",
-      "command": "uvx",
-      "args": ["mcp-server-qdrant"],
-      "env": {
+      "type": "local",
+      "command": ["uvx", "mcp-server-qdrant"],
+      "enabled": true,
+      "environment": {
         "QDRANT_URL": "https://b7cf7be5-1417-49ae-abe2-1fe712ba393b.europe-west3-0.gcp.cloud.qdrant.io",
         "QDRANT_API_KEY": "${QDRANT_API_KEY}",
         "COLLECTION_NAME": "antigravity-agent-memory",
         "EMBEDDING_PROVIDER": "fastembed"
       }
     },
-
     "daytona": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@daytona/mcp"],
-      "env": {
+      "type": "local",
+      "command": ["npx", "-y", "@daytona/mcp"],
+      "enabled": true,
+      "environment": {
         "DAYTONA_API_KEY": "dtn_68b7b34b0ba64c6c06aa397f984a159f7be718f79782ffe914251dfd07043a10",
         "DAYTONA_SERVER_URL": "https://app.daytona.io/api"
       }
     },
-
     "n8n": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@n8n/mcp-server"],
-      "env": {
+      "type": "local",
+      "command": ["npx", "-y", "@n8n/mcp-server"],
+      "enabled": true,
+      "environment": {
         "N8N_API_KEY": "${N8N_API_KEY}",
         "N8N_BASE_URL": "${N8N_BASE_URL}"
       }
     },
-
     "postgres": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "mcp-server-postgres"],
-      "env": {
+      "type": "local",
+      "command": ["npx", "-y", "mcp-server-postgres"],
+      "enabled": true,
+      "environment": {
         "POSTGRES_CONNECTION_STRING": "${POSTGRES_CONNECTION_STRING}"
       }
     },
-
     "firecrawl": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "firecrawl-mcp"],
-      "env": {
+      "type": "local",
+      "command": ["npx", "-y", "firecrawl-mcp"],
+      "enabled": true,
+      "environment": {
         "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
       }
     },
-
     "agentops": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "agentops-mcp"],
-      "env": {
+      "type": "local",
+      "command": ["npx", "-y", "agentops-mcp"],
+      "enabled": true,
+      "environment": {
         "AGENTOPS_API_KEY": "${AGENTOPS_API_KEY}"
       }
     },
-
     "chroma": {
-      "type": "stdio",
-      "command": "uvx",
-      "args": ["chroma-mcp", "--mode", "embedded", "--data-dir", "./.chroma"]
+      "type": "local",
+      "command": ["uvx", "chroma-mcp", "--mode", "embedded", "--data-dir", "./.chroma"],
+      "enabled": true
     },
-
     "taskmaster-ai": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "--package=task-master-ai", "task-master-ai"],
-      "env": {
+      "type": "local",
+      "command": ["npx", "-y", "--package=task-master-ai", "task-master-ai"],
+      "enabled": true,
+      "environment": {
         "GEMINI_API_KEY": "AIzaSyAEZ6ttFSsd3W8Xv5As3AHIwWCeaFQ90qk"
       }
     },
-
     "neon": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@neondatabase/mcp-server-neon"],
-      "env": {
+      "type": "local",
+      "command": ["npx", "-y", "@neondatabase/mcp-server-neon"],
+      "enabled": true,
+      "environment": {
         "NEON_API_KEY": "${NEON_API_KEY}"
       }
     },
-
     "openrouter": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "openrouter-mcp"],
-      "env": {
+      "type": "local",
+      "command": ["npx", "-y", "openrouter-mcp"],
+      "enabled": true,
+      "environment": {
         "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}"
       }
     },
-
     "linear": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "linear-mcp-server"],
-      "env": {
+      "type": "local",
+      "command": ["npx", "-y", "linear-mcp-server"],
+      "enabled": true,
+      "environment": {
         "LINEAR_API_KEY": "${LINEAR_API_KEY}"
       }
     },
-
     "notion": {
-      "type": "stdio",
-      "command": "npx",
-      "args": ["-y", "@notionhq/notion-mcp-server"],
-      "env": {
+      "type": "local",
+      "command": ["npx", "-y", "@notionhq/notion-mcp-server"],
+      "enabled": true,
+      "environment": {
         "NOTION_API_KEY": "${NOTION_API_KEY}"
       }
     }
