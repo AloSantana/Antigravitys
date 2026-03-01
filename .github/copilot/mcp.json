@@ -1,6 +1,6 @@
 {
   "$schema": "https://modelcontextprotocol.io/schema/mcp.json",
-  "description": "Enhanced MCP server configuration for GitHub Copilot - Antigravity Workspace Template. Includes expanded server collection for filesystem, git, github, database, AI analysis, web automation, and search capabilities.",
+  "description": "Enhanced MCP server configuration for GitHub Copilot - Antigravity Workspace Template. Includes 20+ servers for agents, multi-agents, coding, search, browser automation, and AI model bridges. See docs/MCP_SERVERS_CATALOG.md for the full catalog of 100+ servers.",
   "mcpServers": {
     "filesystem": {
       "type": "stdio",
@@ -76,8 +76,8 @@
     "playwright": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@anthropic/server-playwright"],
-      "tools": ["browser_navigate", "browser_screenshot", "browser_click", "browser_fill", "browser_select", "browser_hover", "browser_evaluate", "browser_close"]
+      "args": ["-y", "@playwright/mcp"],
+      "tools": ["browser_navigate", "browser_screenshot", "browser_click", "browser_fill", "browser_select_option", "browser_hover", "browser_evaluate", "browser_close", "browser_snapshot", "browser_type", "browser_wait_for"]
     },
     "yt-dlp": {
       "type": "stdio",
@@ -88,7 +88,7 @@
     "brave-search": {
       "type": "stdio",
       "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-brave-search"],
+      "args": ["-y", "@brave/brave-search-mcp"],
       "env": {
         "BRAVE_API_KEY": "${BRAVE_API_KEY}"
       },
@@ -102,6 +102,48 @@
         "POSTGRES_CONNECTION_STRING": "${POSTGRES_CONNECTION_STRING}"
       },
       "tools": ["query", "execute", "list_tables", "describe_table"]
+    },
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"],
+      "env": {
+        "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
+      },
+      "tools": ["resolve-library-id", "get-library-docs"]
+    },
+    "exa": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "exa-mcp-server"],
+      "env": {
+        "EXA_API_KEY": "${EXA_API_KEY}"
+      },
+      "tools": ["search", "find_similar", "get_contents", "search_and_contents"]
+    },
+    "mermaid": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@narasimhaponnada/mermaid-mcp-server"],
+      "tools": ["generate_diagram", "validate_mermaid", "list_diagram_types"]
+    },
+    "firecrawl": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "firecrawl-mcp"],
+      "env": {
+        "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
+      },
+      "tools": ["scrape", "crawl", "search", "map", "extract"]
+    },
+    "agentops": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "agentops-mcp"],
+      "env": {
+        "AGENTOPS_API_KEY": "${AGENTOPS_API_KEY}"
+      },
+      "tools": ["start_session", "end_session", "log_event", "log_error", "get_analytics"]
     }
   }
 }
