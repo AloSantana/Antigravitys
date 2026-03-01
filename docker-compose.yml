@@ -47,10 +47,9 @@ services:
       - ./drop_zone:/app/drop_zone
       - ./artifacts:/app/artifacts
       - ./logs:/app/logs
-      - ./data.db:/app/data.db
-    depends_on:
-      - chromadb
-      - redis
+      - app-data:/app/data  # Persist conversations.db and other app data
+    # NOTE: chromadb and redis are optional (in profiles).
+    # Start them with: docker compose --profile with-chromadb --profile with-redis up
     networks:
       - antigravity-network
     restart: unless-stopped
@@ -66,7 +65,6 @@ services:
     container_name: antigravity-frontend
     ports:
       - "${FRONTEND_PORT:-3000}:80"
-      - "80:80"
     volumes:
       - ./frontend:/usr/share/nginx/html:ro
       - ./nginx/nginx.conf:/etc/nginx/conf.d/default.conf:ro
@@ -79,6 +77,9 @@ services:
       - BACKEND_HOST=backend
       - BACKEND_PORT=${BACKEND_PORT:-8000}
 
+  # NOTE: Backend currently uses chromadb.Client() (in-memory mode).
+  # To use this persistent ChromaDB server, update backend/rag/store.py
+  # to connect to http://chromadb:8000 instead of using in-memory client.
   chromadb:
     image: chromadb/chroma:latest
     container_name: antigravity-chromadb
@@ -92,7 +93,11 @@ services:
     networks:
       - antigravity-network
     restart: unless-stopped
+    profiles:
+      - with-chromadb
 
+  # NOTE: No Redis client is used in the backend currently.
+  # Enable this profile when Redis caching is implemented.
   redis:
     image: redis:7-alpine
     container_name: antigravity-redis
@@ -109,7 +114,8 @@ services:
       interval: 10s
       timeout: 3s
       retries: 3
-
+    profiles:
+      - with-redis
   # Optional: Ollama for local AI models
   ollama:
     image: ollama/ollama:latest
@@ -125,6 +131,7 @@ services:
       - with-ollama
 
 volumes:
+  app-data:      # Persistent app data (conversations.db, etc.)
   chroma-data:
   redis-data:
   ollama-data:

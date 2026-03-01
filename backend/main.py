@@ -93,7 +93,10 @@ async def lifespan(app: FastAPI):
     # Initialize basic managers first
     try:
         settings_manager = SettingsManager()
-        conversation_manager = ConversationManager(db_path=os.path.join(project_root, "conversations.db"))
+        # Ensure data directory exists for SQLite databases
+        data_dir = os.path.join(project_root, "data")
+        os.makedirs(data_dir, exist_ok=True)
+        conversation_manager = ConversationManager(db_path=os.path.join(data_dir, "conversations.db"))
         artifact_manager = ArtifactManager(artifacts_dir=os.path.join(project_root, "artifacts"))
         agent_manager_instance = AgentManager(agents_dir=os.path.join(project_root, ".github", "agents"))
         logger.info("Basic managers initialized")

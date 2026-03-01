@@ -1,955 +1,1493 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-################################################################################
-# Antigravity Workspace - Automated Installation Script
-# Optimized for Ubuntu VPS deployment
-# Supports: Ubuntu 20.04+, Debian 11+
-################################################################################
+#############################################################################
+# OpenAgents Control Installer
+# Interactive installer for OpenCode agents, commands, tools, and plugins
+#
+# Compatible with:
+# - macOS (bash 3.2+)
+# - Linux (bash 3.2+)
+# - Windows (Git Bash, WSL)
+#############################################################################
 
-set -euo pipefail  # Exit on error, undefined variables, and pipe failures
+set -e
 
-# Colors for output
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-BLUE='\033[0;34m'
-CYAN='\033[0;36m'
-NC='\033[0m' # No Color
+# Detect platform
+PLATFORM="$(uname -s)"
+case "$PLATFORM" in
+    Linux*)     PLATFORM="Linux";;
+    Darwin*)    PLATFORM="macOS";;
+    CYGWIN*|MINGW*|MSYS*) PLATFORM="Windows";;
+    *)          PLATFORM="Unknown";;
+esac
 
-# Script configuration
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-LOG_FILE="${SCRIPT_DIR}/install.log"
-NODE_VERSION="20"
-PYTHON_VERSION="3.11"
+# Colors for output (disable on Windows if not supported)
+if [ "$PLATFORM" = "Windows" ] && [ -z "$WT_SESSION" ] && [ -z "$ConEmuPID" ]; then
+    # Basic Windows terminal without color support
+    RED=''
+    GREEN=''
+    YELLOW=''
+    BLUE=''
+    MAGENTA=''
+    CYAN=''
+    BOLD=''
+    NC=''
+else
+    RED='\033[0;31m'
+    GREEN='\033[0;32m'
+    YELLOW='\033[1;33m'
+    BLUE='\033[0;34m'
+    MAGENTA='\033[0;35m'
+    CYAN='\033[0;36m'
+    BOLD='\033[1m'
+    NC='\033[0m' # No Color
+fi
 
-# Cleanup tracking
-VENV_CREATED=false
-CONFIG_BACKED_UP=false
-BACKUP_DIR=""
+# Configuration
+REPO_URL="https://github.com/darrenhinde/OpenAgentsControl"
+BRANCH="${OPENCODE_BRANCH:-main}"  # Allow override via environment variable
+RAW_URL="https://raw.githubusercontent.com/darrenhinde/OpenAgentsControl/${BRANCH}"
 
-# Rollback and cleanup function
-cleanup_on_error() {
-    local exit_code=$?
-    local timestamp
-    timestamp="$(date '+%Y-%m-%d %H:%M:%S')"
-    
-    echo ""
-    print_error "Installation failed at ${timestamp} (exit code: ${exit_code})"
-    print_status "Performing cleanup..."
-    
-    # Remove partial venv if created
-    if [ "$VENV_CREATED" = true ] && [ -d "${SCRIPT_DIR}/venv" ]; then
-        print_status "Removing partial virtual environment..."
-        rm -rf "${SCRIPT_DIR}/venv"
-        print_success "Virtual environment cleaned up"
-    fi
-    
-    # Restore backed up configs
-    if [ "$CONFIG_BACKED_UP" = true ] && [ -n "$BACKUP_DIR" ] && [ -d "$BACKUP_DIR" ]; then
-        print_status "Restoring backed up configurations..."
-        if [ -f "${BACKUP_DIR}/.env" ]; then
-            cp "${BACKUP_DIR}/.env" "${SCRIPT_DIR}/.env"
-            print_success "Restored .env file"
-        fi
-    fi
-    
-    # Log failure point
-    echo "[${timestamp}] Installation failed at line ${BASH_LINENO[0]} with exit code $exit_code" >> "${LOG_FILE}"
-    
-    print_error "Installation incomplete. Check logs at: ${LOG_FILE}"
-    print_info "You can try running the installer again or fix issues manually."
-    
-    exit "$exit_code"
+# Registry URL - supports local fallback for development
+# Priority: 1) REGISTRY_URL env var, 2) Local registry.json, 3) Remote GitHub
+if [ -n "$REGISTRY_URL" ]; then
+    # Use explicitly set REGISTRY_URL (for testing)
+    :
+elif [ -f "./registry.json" ]; then
+    # Use local registry.json if it exists (for development)
+    REGISTRY_URL="file://$(pwd)/registry.json"
+else
+    # Default to remote GitHub registry
+    REGISTRY_URL="${RAW_URL}/registry.json"
+fi
+
+INSTALL_DIR="${OPENCODE_INSTALL_DIR:-.opencode}"  # Allow override via environment variable
+TEMP_DIR="/tmp/opencode-installer-$$"
+
+# Cleanup temp directory on exit (success or failure)
+trap 'rm -rf "$TEMP_DIR" 2>/dev/null || true' EXIT INT TERM
+
+# Global variables
+SELECTED_COMPONENTS=()
+INSTALL_MODE=""
+PROFILE=""
+NON_INTERACTIVE=false
+CUSTOM_INSTALL_DIR=""  # Set via --install-dir argument
+
+#############################################################################
+# Utility Functions
+#############################################################################
+
+jq_exec() {
+    local output
+    output=$(jq -r "$@")
+    local ret=$?
+    printf "%s\n" "$output" | tr -d '\r'
+    return $ret
 }
 
-# Register cleanup function
-trap cleanup_on_error ERR
-
-# Function to print colored output with timestamps
-print_status() {
-    local timestamp
-    timestamp="$(date '+%Y-%m-%d %H:%M:%S')"
-    echo -e "${BLUE}[${timestamp}] [INFO]${NC} $1"
+print_header() {
+    echo -e "${CYAN}${BOLD}"
+    echo "╔════════════════════════════════════════════════════════════════╗"
+    echo "║                                                                ║"
+    echo "║           OpenAgents Control Installer v1.0.0                 ║"
+    echo "║                                                                ║"
+    echo "╚════════════════════════════════════════════════════════════════╝"
+    echo -e "${NC}"
 }
 
 print_success() {
-    local timestamp
-    timestamp="$(date '+%Y-%m-%d %H:%M:%S')"
-    echo -e "${GREEN}[${timestamp}] [SUCCESS]${NC} $1"
+    echo -e "${GREEN}✓${NC} $1"
 }
 
 print_error() {
-    local timestamp
-    timestamp="$(date '+%Y-%m-%d %H:%M:%S')"
-    echo -e "${RED}[${timestamp}] [ERROR]${NC} $1"
-}
-
-print_warning() {
-    local timestamp
-    timestamp="$(date '+%Y-%m-%d %H:%M:%S')"
-    echo -e "${YELLOW}[${timestamp}] [WARNING]${NC} $1"
+    echo -e "${RED}✗${NC} $1"
 }
 
 print_info() {
-    local timestamp
-    timestamp="$(date '+%Y-%m-%d %H:%M:%S')"
-    echo -e "${CYAN}[${timestamp}] [INFO]${NC} $1"
+    echo -e "${BLUE}ℹ${NC} $1"
 }
 
-# Function to check if command exists
-command_exists() {
-    command -v "$1" >/dev/null 2>&1
+print_warning() {
+    echo -e "${YELLOW}⚠${NC} $1"
 }
 
-# Function to prompt yes/no question
-prompt_yes_no() {
-    local prompt="$1"
-    local default="${2:-n}"
-    local result
-    
-    if [ "$default" = "y" ]; then
-        read -r -p "$(echo -e "${GREEN}?${NC}") $prompt [Y/n]: " result
-        result="${result:-y}"
-    else
-        read -r -p "$(echo -e "${GREEN}?${NC}") $prompt [y/N]: " result
-        result="${result:-n}"
-    fi
-    
-    [[ "$result" =~ ^[Yy]$ ]]
+print_step() {
+    echo -e "\n${MAGENTA}${BOLD}▶${NC} $1\n"
 }
 
-# Function to detect OS
-detect_os() {
-    if [ -f /etc/os-release ]; then
-        # shellcheck source=/dev/null
-        . /etc/os-release
-        OS=$ID
-        VER=$VERSION_ID
-    else
-        print_error "Cannot detect OS. This script requires Ubuntu 20.04+ or Debian 11+"
-        exit 1
-    fi
-    
-    print_status "Detected OS: $OS $VER"
-}
+#############################################################################
+# Path Handling (Cross-Platform)
+#############################################################################
 
-# Function to check system requirements
-check_requirements() {
-    print_status "Checking system requirements..."
+normalize_and_validate_path() {
+    local input_path="$1"
+    local normalized_path
     
-    # Check sudo access BEFORE any sudo command is executed
-    if ! sudo -n true 2>/dev/null; then
-        print_error "This script requires sudo privileges. Please run with sudo or ensure your user is in sudoers."
-        print_info "You can configure passwordless sudo or run: sudo ./install.sh"
-        exit 1
-    fi
-    print_success "Sudo access verified"
-    
-    # Check RAM
-    TOTAL_RAM=$(free -m | awk '/^Mem:/{print $2}')
-    if [ "$TOTAL_RAM" -lt 2048 ]; then
-        print_warning "Recommended RAM: 2GB+. Current: ${TOTAL_RAM}MB"
-    fi
-    
-    # Check disk space
-    AVAILABLE_SPACE=$(df -BG "$SCRIPT_DIR" | awk 'NR==2 {print $4}' | sed 's/G//')
-    if [ "$AVAILABLE_SPACE" -lt 5 ]; then
-        print_warning "Recommended disk space: 5GB+. Available: ${AVAILABLE_SPACE}GB"
-    fi
-    
-    print_success "System requirements check completed"
-}
-
-# Function to install system dependencies
-install_system_dependencies() {
-    print_status "Installing system dependencies..."
-    
-    sudo apt-get update -qq
-    sudo apt-get install -y \
-        curl \
-        wget \
-        git \
-        build-essential \
-        software-properties-common \
-        ca-certificates \
-        gnupg \
-        lsb-release \
-        python3-pip \
-        python3-venv \
-        python3-dev \
-        nginx \
-        supervisor \
-        jq \
-        unzip
-    
-    print_success "System dependencies installed"
-}
-
-# Function to install Node.js
-install_nodejs() {
-    if command_exists node; then
-        CURRENT_NODE_VERSION=$(node -v | cut -d'v' -f2 | cut -d'.' -f1)
-        if [ "$CURRENT_NODE_VERSION" -ge "$NODE_VERSION" ]; then
-            print_success "Node.js $(node -v) already installed"
-            return
-        fi
-    fi
-    
-    print_status "Installing Node.js ${NODE_VERSION}..."
-    
-    # Method 1: Try NodeSource repository
-    if ! install_nodejs_nodesource; then
-        print_warning "NodeSource installation failed, trying nvm..."
-        
-        # Method 2: Try nvm as fallback
-        if ! install_nodejs_nvm; then
-            print_error "All Node.js installation methods failed"
-            print_info "You can manually install Node.js ${NODE_VERSION}+ from https://nodejs.org/"
-            return 1
-        fi
-    fi
-    
-    # Verify installation
-    if command_exists node; then
-        print_success "Node.js $(node -v) installed successfully"
-    else
-        print_error "Node.js installation verification failed"
+    # Handle empty path
+    if [ -z "$input_path" ]; then
+        echo ""
         return 1
     fi
-}
-
-# Function to install Node.js via NodeSource
-install_nodejs_nodesource() {
-    print_status "Attempting NodeSource installation..."
     
-    # Clean up any existing NodeSource configuration
-    sudo rm -f /etc/apt/sources.list.d/nodesource.list 2>/dev/null || true
-    
-    # Try to download and run setup script
-    if curl -fsSL https://deb.nodesource.com/setup_${NODE_VERSION}.x -o /tmp/nodesource_setup.sh 2>/dev/null; then
-        if sudo -E bash /tmp/nodesource_setup.sh 2>&1 | tee -a "$LOG_FILE"; then
-            if sudo apt-get install -y nodejs 2>&1 | tee -a "$LOG_FILE"; then
-                rm -f /tmp/nodesource_setup.sh
-                return 0
-            fi
-        fi
-    fi
-    
-    rm -f /tmp/nodesource_setup.sh
-    return 1
-}
-
-# Function to install Node.js via nvm
-install_nodejs_nvm() {
-    print_status "Installing Node.js via nvm..."
-    
-    # Download and install nvm
-    export NVM_DIR="$HOME/.nvm"
-    
-    if [ ! -d "$NVM_DIR" ]; then
-        if curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash 2>&1 | tee -a "$LOG_FILE"; then
-            print_success "nvm installed"
-        else
-            return 1
-        fi
-    fi
-    
-    # Load nvm
-    # shellcheck source=/dev/null
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-    # shellcheck source=/dev/null
-    [ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"
-    
-    # Install Node.js
-    if nvm install ${NODE_VERSION} 2>&1 | tee -a "$LOG_FILE"; then
-        nvm use ${NODE_VERSION}
-        nvm alias default ${NODE_VERSION}
-        
-        # Add nvm to shell profile for future sessions
-        if ! grep -q 'NVM_DIR' ~/.bashrc 2>/dev/null; then
-            {
-                echo 'export NVM_DIR="$HOME/.nvm"'
-                echo '[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"'
-            } >> ~/.bashrc
-        fi
-        
-        return 0
-    fi
-    
-    return 1
-}
-
-# Function to install Python
-install_python() {
-    if command_exists python3; then
-        print_success "Python $(python3 --version) already installed"
+    # Expand tilde to $HOME (works on Linux, macOS, Windows Git Bash)
+    if [[ $input_path == ~* ]]; then
+        normalized_path="${HOME}${input_path:1}"
     else
-        print_status "Installing Python..."
-        sudo apt-get install -y python3 python3-pip python3-venv
-        print_success "Python installed"
+        normalized_path="$input_path"
+    fi
+    
+    # Convert backslashes to forward slashes (Windows compatibility)
+    normalized_path="${normalized_path//\\//}"
+    
+    # Remove trailing slashes
+    normalized_path="${normalized_path%/}"
+    
+    # If path is relative, make it absolute based on current directory
+    if [[ ! "$normalized_path" = /* ]] && [[ ! "$normalized_path" =~ ^[A-Za-z]: ]]; then
+        normalized_path="$(pwd)/${normalized_path}"
+    fi
+    
+    echo "$normalized_path"
+    return 0
+}
+
+validate_install_path() {
+    local path="$1"
+    local parent_dir
+    
+    # Get parent directory
+    parent_dir="$(dirname "$path")"
+    
+    # Check if parent directory exists
+    if [ ! -d "$parent_dir" ]; then
+        print_error "Parent directory does not exist: $parent_dir"
+        return 1
+    fi
+    
+    # Check if parent directory is writable
+    if [ ! -w "$parent_dir" ]; then
+        print_error "No write permission for directory: $parent_dir"
+        return 1
+    fi
+    
+    # If target directory exists, check if it's writable
+    if [ -d "$path" ] && [ ! -w "$path" ]; then
+        print_error "No write permission for directory: $path"
+        return 1
+    fi
+    
+    return 0
+}
+
+get_global_install_path() {
+    # Return platform-appropriate global installation path
+    case "$PLATFORM" in
+        macOS)
+            # macOS: Use XDG standard (consistent with Linux)
+            echo "${HOME}/.config/opencode"
+            ;;
+        Linux)
+            echo "${HOME}/.config/opencode"
+            ;;
+        Windows)
+            # Windows Git Bash/WSL: Use same as Linux
+            echo "${HOME}/.config/opencode"
+            ;;
+        *)
+            echo "${HOME}/.config/opencode"
+            ;;
+    esac
+}
+
+#############################################################################
+# Dependency Checks
+#############################################################################
+
+check_bash_version() {
+    # Check bash version (need 3.2+)
+    local bash_version="${BASH_VERSION%%.*}"
+    if [ "$bash_version" -lt 3 ]; then
+        echo "Error: This script requires Bash 3.2 or higher"
+        echo "Current version: $BASH_VERSION"
+        echo ""
+        echo "Please upgrade bash or use a different shell:"
+        echo "  macOS:   brew install bash"
+        echo "  Linux:   Use your package manager to update bash"
+        echo "  Windows: Use Git Bash or WSL"
+        exit 1
     fi
 }
 
-# Function to install Docker
-install_docker() {
-    if command_exists docker; then
-        DOCKER_VERSION=$(docker --version | cut -d' ' -f3 | tr -d ',')
-        print_success "Docker ${DOCKER_VERSION} already installed"
-        
-        # Verify Docker is working
-        if docker ps >/dev/null 2>&1; then
-            print_success "Docker daemon is running"
+check_dependencies() {
+    print_step "Checking dependencies..."
+    
+    local missing_deps=()
+    
+    if ! command -v curl &> /dev/null; then
+        missing_deps+=("curl")
+    fi
+    
+    if ! command -v jq &> /dev/null; then
+        missing_deps+=("jq")
+    fi
+    
+    if [ ${#missing_deps[@]} -ne 0 ]; then
+        print_error "Missing required dependencies: ${missing_deps[*]}"
+        echo ""
+        echo "Please install them:"
+        case "$PLATFORM" in
+            macOS)
+                echo "  brew install ${missing_deps[*]}"
+                ;;
+            Linux)
+                echo "  Ubuntu/Debian: sudo apt-get install ${missing_deps[*]}"
+                echo "  Fedora/RHEL:   sudo dnf install ${missing_deps[*]}"
+                echo "  Arch:          sudo pacman -S ${missing_deps[*]}"
+                ;;
+            Windows)
+                echo "  Git Bash: Install via https://git-scm.com/"
+                echo "  WSL:      sudo apt-get install ${missing_deps[*]}"
+                echo "  Scoop:    scoop install ${missing_deps[*]}"
+                ;;
+            *)
+                echo "  Use your package manager to install: ${missing_deps[*]}"
+                ;;
+        esac
+        exit 1
+    fi
+    
+    print_success "All dependencies found"
+}
+
+#############################################################################
+# Registry Functions
+#############################################################################
+
+fetch_registry() {
+    print_step "Fetching component registry..."
+    
+    mkdir -p "$TEMP_DIR"
+    
+    # Handle local file:// URLs
+    if [[ "$REGISTRY_URL" == file://* ]]; then
+        local local_path="${REGISTRY_URL#file://}"
+        if [ -f "$local_path" ]; then
+            cp "$local_path" "$TEMP_DIR/registry.json"
+            print_success "Using local registry: $local_path"
         else
-            print_warning "Docker installed but daemon not accessible"
-            print_info "You may need to start Docker or add your user to docker group"
+            print_error "Local registry not found: $local_path"
+            exit 1
         fi
+    else
+        # Fetch from remote URL
+        if ! curl -fsSL "$REGISTRY_URL" -o "$TEMP_DIR/registry.json"; then
+            print_error "Failed to fetch registry from $REGISTRY_URL"
+            exit 1
+        fi
+        print_success "Registry fetched successfully"
+    fi
+}
+
+get_profile_components() {
+    local profile=$1
+    jq_exec ".profiles.${profile}.components[]?" "$TEMP_DIR/registry.json"
+}
+
+get_component_info() {
+    local component_id=$1
+    local component_type=$2
+    
+    if [ "$component_type" = "context" ] && [[ "$component_id" == */* ]]; then
+        jq_exec "first(.components.contexts[]? | select(.path == \".opencode/context/${component_id}.md\"))" "$TEMP_DIR/registry.json"
+        return
+    fi
+
+    jq_exec ".components.${component_type}[]? | select(.id == \"${component_id}\" or (.aliases // [] | index(\"${component_id}\")))" "$TEMP_DIR/registry.json"
+}
+
+resolve_component_path() {
+    local component_type=$1
+    local component_id=$2
+    local registry_key
+    registry_key=$(get_registry_key "$component_type")
+
+    if [ "$component_type" = "context" ] && [[ "$component_id" == */* ]]; then
+        jq_exec "first(.components.contexts[]? | select(.path == \".opencode/context/${component_id}.md\") | .path)" "$TEMP_DIR/registry.json"
+        return
+    fi
+
+    jq_exec ".components.${registry_key}[]? | select(.id == \"${component_id}\" or (.aliases // [] | index(\"${component_id}\"))) | .path" "$TEMP_DIR/registry.json"
+}
+
+# Helper function to get the correct registry key for a component type
+get_registry_key() {
+    local type=$1
+    # Most types are pluralized, but 'config' stays singular
+    case "$type" in
+        config) echo "config" ;;
+        *) echo "${type}s" ;;
+    esac
+}
+
+# Helper function to convert registry path to installation path
+# Registry paths are like ".opencode/agent/foo.md"
+# We need to replace ".opencode" with the actual INSTALL_DIR
+get_install_path() {
+    local registry_path=$1
+    # Strip leading .opencode/ if present
+    local relative_path="${registry_path#.opencode/}"
+    # Return INSTALL_DIR + relative path
+    echo "${INSTALL_DIR}/${relative_path}"
+}
+
+expand_context_wildcard() {
+    local pattern=$1
+    local prefix="${pattern%%\**}"
+
+    prefix="${prefix%/}"
+    if [ -n "$prefix" ]; then
+        prefix="${prefix}/"
+    fi
+
+    jq_exec ".components.contexts[]? | select(.path | startswith(\".opencode/context/${prefix}\")) | .path | sub(\"^\\\\.opencode/context/\"; \"\") | sub(\"\\\\.md$\"; \"\")" "$TEMP_DIR/registry.json"
+}
+
+expand_selected_components() {
+    local expanded=()
+
+    for comp in "${SELECTED_COMPONENTS[@]}"; do
+        local type="${comp%%:*}"
+        local id="${comp##*:}"
+
+        if [[ "$id" == *"*"* ]]; then
+            if [ "$type" != "context" ]; then
+                print_warning "Wildcard only supported for context components: ${comp}"
+                continue
+            fi
+
+            local matches
+            matches=$(expand_context_wildcard "$id")
+
+            if [ -z "$matches" ]; then
+                print_warning "No contexts matched: ${comp}"
+                continue
+            fi
+
+            while IFS= read -r match; do
+                [ -n "$match" ] && expanded+=("context:${match}")
+            done <<< "$matches"
+            continue
+        fi
+
+        expanded+=("$comp")
+    done
+
+    local deduped=()
+    for comp in "${expanded[@]}"; do
+        local found=0
+        for existing in "${deduped[@]}"; do
+            if [ "$existing" = "$comp" ]; then
+                found=1
+                break
+            fi
+        done
+        if [ "$found" -eq 0 ]; then
+            deduped+=("$comp")
+        fi
+    done
+
+    SELECTED_COMPONENTS=("${deduped[@]}")
+}
+
+resolve_dependencies() {
+    local component=$1
+    local type="${component%%:*}"
+    local id="${component##*:}"
+    
+    # Get the correct registry key (handles singular/plural)
+    local registry_key
+    registry_key=$(get_registry_key "$type")
+    
+    # Get dependencies for this component
+    local deps
+    deps=$(jq_exec ".components.${registry_key}[] | select(.id == \"${id}\" or (.aliases // [] | index(\"${id}\"))) | .dependencies[]?" "$TEMP_DIR/registry.json" 2>/dev/null || echo "")
+    
+    if [ -n "$deps" ]; then
+        for dep in $deps; do
+            if [[ "$dep" == *"*"* ]]; then
+                local dep_type="${dep%%:*}"
+                local dep_id="${dep##*:}"
+
+                if [ "$dep_type" = "context" ]; then
+                    local matched
+                    matched=$(expand_context_wildcard "$dep_id")
+
+                    if [ -z "$matched" ]; then
+                        print_warning "No contexts matched dependency: ${dep}"
+                        continue
+                    fi
+
+                    while IFS= read -r match; do
+                        local expanded_dep="context:${match}"
+                        local found=0
+                        for existing in "${SELECTED_COMPONENTS[@]}"; do
+                            if [ "$existing" = "$expanded_dep" ]; then
+                                found=1
+                                break
+                            fi
+                        done
+                        if [ "$found" -eq 0 ]; then
+                            SELECTED_COMPONENTS+=("$expanded_dep")
+                            resolve_dependencies "$expanded_dep"
+                        fi
+                    done <<< "$matched"
+                    continue
+                fi
+            fi
+
+            # Add dependency if not already in list
+            local found=0
+            for existing in "${SELECTED_COMPONENTS[@]}"; do
+                if [ "$existing" = "$dep" ]; then
+                    found=1
+                    break
+                fi
+            done
+            if [ "$found" -eq 0 ]; then
+                SELECTED_COMPONENTS+=("$dep")
+                # Recursively resolve dependencies
+                resolve_dependencies "$dep"
+            fi
+        done
+    fi
+}
+
+#############################################################################
+# Installation Mode Selection
+#############################################################################
+
+check_interactive_mode() {
+    # Check if stdin is a terminal (not piped from curl)
+    if [ ! -t 0 ]; then
+        print_header
+        print_error "Interactive mode requires a terminal"
+        echo ""
+        echo "You're running this script in a pipe (e.g., curl | bash)"
+        echo "For interactive mode, download the script first:"
+        echo ""
+        echo -e "${CYAN}# Download the script${NC}"
+        echo "curl -fsSL https://raw.githubusercontent.com/darrenhinde/OpenAgentsControl/main/install.sh -o install.sh"
+        echo ""
+        echo -e "${CYAN}# Run interactively${NC}"
+        echo "bash install.sh"
+        echo ""
+        echo "Or use a profile directly:"
+        echo ""
+        echo -e "${CYAN}# Quick install with profile${NC}"
+        echo "curl -fsSL https://raw.githubusercontent.com/darrenhinde/OpenAgentsControl/main/install.sh | bash -s essential"
+        echo ""
+        echo "Available profiles: essential, developer, business, full, advanced"
+        echo ""
+        cleanup_and_exit 1
+    fi
+}
+
+show_install_location_menu() {
+    check_interactive_mode
+    
+    clear
+    print_header
+    
+    local global_path
+    global_path=$(get_global_install_path)
+    
+    echo -e "${BOLD}Choose installation location:${NC}\n"
+    echo -e "  ${GREEN}1) Local${NC} - Install to ${CYAN}.opencode/${NC} in current directory"
+    echo "     (Best for project-specific agents)"
+    echo ""
+    echo -e "  ${BLUE}2) Global${NC} - Install to ${CYAN}${global_path}${NC}"
+    echo "     (Best for user-wide agents available everywhere)"
+    echo ""
+    echo -e "  ${MAGENTA}3) Custom${NC} - Enter exact path"
+    echo "     Examples:"
+    case "$PLATFORM" in
+        Windows)
+            echo -e "       ${CYAN}C:/Users/username/my-agents${NC} or ${CYAN}~/my-agents${NC}"
+            ;;
+        *)
+            echo -e "       ${CYAN}/home/username/my-agents${NC} or ${CYAN}~/my-agents${NC}"
+            ;;
+    esac
+    echo ""
+    echo "  4) Back / Exit"
+    echo ""
+    read -r -p "Enter your choice [1-4]: " location_choice
+    
+    case $location_choice in
+        1)
+            INSTALL_DIR=".opencode"
+            print_success "Installing to local directory: .opencode/"
+            sleep 1
+            ;;
+        2)
+            INSTALL_DIR="$global_path"
+            print_success "Installing to global directory: $global_path"
+            sleep 1
+            ;;
+        3)
+            echo ""
+            read -r -p "Enter installation path: " custom_path
+            
+            if [ -z "$custom_path" ]; then
+                print_error "No path entered"
+                sleep 2
+                show_install_location_menu
+                return
+            fi
+            
+            local normalized_path
+            normalized_path=$(normalize_and_validate_path "$custom_path")
+            
+            if ! normalize_and_validate_path "$custom_path" > /dev/null; then
+                print_error "Invalid path"
+                sleep 2
+                show_install_location_menu
+                return
+            fi
+            
+            if ! validate_install_path "$normalized_path"; then
+                echo ""
+                read -r -p "Continue anyway? [y/N]: " continue_choice
+                if [[ ! $continue_choice =~ ^[Yy] ]]; then
+                    show_install_location_menu
+                    return
+                fi
+            fi
+            
+            INSTALL_DIR="$normalized_path"
+            print_success "Installing to custom directory: $INSTALL_DIR"
+            sleep 1
+            ;;
+        4)
+            cleanup_and_exit 0
+            ;;
+        *)
+            print_error "Invalid choice"
+            sleep 2
+            show_install_location_menu
+            return
+            ;;
+    esac
+}
+
+show_main_menu() {
+    check_interactive_mode
+    
+    clear
+    print_header
+    
+    echo -e "${BOLD}Choose installation mode:${NC}\n"
+    echo "  1) Quick Install (Choose a profile)"
+    echo "  2) Custom Install (Pick individual components)"
+    echo "  3) List Available Components"
+    echo "  4) Exit"
+    echo ""
+    read -r -p "Enter your choice [1-4]: " choice
+    
+    case $choice in
+        1) INSTALL_MODE="profile" ;;
+        2) INSTALL_MODE="custom" ;;
+        3) list_components; read -r -p "Press Enter to continue..."; show_main_menu ;;
+        4) cleanup_and_exit 0 ;;
+        *) print_error "Invalid choice"; sleep 2; show_main_menu ;;
+    esac
+}
+
+#############################################################################
+# Profile Installation
+#############################################################################
+
+show_profile_menu() {
+    clear
+    print_header
+    
+    echo -e "${BOLD}Available Installation Profiles:${NC}\n"
+    
+    # Essential profile
+    local essential_name
+    essential_name=$(jq_exec '.profiles.essential.name' "$TEMP_DIR/registry.json")
+    local essential_desc
+    essential_desc=$(jq_exec '.profiles.essential.description' "$TEMP_DIR/registry.json")
+    local essential_count
+    essential_count=$(jq_exec '.profiles.essential.components | length' "$TEMP_DIR/registry.json")
+    echo -e "  ${GREEN}1) ${essential_name}${NC}"
+    echo -e "     ${essential_desc}"
+    echo -e "     Components: ${essential_count}\n"
+    
+    # Developer profile
+    local dev_desc
+    dev_desc=$(jq_exec '.profiles.developer.description' "$TEMP_DIR/registry.json")
+    local dev_count
+    dev_count=$(jq_exec '.profiles.developer.components | length' "$TEMP_DIR/registry.json")
+    local dev_badge
+    dev_badge=$(jq_exec '.profiles.developer.badge // ""' "$TEMP_DIR/registry.json")
+    if [ -n "$dev_badge" ]; then
+        echo -e "  ${BLUE}2) Developer ${GREEN}[${dev_badge}]${NC}"
+    else
+        echo -e "  ${BLUE}2) Developer${NC}"
+    fi
+    echo -e "     ${dev_desc}"
+    echo -e "     Components: ${dev_count}\n"
+    
+    # Business profile
+    local business_name
+    business_name=$(jq_exec '.profiles.business.name' "$TEMP_DIR/registry.json")
+    local business_desc
+    business_desc=$(jq_exec '.profiles.business.description' "$TEMP_DIR/registry.json")
+    local business_count
+    business_count=$(jq_exec '.profiles.business.components | length' "$TEMP_DIR/registry.json")
+    echo -e "  ${CYAN}3) ${business_name}${NC}"
+    echo -e "     ${business_desc}"
+    echo -e "     Components: ${business_count}\n"
+    
+    # Full profile
+    local full_name
+    full_name=$(jq_exec '.profiles.full.name' "$TEMP_DIR/registry.json")
+    local full_desc
+    full_desc=$(jq_exec '.profiles.full.description' "$TEMP_DIR/registry.json")
+    local full_count
+    full_count=$(jq_exec '.profiles.full.components | length' "$TEMP_DIR/registry.json")
+    echo -e "  ${MAGENTA}4) ${full_name}${NC}"
+    echo -e "     ${full_desc}"
+    echo -e "     Components: ${full_count}\n"
+    
+    # Advanced profile
+    local adv_name
+    adv_name=$(jq_exec '.profiles.advanced.name' "$TEMP_DIR/registry.json")
+    local adv_desc
+    adv_desc=$(jq_exec '.profiles.advanced.description' "$TEMP_DIR/registry.json")
+    local adv_count
+    adv_count=$(jq_exec '.profiles.advanced.components | length' "$TEMP_DIR/registry.json")
+    echo -e "  ${YELLOW}5) ${adv_name}${NC}"
+    echo -e "     ${adv_desc}"
+    echo -e "     Components: ${adv_count}\n"
+    
+    echo "  6) Back to main menu"
+    echo ""
+    read -r -p "Enter your choice [1-6]: " choice
+    
+    case $choice in
+        1) PROFILE="essential" ;;
+        2) PROFILE="developer" ;;
+        3) PROFILE="business" ;;
+        4) PROFILE="full" ;;
+        5) PROFILE="advanced" ;;
+        6) show_main_menu; return ;;
+        *) print_error "Invalid choice"; sleep 2; show_profile_menu; return ;;
+    esac
+    
+    # Load profile components (compatible with bash 3.2+)
+    SELECTED_COMPONENTS=()
+    local temp_file="$TEMP_DIR/components.tmp"
+    get_profile_components "$PROFILE" > "$temp_file"
+    while IFS= read -r component; do
+        [ -n "$component" ] && SELECTED_COMPONENTS+=("$component")
+    done < "$temp_file"
+
+    expand_selected_components
+    
+    # Resolve dependencies for profile installs
+    print_step "Resolving dependencies..."
+    local original_count=${#SELECTED_COMPONENTS[@]}
+    for comp in "${SELECTED_COMPONENTS[@]}"; do
+        resolve_dependencies "$comp"
+    done
+    
+    local new_count=${#SELECTED_COMPONENTS[@]}
+    if [ "$new_count" -gt "$original_count" ]; then
+        local added=$((new_count - original_count))
+        print_info "Added $added dependencies"
+    fi
+    
+    show_installation_preview
+}
+
+#############################################################################
+# Custom Component Selection
+#############################################################################
+
+show_custom_menu() {
+    clear
+    print_header
+    
+    echo -e "${BOLD}Select component categories to install:${NC}\n"
+    echo "Use space to toggle, Enter to continue"
+    echo ""
+    
+    local categories=("agents" "subagents" "commands" "tools" "plugins" "skills" "contexts" "config")
+    local selected_categories=()
+    
+    # Simple selection (for now, we'll make it interactive later)
+    echo "Available categories:"
+    for i in "${!categories[@]}"; do
+        local cat="${categories[$i]}"
+        local count
+        count=$(jq_exec ".components.${cat} | length" "$TEMP_DIR/registry.json")
+        local cat_display
+        cat_display=$(echo "$cat" | awk '{print toupper(substr($0,1,1)) tolower(substr($0,2))}')
+        echo "  $((i+1))) ${cat_display} (${count} available)"
+    done
+    echo "  $((${#categories[@]}+1))) Select All"
+    echo "  $((${#categories[@]}+2))) Continue to component selection"
+    echo "  $((${#categories[@]}+3))) Back to main menu"
+    echo ""
+    
+    read -r -p "Enter category numbers (space-separated) or option: " -a selections
+    
+    for sel in "${selections[@]}"; do
+        if [ "$sel" -eq $((${#categories[@]}+1)) ]; then
+            selected_categories=("${categories[@]}")
+            break
+        elif [ "$sel" -eq $((${#categories[@]}+2)) ]; then
+            break
+        elif [ "$sel" -eq $((${#categories[@]}+3)) ]; then
+            show_main_menu
+            return
+        elif [ "$sel" -ge 1 ] && [ "$sel" -le ${#categories[@]} ]; then
+            selected_categories+=("${categories[$((sel-1))]}")
+        fi
+    done
+    
+    if [ ${#selected_categories[@]} -eq 0 ]; then
+        print_warning "No categories selected"
+        sleep 2
+        show_custom_menu
         return
     fi
     
-    print_status "Installing Docker..."
-    
-    # Detect OS for correct repository
-    if [ -f /etc/os-release ]; then
-        # shellcheck source=/dev/null
-        . /etc/os-release
-        OS_ID=$ID
-    else
-        OS_ID="ubuntu"
-    fi
-    
-    # Remove old Docker versions if they exist
-    sudo apt-get remove -y docker docker-engine docker.io containerd runc 2>/dev/null || true
-    
-    # Add Docker's official GPG key
-    sudo mkdir -p /etc/apt/keyrings
-    
-    if [ "$OS_ID" = "debian" ]; then
-        curl -fsSL https://download.docker.com/linux/debian/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-        echo \
-            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/debian \
-            $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-    else
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-        echo \
-            "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
-            $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
-    fi
-    
-    # Set proper permissions on GPG key
-    sudo chmod a+r /etc/apt/keyrings/docker.gpg
-    
-    # Install Docker
-    sudo apt-get update -qq
-    if sudo apt-get install -y docker-ce docker-ce-cli containerd.io docker-buildx-plugin docker-compose-plugin 2>&1 | tee -a "$LOG_FILE"; then
-        print_success "Docker packages installed"
-    else
-        print_error "Docker installation failed"
-        return 1
-    fi
-    
-    # Start Docker service
-    sudo systemctl start docker
-    sudo systemctl enable docker
-    
-    # Add current user to docker group
-    sudo usermod -aG docker "$USER"
-    
-    # Create docker group if it doesn't exist
-    if ! getent group docker > /dev/null 2>&1; then
-        sudo groupadd docker
-    fi
-    
-    print_success "Docker installed successfully"
-    print_warning "You may need to log out and back in for docker group membership to take effect"
-    print_info "Or run: newgrp docker"
-    
-    # Verify installation
-    if sudo docker run hello-world >/dev/null 2>&1; then
-        print_success "Docker is working correctly"
-    else
-        print_warning "Docker installed but test container failed"
-    fi
+    show_component_selection "${selected_categories[@]}"
 }
 
-# Function to setup npm prefix for non-sudo installs
-setup_npm_prefix() {
-    # Check if nvm is being used
-    if [ -d "$HOME/.nvm" ]; then
-        # nvm handles its own prefix, no setup needed
-        return 0
-    fi
+show_component_selection() {
+    local categories=("$@")
+    clear
+    print_header
     
-    # Setup npm prefix to avoid sudo for global packages
-    NPM_PREFIX="$HOME/.npm-global"
+    echo -e "${BOLD}Select components to install:${NC}\n"
     
-    if [ ! -d "$NPM_PREFIX" ]; then
-        print_status "Setting up npm global prefix..."
-        mkdir -p "$NPM_PREFIX"
-        npm config set prefix "$NPM_PREFIX"
+    local all_components=()
+    local component_details=()
+    
+    for category in "${categories[@]}"; do
+        local cat_display
+        cat_display=$(echo "$category" | awk '{print toupper(substr($0,1,1)) tolower(substr($0,2))}')
+        echo -e "${CYAN}${BOLD}${cat_display}:${NC}"
         
-        # Add to PATH if not already there
-        if ! echo "$PATH" | grep -q "$NPM_PREFIX/bin"; then
-            echo "export PATH=$NPM_PREFIX/bin:\$PATH" >> ~/.bashrc
-            export PATH="$NPM_PREFIX/bin:$PATH"
-        fi
+        local components
+        components=$(jq_exec ".components.${category}[]? | .id" "$TEMP_DIR/registry.json")
         
-        print_success "npm prefix configured to $NPM_PREFIX"
-    fi
-}
-
-# Function to install npm package with fallback methods
-install_npm_package() {
-    local package="$1"
+        local idx=1
+        while IFS= read -r comp_id; do
+            local comp_name
+            comp_name=$(jq_exec ".components.${category}[]? | select(.id == \"${comp_id}\") | .name" "$TEMP_DIR/registry.json")
+            local comp_desc
+            comp_desc=$(jq_exec ".components.${category}[]? | select(.id == \"${comp_id}\") | .description" "$TEMP_DIR/registry.json")
+            
+            echo "  ${idx}) ${comp_name}"
+            echo "     ${comp_desc}"
+            
+            all_components+=("${category}:${comp_id}")
+            component_details+=("${comp_name}|${comp_desc}")
+            
+            idx=$((idx+1))
+        done <<< "$components"
+        
+        echo ""
+    done
     
-    # Try without sudo first (if nvm or prefix is set)
-    if npm install -g "$package" 2>&1 | tee -a "$LOG_FILE"; then
-        return 0
-    fi
+    echo "Enter component numbers (space-separated), 'all' for all, or 'done' to continue:"
+    read -r -a selections
     
-    # If that failed, try with sudo
-    print_status "Retrying with sudo..."
-    if sudo npm install -g "$package" 2>&1 | tee -a "$LOG_FILE"; then
-        return 0
-    fi
-    
-    return 1
-}
-
-# Function to install MCP servers
-install_mcp_servers() {
-    print_status "Installing MCP servers..."
-    
-    # Check npm prefix and setup if needed
-    setup_npm_prefix
-    
-    # Define MCP servers to install
-    MCP_SERVERS=(
-        "@modelcontextprotocol/server-filesystem"
-        "@modelcontextprotocol/server-memory"
-        "@modelcontextprotocol/server-sequential-thinking"
-    )
-    
-    # Optional MCP servers (may fail, but that's okay)
-    OPTIONAL_SERVERS=(
-        "mcp-server-docker"
-    )
-    
-    # Install core MCP servers one by one with error handling
-    for server in "${MCP_SERVERS[@]}"; do
-        print_status "Installing $server..."
-        if install_npm_package "$server"; then
-            print_success "$server installed"
-        else
-            print_error "Failed to install $server"
-            # Continue anyway for now
+    for sel in "${selections[@]}"; do
+        if [ "$sel" = "all" ]; then
+            SELECTED_COMPONENTS=("${all_components[@]}")
+            break
+        elif [ "$sel" = "done" ]; then
+            break
+        elif [ "$sel" -ge 1 ] && [ "$sel" -le ${#all_components[@]} ]; then
+            SELECTED_COMPONENTS+=("${all_components[$((sel-1))]}")
         fi
     done
     
-    # Install optional MCP servers (don't fail if these don't work)
-    for server in "${OPTIONAL_SERVERS[@]}"; do
-        print_status "Installing optional $server..."
-        if install_npm_package "$server"; then
-            print_success "$server installed"
+    if [ ${#SELECTED_COMPONENTS[@]} -eq 0 ]; then
+        print_warning "No components selected"
+        sleep 2
+        show_custom_menu
+        return
+    fi
+    
+    # Resolve dependencies
+    print_step "Resolving dependencies..."
+    local original_count=${#SELECTED_COMPONENTS[@]}
+    for comp in "${SELECTED_COMPONENTS[@]}"; do
+        resolve_dependencies "$comp"
+    done
+    
+    if [ ${#SELECTED_COMPONENTS[@]} -gt "$original_count" ]; then
+        print_info "Added $((${#SELECTED_COMPONENTS[@]} - original_count)) dependencies"
+    fi
+    
+    show_installation_preview
+}
+
+#############################################################################
+# Installation Preview & Confirmation
+#############################################################################
+
+show_installation_preview() {
+    # Only clear screen in interactive mode
+    if [ "$NON_INTERACTIVE" != true ]; then
+        clear
+    fi
+    print_header
+    
+    echo -e "${BOLD}Installation Preview${NC}\n"
+    
+    if [ -n "$PROFILE" ]; then
+        echo -e "Profile: ${GREEN}${PROFILE}${NC}"
+    else
+        echo -e "Mode: ${GREEN}Custom${NC}"
+    fi
+    
+    echo -e "Installation directory: ${CYAN}${INSTALL_DIR}${NC}"
+    
+    echo -e "\nComponents to install (${#SELECTED_COMPONENTS[@]} total):\n"
+    
+    # Group by type
+    local agents=()
+    local subagents=()
+    local commands=()
+    local tools=()
+    local plugins=()
+    local skills=()
+    local contexts=()
+    local configs=()
+    
+    for comp in "${SELECTED_COMPONENTS[@]}"; do
+        local type="${comp%%:*}"
+        case $type in
+            agent) agents+=("$comp") ;;
+            subagent) subagents+=("$comp") ;;
+            command) commands+=("$comp") ;;
+            tool) tools+=("$comp") ;;
+            plugin) plugins+=("$comp") ;;
+            skill) skills+=("$comp") ;;
+            context) contexts+=("$comp") ;;
+            config) configs+=("$comp") ;;
+        esac
+    done
+    
+    [ ${#agents[@]} -gt 0 ] && echo -e "${CYAN}Agents (${#agents[@]}):${NC} ${agents[*]##*:}"
+    [ ${#subagents[@]} -gt 0 ] && echo -e "${CYAN}Subagents (${#subagents[@]}):${NC} ${subagents[*]##*:}"
+    [ ${#commands[@]} -gt 0 ] && echo -e "${CYAN}Commands (${#commands[@]}):${NC} ${commands[*]##*:}"
+    [ ${#tools[@]} -gt 0 ] && echo -e "${CYAN}Tools (${#tools[@]}):${NC} ${tools[*]##*:}"
+    [ ${#plugins[@]} -gt 0 ] && echo -e "${CYAN}Plugins (${#plugins[@]}):${NC} ${plugins[*]##*:}"
+    [ ${#skills[@]} -gt 0 ] && echo -e "${CYAN}Skills (${#skills[@]}):${NC} ${skills[*]##*:}"
+    [ ${#contexts[@]} -gt 0 ] && echo -e "${CYAN}Contexts (${#contexts[@]}):${NC} ${contexts[*]##*:}"
+    [ ${#configs[@]} -gt 0 ] && echo -e "${CYAN}Config (${#configs[@]}):${NC} ${configs[*]##*:}"
+    
+    echo ""
+    
+    # Skip confirmation if profile was provided via command line
+    if [ "$NON_INTERACTIVE" = true ]; then
+        print_info "Installing automatically (profile specified)..."
+        perform_installation
+    else
+        read -r -p "Proceed with installation? [Y/n]: " confirm
+        
+        if [[ $confirm =~ ^[Nn] ]]; then
+            print_info "Installation cancelled"
+            cleanup_and_exit 0
+        fi
+        
+        perform_installation
+    fi
+}
+
+#############################################################################
+# Collision Detection
+#############################################################################
+
+show_collision_report() {
+    local collision_count=$1
+    shift
+    local collisions=("$@")
+    
+    echo ""
+    print_warning "Found ${collision_count} file collision(s):"
+    echo ""
+    
+    # Group by type
+    local agents=()
+    local subagents=()
+    local commands=()
+    local tools=()
+    local plugins=()
+    local skills=()
+    local contexts=()
+    local configs=()
+    
+    for file in "${collisions[@]}"; do
+        # Skip empty entries
+        [ -z "$file" ] && continue
+        
+        if [[ $file == *"/agent/subagents/"* ]]; then
+            subagents+=("$file")
+        elif [[ $file == *"/agent/"* ]]; then
+            agents+=("$file")
+        elif [[ $file == *"/command/"* ]]; then
+            commands+=("$file")
+        elif [[ $file == *"/tool/"* ]]; then
+            tools+=("$file")
+        elif [[ $file == *"/plugin/"* ]]; then
+            plugins+=("$file")
+        elif [[ $file == *"/skills/"* ]]; then
+            skills+=("$file")
+        elif [[ $file == *"/context/"* ]]; then
+            contexts+=("$file")
         else
-            print_warning "Optional $server not installed (this is okay)"
+            configs+=("$file")
         fi
     done
     
-    # Install Python based MCP server
-    print_status "Installing Python MCP server..."
+    # Display grouped collisions
+    [ ${#agents[@]} -gt 0 ] && echo -e "${YELLOW}  Agents (${#agents[@]}):${NC}" && printf '    %s\n' "${agents[@]}"
+    [ ${#subagents[@]} -gt 0 ] && echo -e "${YELLOW}  Subagents (${#subagents[@]}):${NC}" && printf '    %s\n' "${subagents[@]}"
+    [ ${#commands[@]} -gt 0 ] && echo -e "${YELLOW}  Commands (${#commands[@]}):${NC}" && printf '    %s\n' "${commands[@]}"
+    [ ${#tools[@]} -gt 0 ] && echo -e "${YELLOW}  Tools (${#tools[@]}):${NC}" && printf '    %s\n' "${tools[@]}"
+    [ ${#plugins[@]} -gt 0 ] && echo -e "${YELLOW}  Plugins (${#plugins[@]}):${NC}" && printf '    %s\n' "${plugins[@]}"
+    [ ${#skills[@]} -gt 0 ] && echo -e "${YELLOW}  Skills (${#skills[@]}):${NC}" && printf '    %s\n' "${skills[@]}"
+    [ ${#contexts[@]} -gt 0 ] && echo -e "${YELLOW}  Context (${#contexts[@]}):${NC}" && printf '    %s\n' "${contexts[@]}"
+    [ ${#configs[@]} -gt 0 ] && echo -e "${YELLOW}  Config (${#configs[@]}):${NC}" && printf '    %s\n' "${configs[@]}"
     
-    # Try to install in venv if available
-    if [ -d "$SCRIPT_DIR/venv" ]; then
-        # shellcheck source=/dev/null
-        source "$SCRIPT_DIR/venv/bin/activate"
-        if pip install mcp-server-python-analysis 2>&1 | tee -a "$LOG_FILE"; then
-            print_success "Python MCP server installed in venv"
-        else
-            print_warning "Python MCP server not installed (optional)"
-        fi
-        deactivate
-    else
-        # Fallback: try user install if venv not available
-        if pip3 install --user mcp-server-python-analysis 2>&1 | tee -a "$LOG_FILE"; then
-            print_success "Python MCP server installed (user)"
-        elif command_exists pipx; then
-            if pipx install mcp-server-python-analysis 2>&1 | tee -a "$LOG_FILE"; then
-                print_success "Python MCP server installed via pipx"
+    echo ""
+}
+
+get_install_strategy() {
+    echo -e "${BOLD}How would you like to proceed?${NC}\n" >&2
+    echo "  1) ${GREEN}Skip existing${NC} - Only install new files, keep all existing files unchanged" >&2
+    echo "  2) ${YELLOW}Overwrite all${NC} - Replace existing files with new versions (your changes will be lost)" >&2
+    echo "  3) ${CYAN}Backup & overwrite${NC} - Backup existing files, then install new versions" >&2
+    echo "  4) ${RED}Cancel${NC} - Exit without making changes" >&2
+    echo "" >&2
+    read -r -p "Enter your choice [1-4]: " strategy_choice
+    
+    case $strategy_choice in
+        1) echo "skip" ;;
+        2) 
+            echo "" >&2
+            print_warning "This will overwrite existing files. Your changes will be lost!"
+            read -r -p "Are you sure? Type 'yes' to confirm: " confirm
+            if [ "$confirm" = "yes" ]; then
+                echo "overwrite"
             else
-                print_warning "Python MCP server not installed (optional)"
+                echo "cancel"
+            fi
+            ;;
+        3) echo "backup" ;;
+        4) echo "cancel" ;;
+        *) echo "cancel" ;;
+    esac
+}
+
+#############################################################################
+# Installation
+#############################################################################
+
+perform_installation() {
+    print_step "Preparing installation..."
+    
+    # Create base directory only - subdirectories created on-demand when files are installed
+    mkdir -p "$INSTALL_DIR"
+    
+    # Check for collisions
+    local collisions=()
+    for comp in "${SELECTED_COMPONENTS[@]}"; do
+        local type="${comp%%:*}"
+        local id="${comp##*:}"
+        local registry_key
+        registry_key=$(get_registry_key "$type")
+        local path
+        path=$(resolve_component_path "$type" "$id")
+        
+        if [ -n "$path" ] && [ "$path" != "null" ]; then
+            local install_path
+            install_path=$(get_install_path "$path")
+            if [ -f "$install_path" ]; then
+                collisions+=("$install_path")
+            fi
+        fi
+    done
+    
+    # Determine installation strategy
+    local install_strategy="fresh"
+    
+    if [ ${#collisions[@]} -gt 0 ]; then
+        # In non-interactive mode, use default strategy (skip existing files)
+        if [ "$NON_INTERACTIVE" = true ]; then
+            print_info "Found ${#collisions[@]} existing file(s) - using 'skip' strategy (non-interactive mode)"
+            print_info "To overwrite, download script and run interactively, or delete existing files first"
+            install_strategy="skip"
+        else
+            show_collision_report ${#collisions[@]} "${collisions[@]}"
+            install_strategy=$(get_install_strategy)
+            
+            if [ "$install_strategy" = "cancel" ]; then
+                print_info "Installation cancelled by user"
+                cleanup_and_exit 0
+            fi
+        fi
+        
+        # Handle backup strategy
+        if [ "$install_strategy" = "backup" ]; then
+            local backup_dir
+            backup_dir="${INSTALL_DIR}.backup.$(date +%Y%m%d-%H%M%S)"
+            print_step "Creating backup..."
+            
+            # Only backup files that will be overwritten
+            local backup_count=0
+            for file in "${collisions[@]}"; do
+                if [ -f "$file" ]; then
+                    local backup_file="${backup_dir}/${file}"
+                    mkdir -p "$(dirname "$backup_file")"
+                    if cp "$file" "$backup_file" 2>/dev/null; then
+                        backup_count=$((backup_count + 1))
+                    else
+                        print_warning "Failed to backup: $file"
+                    fi
+                fi
+            done
+            
+            if [ $backup_count -gt 0 ]; then
+                print_success "Backed up ${backup_count} file(s) to $backup_dir"
+                install_strategy="overwrite"  # Now we can overwrite
+            else
+                print_error "Backup failed. Installation cancelled."
+                cleanup_and_exit 1
+            fi
+        fi
+    fi
+    
+    # Perform installation
+    print_step "Installing components..."
+    
+    local installed=0
+    local skipped=0
+    local failed=0
+    
+    for comp in "${SELECTED_COMPONENTS[@]}"; do
+        local type="${comp%%:*}"
+        local id="${comp##*:}"
+        
+        # Get the correct registry key (handles singular/plural)
+        local registry_key
+        registry_key=$(get_registry_key "$type")
+        
+        # Get component path
+        local path
+        path=$(resolve_component_path "$type" "$id")
+        
+        if [ -z "$path" ] || [ "$path" = "null" ]; then
+            print_warning "Could not find path for ${comp}"
+            failed=$((failed + 1))
+            continue
+        fi
+        
+        # Check if component has additional files (for skills)
+        local files_array
+        files_array=$(jq_exec ".components.${registry_key}[]? | select(.id == \"${id}\") | .files[]?" "$TEMP_DIR/registry.json")
+        
+        if [ -n "$files_array" ]; then
+            # Component has multiple files - download all of them
+            local component_installed=0
+            local component_failed=0
+            
+            while IFS= read -r file_path; do
+                [ -z "$file_path" ] && continue
+                
+                local dest
+                dest=$(get_install_path "$file_path")
+                
+                # Check if file exists and we're in skip mode
+                if [ -f "$dest" ] && [ "$install_strategy" = "skip" ]; then
+                    continue
+                fi
+                
+                # Download file
+                local url="${RAW_URL}/${file_path}"
+                mkdir -p "$(dirname "$dest")"
+                
+                if curl -fsSL "$url" -o "$dest"; then
+                    # Transform paths for global installation
+                    if [[ "$INSTALL_DIR" != ".opencode" ]] && [[ "$INSTALL_DIR" != *"/.opencode" ]]; then
+                        local expanded_path="${INSTALL_DIR/#\~/$HOME}"
+                        sed -i.bak -e "s|@\.opencode/context/|@${expanded_path}/context/|g" \
+                                   -e "s|\.opencode/context|${expanded_path}/context|g" "$dest" 2>/dev/null || true
+                        rm -f "${dest}.bak" 2>/dev/null || true
+                    fi
+                    component_installed=$((component_installed + 1))
+                else
+                    component_failed=$((component_failed + 1))
+                fi
+            done <<< "$files_array"
+            
+            if [ $component_failed -eq 0 ]; then
+                print_success "Installed ${type}: ${id} (${component_installed} files)"
+                installed=$((installed + 1))
+            else
+                print_error "Failed to install ${type}: ${id} (${component_failed} files failed)"
+                failed=$((failed + 1))
             fi
         else
-            print_warning "Python MCP server not installed (optional) - venv not available"
+            # Single file component - original logic
+            local dest
+            dest=$(get_install_path "$path")
+            
+            # Check if file exists before we install (for proper messaging)
+            local file_existed=false
+            if [ -f "$dest" ]; then
+                file_existed=true
+            fi
+            
+            # Check if file exists and we're in skip mode
+            if [ "$file_existed" = true ] && [ "$install_strategy" = "skip" ]; then
+                print_info "Skipped existing: ${type}:${id}"
+                skipped=$((skipped + 1))
+                continue
+            fi
+            
+            # Download component
+            local url="${RAW_URL}/${path}"
+            
+            # Create parent directory if needed
+            mkdir -p "$(dirname "$dest")"
+            
+            if curl -fsSL "$url" -o "$dest"; then
+                # Transform paths for global installation (any non-local path)
+                # Local paths: .opencode or */.opencode
+                if [[ "$INSTALL_DIR" != ".opencode" ]] && [[ "$INSTALL_DIR" != *"/.opencode" ]]; then
+                    # Expand tilde and get absolute path for transformation
+                    local expanded_path="${INSTALL_DIR/#\~/$HOME}"
+                    # Transform @.opencode/context/ references to actual install path
+                    sed -i.bak -e "s|@\.opencode/context/|@${expanded_path}/context/|g" \
+                               -e "s|\.opencode/context|${expanded_path}/context|g" "$dest" 2>/dev/null || true
+                    rm -f "${dest}.bak" 2>/dev/null || true
+                fi
+                
+                # Show appropriate message based on whether file existed before
+                if [ "$file_existed" = true ]; then
+                    print_success "Updated ${type}: ${id}"
+                else
+                    print_success "Installed ${type}: ${id}"
+                fi
+                installed=$((installed + 1))
+            else
+                print_error "Failed to install ${type}: ${id}"
+                failed=$((failed + 1))
+            fi
+        fi
+    done
+    
+    # Handle additional paths for advanced profile
+    if [ "$PROFILE" = "advanced" ]; then
+        local additional_paths
+        additional_paths=$(jq_exec '.profiles.advanced.additionalPaths[]?' "$TEMP_DIR/registry.json")
+        if [ -n "$additional_paths" ]; then
+            print_step "Installing additional paths..."
+            while IFS= read -r path; do
+                # For directories, we'd need to recursively download
+                # For now, just note them
+                print_info "Additional path: $path (manual download required)"
+            done <<< "$additional_paths"
         fi
     fi
     
-    print_success "MCP server installation completed"
+    echo ""
+    print_success "Installation complete!"
+    echo -e "  Installed: ${GREEN}${installed}${NC}"
+    [ $skipped -gt 0 ] && echo -e "  Skipped: ${CYAN}${skipped}${NC}"
+    [ $failed -gt 0 ] && echo -e "  Failed: ${RED}${failed}${NC}"
+    
+    show_post_install
 }
 
-# Function to setup Python environment
-setup_python_env() {
-    print_status "Setting up Python environment..."
-    
-    cd "$SCRIPT_DIR" || exit 1
-    
-    # Create virtual environment if it doesn't exist
-    if [ ! -d "venv" ]; then
-        VENV_CREATED=true
-        python3 -m venv venv
-    fi
-    
-    # Activate virtual environment
-    # shellcheck source=/dev/null
-    source venv/bin/activate
-    
-    # Upgrade pip
-    pip install --upgrade pip
-    
-    # Install backend requirements
-    if [ -f "backend/requirements.txt" ]; then
-        pip install -r backend/requirements.txt
-    fi
-    
-    # Install root requirements if exists
-    if [ -f "requirements.txt" ]; then
-        pip install -r requirements.txt
-    fi
-    
-    print_success "Python environment setup completed"
-}
+#############################################################################
+# Post-Installation
+#############################################################################
 
-# Function to build Docker image
-build_docker_image() {
-    print_status "Building Docker image..."
+show_post_install() {
+    echo ""
+    print_step "Next Steps"
     
-    if ! command_exists docker; then
-        print_warning "Docker not installed, skipping image build"
-        return 0
+    echo "1. Review the installed components in ${CYAN}${INSTALL_DIR}/${NC}"
+    
+    # Check if env.example was installed
+    if [ -f "${INSTALL_DIR}/env.example" ] || [ -f "env.example" ]; then
+        echo "2. Copy env.example to .env and configure:"
+        echo -e "   ${CYAN}cp env.example .env${NC}"
+        echo "3. Start using OpenCode agents:"
+    else
+        echo "2. Start using OpenCode agents:"
     fi
+    echo -e "   ${CYAN}opencode${NC}"
+    echo ""
     
-    # Check if we can run docker without sudo
-    if ! docker ps >/dev/null 2>&1; then
-        print_warning "Cannot access Docker daemon. You may need to:"
-        print_info "  1. Log out and back in (for docker group)"
-        print_info "  2. Or run: newgrp docker"
-        print_info "  3. Or run with sudo: sudo docker compose build"
-        return 0
-    fi
+    # Show installation location info
+    print_info "Installation directory: ${CYAN}${INSTALL_DIR}${NC}"
     
-    # Build using docker compose
-    if command_exists docker && docker compose version >/dev/null 2>&1; then
-        print_status "Building with docker compose..."
-        if docker compose build 2>&1 | tee -a "$LOG_FILE"; then
-            print_success "Docker image built successfully"
-        else
-            print_warning "Docker image build failed (you can build later with: docker compose build)"
+    # Check for backup directories
+    local has_backup=0
+    local backup_dir
+    local backup_dirs=()
+
+    shopt -s nullglob
+    backup_dirs=("${INSTALL_DIR}.backup."*)
+    shopt -u nullglob
+
+    for backup_dir in "${backup_dirs[@]}"; do
+        if [ -d "$backup_dir" ]; then
+            has_backup=1
+            break
         fi
-    elif command_exists docker-compose; then
-        print_status "Building with docker-compose..."
-        if docker-compose build 2>&1 | tee -a "$LOG_FILE"; then
-            print_success "Docker image built successfully"
-        else
-            print_warning "Docker image build failed (you can build later with: docker-compose build)"
-        fi
-    else
-        print_status "Building with docker build..."
-        if docker build -t antigravity-workspace:latest . 2>&1 | tee -a "$LOG_FILE"; then
-            print_success "Docker image built successfully"
-        else
-            print_warning "Docker image build failed"
-        fi
+    done
+    if [ "$has_backup" -eq 1 ]; then
+        print_info "Backup created - you can restore files from ${INSTALL_DIR}.backup.* if needed"
     fi
+    
+    print_info "Documentation: ${REPO_URL}"
+    echo ""
+    
+    cleanup_and_exit 0
 }
 
-# Function to test Docker setup
-test_docker_setup() {
-    print_status "Testing Docker setup..."
-    
-    if ! command_exists docker; then
-        print_info "Docker not installed, skipping test"
-        return 0
-    fi
-    
-    # Test docker command
-    if docker --version >/dev/null 2>&1; then
-        print_success "Docker command available: $(docker --version | cut -d' ' -f3 | tr -d ',')"
-    else
-        print_error "Docker command failed"
-        return 1
-    fi
-    
-    # Test docker compose
-    if docker compose version >/dev/null 2>&1; then
-        print_success "Docker Compose available: $(docker compose version | cut -d' ' -f4)"
-    elif command_exists docker-compose; then
-        print_success "Docker Compose (standalone) available: $(docker-compose --version | cut -d' ' -f4 | tr -d ',')"
-    else
-        print_warning "Docker Compose not available"
-    fi
-    
-    # Test docker daemon access
-    if docker ps >/dev/null 2>&1; then
-        print_success "Docker daemon accessible"
-    else
-        print_warning "Docker daemon not accessible (may need to relogin or use: newgrp docker)"
-    fi
-    
-    # Test if image exists
-    if docker images | grep -q antigravity; then
-        print_success "Antigravity Docker image found"
-    else
-        print_info "Antigravity Docker image not built yet (run: docker compose build)"
-    fi
-}
+#############################################################################
+# Component Listing
+#############################################################################
 
-# Function to setup environment variables
-setup_environment() {
-    print_status "Setting up environment variables..."
+list_components() {
+    clear || true
+    print_header
     
-    cd "$SCRIPT_DIR" || exit 1
+    echo -e "${BOLD}Available Components${NC}\n"
     
-    # Backup existing .env if present
-    if [ -f ".env" ]; then
-        BACKUP_DIR="${SCRIPT_DIR}/.backup_$(date +%Y%m%d_%H%M%S)"
-        mkdir -p "$BACKUP_DIR"
-        cp ".env" "$BACKUP_DIR/.env"
-        CONFIG_BACKED_UP=true
-        print_info "Backed up existing .env to $BACKUP_DIR"
-    fi
+    local categories=("agents" "subagents" "commands" "tools" "plugins" "skills" "contexts")
     
-    if [ ! -f ".env" ]; then
-        if [ -f ".env.example" ]; then
-            cp .env.example .env
-            print_warning "Created .env from .env.example. Please edit .env with your API keys."
-        else
-            cat > .env << 'EOF'
-# Gemini API Key (get from https://aistudio.google.com/app/apikey)
-GEMINI_API_KEY=your_gemini_api_key_here
-
-# Local Model Settings (if using Ollama)
-LOCAL_MODEL=llama3
-
-# GitHub Token for MCP integration
-COPILOT_MCP_GITHUB_TOKEN=your_github_token_here
-
-# Optional: Brave Search API
-COPILOT_MCP_BRAVE_API_KEY=
-
-# Optional: PostgreSQL connection
-COPILOT_MCP_POSTGRES_CONNECTION_STRING=
-
-# Server Configuration
-HOST=0.0.0.0
-PORT=8000
-EOF
-            print_warning "Created .env file. Please edit it with your API keys."
-        fi
-    else
-        print_success ".env file already exists"
-    fi
-}
-
-# Function to create systemd service
-create_systemd_service() {
-    print_status "Creating systemd service..."
-    
-    SERVICE_FILE="/etc/systemd/system/antigravity.service"
-    
-    sudo tee "$SERVICE_FILE" > /dev/null << EOF
-[Unit]
-Description=Antigravity Workspace Backend
-After=network.target
-
-[Service]
-Type=simple
-User=$USER
-WorkingDirectory=$SCRIPT_DIR/backend
-Environment="PATH=$SCRIPT_DIR/venv/bin:/usr/local/bin:/usr/bin:/bin"
-EnvironmentFile=$SCRIPT_DIR/.env
-ExecStart=$SCRIPT_DIR/venv/bin/python main.py
-Restart=always
-RestartSec=10
-
-[Install]
-WantedBy=multi-user.target
-EOF
-    
-    sudo systemctl daemon-reload
-    sudo systemctl enable antigravity.service
-    
-    print_success "Systemd service created"
-}
-
-# Function to setup nginx reverse proxy
-setup_nginx() {
-    print_status "Setting up Nginx reverse proxy..."
-    
-    NGINX_CONF="/etc/nginx/sites-available/antigravity"
-    
-    # Use SCRIPT_DIR instead of hardcoded paths
-    sudo tee "$NGINX_CONF" > /dev/null << EOF
-server {
-    listen 80;
-    server_name _;
-    
-    # Frontend
-    location / {
-        root ${SCRIPT_DIR}/frontend;
-        index index.html;
-        try_files \$uri \$uri/ =404;
-    }
-    
-    # Backend API
-    location /api/ {
-        proxy_pass http://localhost:8000/;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection 'upgrade';
-        proxy_set_header Host \$host;
-        proxy_cache_bypass \$http_upgrade;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-        proxy_set_header X-Forwarded-Proto \$scheme;
-    }
-    
-    # WebSocket
-    location /ws {
-        proxy_pass http://localhost:8000/ws;
-        proxy_http_version 1.1;
-        proxy_set_header Upgrade \$http_upgrade;
-        proxy_set_header Connection "upgrade";
-        proxy_set_header Host \$host;
-        proxy_set_header X-Real-IP \$remote_addr;
-        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
-    }
-    
-    # Static files
-    location /static/ {
-        alias ${SCRIPT_DIR}/frontend/static/;
-        expires 30d;
-        add_header Cache-Control "public, immutable";
-    }
-}
-EOF
-    
-    # Enable site
-    sudo ln -sf "$NGINX_CONF" /etc/nginx/sites-enabled/
-    sudo rm -f /etc/nginx/sites-enabled/default
-    
-    # Test nginx configuration
-    sudo nginx -t
-    
-    # Restart nginx
-    sudo systemctl restart nginx
-    sudo systemctl enable nginx
-    
-    print_success "Nginx reverse proxy configured"
-}
-
-# Function to setup firewall
-setup_firewall() {
-    print_status "Setting up firewall..."
-    
-    if command_exists ufw; then
-        sudo ufw --force enable
-        sudo ufw allow 22/tcp
-        sudo ufw allow 80/tcp
-        sudo ufw allow 443/tcp
-        sudo ufw allow 8000/tcp
-        print_success "Firewall configured"
-    else
-        print_warning "UFW not installed, skipping firewall setup"
-    fi
-}
-
-# Function to create directories
-create_directories() {
-    print_status "Creating required directories..."
-    
-    cd "$SCRIPT_DIR" || exit 1
-    
-    mkdir -p drop_zone
-    mkdir -p artifacts
-    mkdir -p logs
-    mkdir -p frontend/static
-    mkdir -p data
-    
-    print_success "Directories created"
-}
-
-# Function to run health check
-run_health_check() {
-    print_status "Running health check..."
-    
-    cd "$SCRIPT_DIR" || exit 1
-    
-    if [ -f "health-check.sh" ]; then
-        chmod +x health-check.sh
-        ./health-check.sh || true
-    fi
-    
-    print_success "Health check completed"
-}
-
-# Function to verify installation
-verify_installation() {
-    print_status "Verifying installation..."
-    
-    cd "$SCRIPT_DIR" || exit 1
-    
-    # Test critical Python imports
-    print_status "Testing Python imports..."
-    if [ -d "venv" ]; then
-        # shellcheck source=/dev/null
-        source venv/bin/activate
+    for category in "${categories[@]}"; do
+        local cat_display
+        cat_display=$(echo "$category" | awk '{print toupper(substr($0,1,1)) tolower(substr($0,2))}')
+        echo -e "${CYAN}${BOLD}${cat_display}:${NC}"
         
-        # Robust verification script
-        python3 - << 'EOF'
-import sys
-try:
-    import fastapi
-    import uvicorn
-    # Use the new genai package
-    from google import genai
-    print("Core modules: OK")
-except Exception as e:
-    print(f"CRITICAL_FAIL: {e}")
-    sys.exit(1)
-
-try:
-    import chromadb
-    print("chromadb: OK")
-except Exception as e:
-    print(f"OPTIONAL_WARNING: chromadb failed to load: {e}")
-    # We don't exit with 1 for chromadb to allow resilience mode
-EOF
+        local components
+        components=$(jq_exec ".components.${category}[]? | \"\(.id)|\(.name)|\(.description)\"" "$TEMP_DIR/registry.json")
         
-        if [ $? -eq 0 ]; then
-            print_success "Python dependencies verified"
-        else
-            print_error "Python dependency verification failed"
-            print_info "Try running: source venv/bin/activate && pip install -r backend/requirements.txt"
-        fi
+        while IFS='|' read -r id name desc; do
+            echo -e "  ${GREEN}${name}${NC} (${id})"
+            echo -e "    ${desc}"
+        done <<< "$components"
         
-        # Test if backend can at least parse
-        print_status "Testing backend startup..."
-        if python3 -c "import sys; sys.path.insert(0, '${SCRIPT_DIR}/backend'); from main import app; print('Backend OK')" 2>&1 | tee -a "$LOG_FILE"; then
-            print_success "Backend module loads successfully"
-        else
-            print_warning "Backend module has issues - check logs"
-        fi
-        
-        deactivate
-    else
-        print_warning "Virtual environment not found - skipping Python verification"
-    fi
-    
-    print_success "Installation verification completed"
+        echo ""
+    done
 }
 
-# Function to display completion message
-display_completion() {
-    echo ""
-    echo -e "${GREEN}╔════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${GREEN}║                                                            ║${NC}"
-    echo -e "${GREEN}║        Antigravity Workspace Installation Complete!       ║${NC}"
-    echo -e "${GREEN}║                                                            ║${NC}"
-    echo -e "${GREEN}╚════════════════════════════════════════════════════════════╝${NC}"
-    echo ""
-    print_success "Installation completed successfully!"
-    echo ""
-    print_status "Next steps:"
-    echo "  1. Edit .env file with your API keys:"
-    echo "     nano $SCRIPT_DIR/.env"
-    echo ""
-    echo "  2. Start the service:"
-    echo "     sudo systemctl start antigravity"
-    echo ""
-    echo "  3. Check service status:"
-    echo "     sudo systemctl status antigravity"
-    echo ""
-    echo "  4. View logs:"
-    echo "     sudo journalctl -u antigravity -f"
-    echo ""
-    echo "  5. Access the web interface:"
-    echo "     http://$(hostname -I | awk '{print $1}')"
-    echo ""
-    print_warning "Important: After editing .env, restart the service:"
-    echo "     sudo systemctl restart antigravity"
-    echo ""
-    echo "  Documentation: $SCRIPT_DIR/README.md"
-    echo "  Log file: $LOG_FILE"
-    echo ""
+#############################################################################
+# Cleanup
+#############################################################################
+
+cleanup_and_exit() {
+    rm -rf "$TEMP_DIR"
+    exit "$1"
 }
 
-# Main installation flow
+trap 'cleanup_and_exit 1' INT TERM
+
+#############################################################################
+# Main
+#############################################################################
+
 main() {
-    echo ""
-    echo -e "${BLUE}╔════════════════════════════════════════════════════════════╗${NC}"
-    echo -e "${BLUE}║                                                            ║${NC}"
-    echo -e "${BLUE}║     Antigravity Workspace - Automated Installation        ║${NC}"
-    echo -e "${BLUE}║                                                            ║${NC}"
-    echo -e "${BLUE}╚════════════════════════════════════════════════════════════╝${NC}"
-    echo ""
+    # Parse command line arguments
+    while [ $# -gt 0 ]; do
+        case "$1" in
+            --install-dir=*)
+                CUSTOM_INSTALL_DIR="${1#*=}"
+                # Basic validation - check not empty
+                if [ -z "$CUSTOM_INSTALL_DIR" ]; then
+                    echo "Error: --install-dir requires a non-empty path"
+                    exit 1
+                fi
+                shift
+                ;;
+            --install-dir)
+                if [ -n "$2" ] && [ "${2:0:1}" != "-" ]; then
+                    CUSTOM_INSTALL_DIR="$2"
+                    shift 2
+                else
+                    echo "Error: --install-dir requires a path argument"
+                    exit 1
+                fi
+                ;;
+            essential|--essential)
+                INSTALL_MODE="profile"
+                PROFILE="essential"
+                NON_INTERACTIVE=true
+                shift
+                ;;
+            developer|--developer)
+                INSTALL_MODE="profile"
+                PROFILE="developer"
+                NON_INTERACTIVE=true
+                shift
+                ;;
+            business|--business)
+                INSTALL_MODE="profile"
+                PROFILE="business"
+                NON_INTERACTIVE=true
+                shift
+                ;;
+            full|--full)
+                INSTALL_MODE="profile"
+                PROFILE="full"
+                NON_INTERACTIVE=true
+                shift
+                ;;
+            advanced|--advanced)
+                INSTALL_MODE="profile"
+                PROFILE="advanced"
+                NON_INTERACTIVE=true
+                shift
+                ;;
+            list|--list)
+                check_dependencies
+                fetch_registry
+                list_components
+                cleanup_and_exit 0
+                ;;
+            --help|-h|help)
+                print_header
+                echo "Usage: $0 [PROFILE] [OPTIONS]"
+                echo ""
+                echo -e "${BOLD}Profiles:${NC}"
+                echo "  essential, --essential    Minimal setup with core agents"
+                echo "  developer, --developer    Code-focused development tools"
+                echo "  business, --business      Content and business-focused tools"
+                echo "  full, --full              Everything except system-builder"
+                echo "  advanced, --advanced      Complete system with all components"
+                echo ""
+                echo -e "${BOLD}Options:${NC}"
+                echo "  --install-dir PATH        Custom installation directory"
+                echo "                            (default: .opencode)"
+                echo "  list, --list              List all available components"
+                echo "  help, --help, -h          Show this help message"
+                echo ""
+                echo -e "${BOLD}Environment Variables:${NC}"
+                echo "  OPENCODE_INSTALL_DIR      Installation directory"
+                echo "  OPENCODE_BRANCH           Git branch to install from (default: main)"
+                echo ""
+                echo -e "${BOLD}Examples:${NC}"
+                echo ""
+                echo -e "  ${CYAN}# Interactive mode (choose location and components)${NC}"
+                echo "  $0"
+                echo ""
+                echo -e "  ${CYAN}# Quick install with default location (.opencode/)${NC}"
+                echo "  $0 developer"
+                echo ""
+                echo -e "  ${CYAN}# Install to global location (Linux/macOS)${NC}"
+                echo "  $0 developer --install-dir ~/.config/opencode"
+                echo ""
+                echo -e "  ${CYAN}# Install to global location (Windows Git Bash)${NC}"
+                echo "  $0 developer --install-dir ~/.config/opencode"
+                echo ""
+                echo -e "  ${CYAN}# Install to custom location${NC}"
+                echo "  $0 essential --install-dir ~/my-agents"
+                echo ""
+                echo -e "  ${CYAN}# Using environment variable${NC}"
+                echo "  export OPENCODE_INSTALL_DIR=~/.config/opencode"
+                echo "  $0 developer"
+                echo ""
+                echo -e "  ${CYAN}# Install from URL (non-interactive)${NC}"
+                echo "  curl -fsSL https://raw.githubusercontent.com/darrenhinde/OpenAgentsControl/main/install.sh | bash -s developer"
+                echo ""
+                echo -e "${BOLD}Platform Support:${NC}"
+                echo "  ✓ Linux (bash 3.2+)"
+                echo "  ✓ macOS (bash 3.2+)"
+                echo "  ✓ Windows (Git Bash, WSL)"
+                echo ""
+                exit 0
+                ;;
+            *)
+                echo "Unknown option: $1"
+                echo "Run '$0 --help' for usage information"
+                exit 1
+                ;;
+        esac
+    done
     
-    # Check if running as root
-    if [ "$EUID" -eq 0 ]; then
-        print_error "Please do not run this script as root. It will use sudo when needed."
-        exit 1
+    # Apply custom install directory if specified (CLI arg overrides env var)
+    if [ -n "$CUSTOM_INSTALL_DIR" ]; then
+        local normalized_path
+        if normalize_and_validate_path "$CUSTOM_INSTALL_DIR" > /dev/null; then
+            normalized_path=$(normalize_and_validate_path "$CUSTOM_INSTALL_DIR")
+            INSTALL_DIR="$normalized_path"
+            if ! validate_install_path "$INSTALL_DIR"; then
+                print_warning "Installation path may have issues, but continuing..."
+            fi
+        else
+            print_error "Invalid installation directory: $CUSTOM_INSTALL_DIR"
+            exit 1
+        fi
     fi
     
-    # Start logging
-    exec > >(tee -a "$LOG_FILE")
-    exec 2>&1
+    check_bash_version
+    check_dependencies
+    fetch_registry
     
-    print_status "Installation started at $(date)"
-    echo ""
-    
-    # Run installation steps
-    detect_os
-    check_requirements
-    install_system_dependencies
-    install_nodejs
-    install_python
-    install_docker
-    create_directories
-    install_mcp_servers
-    setup_python_env
-    setup_environment
-    
-    # Test Docker setup
-    test_docker_setup
-    
-    # Build Docker image (optional, can be done later)
-    if prompt_yes_no "Build Docker image now? (optional, takes a few minutes)" "n"; then
-        build_docker_image
+    if [ -n "$PROFILE" ]; then
+        # Non-interactive mode (compatible with bash 3.2+)
+        SELECTED_COMPONENTS=()
+        local temp_file="$TEMP_DIR/components.tmp"
+        get_profile_components "$PROFILE" > "$temp_file"
+        while IFS= read -r component; do
+            [ -n "$component" ] && SELECTED_COMPONENTS+=("$component")
+        done < "$temp_file"
+
+        expand_selected_components
+
+        # Resolve dependencies for profile installs
+        print_step "Resolving dependencies..."
+        local original_count=${#SELECTED_COMPONENTS[@]}
+        for comp in "${SELECTED_COMPONENTS[@]}"; do
+            resolve_dependencies "$comp"
+        done
+
+        local new_count=${#SELECTED_COMPONENTS[@]}
+        if [ "$new_count" -gt "$original_count" ]; then
+            local added=$((new_count - original_count))
+            print_info "Added $added dependencies"
+        fi
+
+        show_installation_preview
     else
-        print_info "Skipping Docker image build. You can build later with: docker compose build"
+        # Interactive mode - show location menu first
+        show_install_location_menu
+        show_main_menu
+        
+        if [ "$INSTALL_MODE" = "profile" ]; then
+            show_profile_menu
+        elif [ "$INSTALL_MODE" = "custom" ]; then
+            show_custom_menu
+        fi
     fi
-    
-    create_systemd_service
-    
-    # Optional: Setup nginx (comment out if not needed)
-    if command_exists nginx; then
-        setup_nginx
-    else
-        print_warning "Nginx not installed, skipping reverse proxy setup"
-    fi
-    
-    # Optional: Setup firewall
-    setup_firewall
-    
-    # Run health check
-    run_health_check
-    
-    # Verify installation
-    verify_installation
-    
-    # Display completion message
-    display_completion
-    
-    print_status "Installation log saved to: $LOG_FILE"
 }
 
-# Run main installation
 main "$@"

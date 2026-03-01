@@ -1,401 +1,129 @@
-# Multi-Agent Swarm System Documentation
+# ANTIGRAVITY WORKSPACE
 
-## Overview
+**Generated:** 2026-03-01 | **Commit:** 8be6068 | **Branch:** main
 
-The Antigravity Workspace includes a sophisticated multi-agent swarm system that implements a **router-worker pattern** for collaborative task execution. The system enables multiple specialized agents to work together on complex tasks through intelligent delegation and result synthesis.
+## OVERVIEW
 
-## Architecture
+AI-powered development workspace built on FastAPI + vanilla JS. Features a Gemini-based agent system with router-worker swarm orchestration, MCP tool integration, RAG-based context retrieval, model rotation across multiple providers (Gemini, Vertex, OpenAI, OpenRouter), and sandboxed code execution (local + Docker).
+
+## STRUCTURE
 
 ```
-┌─────────────────────────────────────────────┐
-│         User Task Request                    │
-└───────────────┬─────────────────────────────┘
-                │
-                ▼
-┌─────────────────────────────────────────────┐
-│          Router Agent                        │
-│  • Analyzes task complexity                  │
-│  • Identifies required specialists           │
-│  • Creates delegation plan                   │
-└───────────────┬─────────────────────────────┘
-                │
-        ┌───────┴───────┬───────────────┐
-        ▼               ▼               ▼
-┌──────────────┐ ┌──────────────┐ ┌──────────────┐
-│ Coder Agent  │ │Reviewer Agent│ │Researcher    │
-│ • Write code │ │• Review code │ │Agent         │
-│ • Fix bugs   │ │• Security    │ │• Research    │
-│ • Refactor   │ │• Quality     │ │• Analyze     │
-└──────┬───────┘ └──────┬───────┘ └──────┬───────┘
-       │                │                │
-       └────────┬───────┴────────┬───────┘
-                ▼                ▼
-┌─────────────────────────────────────────────┐
-│          Router Agent                        │
-│  • Synthesizes all results                   │
-│  • Produces final response                   │
-└─────────────────────────────────────────────┘
+Antigravitys/
+├── backend/           # FastAPI server — main.py is 2955-line monolith (ALL routes here)
+│   ├── agent/         # Multi-client orchestrator (Gemini, Vertex, local/Ollama)
+│   ├── cli/           # Gemini CLI interface
+│   ├── rag/           # ChromaDB-based vector store + ingestion
+│   └── utils/         # Performance, debug logging, ngrok, platform detection
+├── src/               # Agent SDK — Gemini agent, swarm system, MCP client, model rotator
+│   ├── agents/        # Swarm workers (coder, reviewer, researcher, router)
+│   ├── sandbox/       # Code execution (local + Docker, factory pattern)
+│   └── tools/         # Tool registry (MCP tools, OpenAI proxy, execution tool)
+├── frontend/          # Vanilla JS SPA — NO framework, NO build step
+│   ├── js/app.js      # Single 2914-line file — entire frontend logic
+│   └── css/           # style.css + legacy.css
+├── tests/             # Pytest — unit/integration/e2e/performance, 430-line conftest.py
+├── tools/             # Dev utilities (auto_issue_finder, health_monitor, split_monolith)
+├── .github/agents/    # 12 agent persona definitions (.agent.md files)
+├── .antigravity/      # rules.md — project directives and coding standards
+├── nginx/             # Reverse proxy config for Docker deployment
+├── drop_zone/         # File watcher directory — auto-ingests into RAG
+├── artifacts/         # Agent output artifacts (plans, logs)
+└── docs/              # 26 markdown files — architecture, security, deployment guides
 ```
 
-## Components
+## WHERE TO LOOK
 
-### 1. Message Bus
+| Task | Location | Notes |
+|------|----------|-------|
+| Add API endpoint | `backend/main.py` | All routes in single file. Search for `@app.` decorators |
+| WebSocket handling | `backend/main.py` | Search `@app.websocket`. Reconnection with exponential backoff |
+| Agent orchestration | `backend/agent/orchestrator.py` | Multi-model routing (Gemini/Vertex/local), caching, dual-agent sessions |
+| Swarm system | `src/swarm.py` + `src/agents/` | Router-worker pattern. `MessageBus` + `SwarmOrchestrator` |
+| Model rotation | `src/model_rotator.py` | API key rotation, rate limit detection, health monitoring (522 lines) |
+| MCP integration | `src/mcp_client.py` | MCP server connections, tool discovery |
+| Settings/config | `backend/settings_manager.py` + `src/config.py` | Pydantic Settings, env-based config |
+| Security | `backend/security.py` | Input validation, file sanitization, rate limiting |
+| RAG pipeline | `backend/rag/` | ChromaDB store + file ingestion pipeline |
+| File watcher | `backend/watcher.py` | Watchdog-based, monitors `drop_zone/`, debounced |
+| Frontend UI | `frontend/index.html` + `frontend/js/app.js` | 1222-line HTML + 2914-line JS |
+| Agent personas | `.github/agents/*.agent.md` | 12 agent definitions loaded by `backend/agent/manager.py` |
+| Project rules | `.antigravity/rules.md` | Coding standards, artifact protocol, YOLO mode |
+| Tests | `tests/` | See `tests/AGENTS.md` |
+| Docker deploy | `docker-compose.yml` | 4 services: backend, frontend(nginx), chromadb, redis |
+| CI/CD | `.github/workflows/` | 7 workflows: ci, test, security, deploy (GCP, DigitalOcean) |
 
-The `MessageBus` provides centralized communication between agents:
+## CONVENTIONS
 
-```python
-from src.swarm import MessageBus
+- **Type hints**: ALL Python functions MUST use strict type hints (`typing` module)
+- **Docstrings**: Google-style docstrings on all functions/classes
+- **Data models**: Pydantic `BaseModel` for all request/response schemas
+- **Tools**: External API calls MUST be wrapped in dedicated functions in `tools/` or `src/tools/`
+- **Linter**: Ruff — line-length 120, indent 4. Ignores: E402, E701, E722, F401, F811, F841
+- **Tests**: Pytest with markers (`unit`, `integration`, `e2e`, `slow`, `asyncio`, `requires_ollama`, `requires_gemini`). Coverage on `backend/` + `src/`. Max 5 failures then stop.
+- **Async**: `asyncio_mode = auto` in pytest. FastAPI async endpoints throughout.
+- **Artifact protocol**: Complex tasks → create `artifacts/plan_[task_id].md` first, test logs → `artifacts/logs/`
 
-bus = MessageBus()
+## ANTI-PATTERNS (THIS PROJECT)
 
-# Send messages
-bus.send("Agent1", "Task complete")
+- **DO NOT** add new route files — ALL routes live in `backend/main.py` (monolith pattern)
+- **DO NOT** add frontend build tools — vanilla JS, served statically via nginx
+- **DO NOT** summarize excessively — project uses large context windows (1M+ tokens)
+- **NEVER** suppress type errors with `as any`, `@ts-ignore`, `@ts-expect-error`
+- **ALWAYS** run `pytest` after modifying logic
+- **ALWAYS** read `mission.md` before architectural decisions
+- **ALWAYS** read `.antigravity/rules.md` for project directives
+- Rate limiter is auto-disabled during pytest (`if "pytest" in sys.modules`)
 
-# Get context for an agent
-recent_messages = bus.get_context_for("Agent2", last_n=10)
+## UNIQUE STYLES
 
-# Get all messages
-all_messages = bus.get_all_messages()
-```
+- **Dual-layer architecture**: `backend/` = FastAPI HTTP server; `src/` = Agent SDK (can run independently)
+- **Agent personas**: 12 `.agent.md` files in `.github/agents/` define specialized agents with priority rankings (jules=10 highest → docs-master=1 lowest)
+- **Multi-provider model routing**: Orchestrator tries Gemini → Vertex → local(Ollama) with caching and handoff
+- **Drop zone pattern**: Files placed in `drop_zone/` are auto-ingested into ChromaDB via watchdog
+- **.cursorrules**: Redirects to `.antigravity/rules.md` for agent instructions
+- **YOLO mode**: All terminal/file operations auto-approved, no confirmation prompts
 
-**Features:**
-- Chronological message log
-- Context retrieval for agents
-- Metadata support
-- Message broadcasting
-
-### 2. Swarm Orchestrator
-
-The `SwarmOrchestrator` coordinates all agents:
-
-```python
-from src.swarm import SwarmOrchestrator
-
-orchestrator = SwarmOrchestrator()
-
-# Execute a task
-result = await orchestrator.execute(
-    "Create a Python function and review it",
-    verbose=True
-)
-
-# Get agent capabilities
-capabilities = orchestrator.get_agent_capabilities()
-
-# Get message log
-messages = orchestrator.get_message_log()
-
-# Reset state
-orchestrator.reset()
-```
-
-### 3. Router Agent
-
-The `RouterAgent` analyzes tasks and creates delegation plans:
-
-**Capabilities:**
-- Task analysis and complexity assessment
-- Agent selection based on keywords and patterns
-- Delegation plan creation
-- Result synthesis from multiple workers
-
-**Keywords for routing:**
-- **Coder**: code, implement, write, function, class, fix bug, refactor
-- **Reviewer**: review, check, validate, security, quality, test
-- **Researcher**: research, investigate, analyze, find, search, learn
-
-### 4. Worker Agents
-
-#### Coder Agent
-Specialized in code implementation:
-- Write new code
-- Fix bugs
-- Refactor existing code
-- Implement features
-- Supports multiple languages
-
-#### Reviewer Agent
-Specialized in code review:
-- Quality assessment
-- Security vulnerability detection
-- Best practices validation
-- Performance analysis
-- Documentation review
-
-#### Researcher Agent
-Specialized in information gathering:
-- Technology research
-- Documentation analysis
-- Best practices discovery
-- Comparative analysis
-- Recommendation generation
-
-## Usage Examples
-
-### Basic Task Execution
-
-```python
-import asyncio
-from src.swarm import SwarmOrchestrator
-
-async def main():
-    orchestrator = SwarmOrchestrator()
-    
-    result = await orchestrator.execute(
-        "Create a login function with security validation"
-    )
-    
-    print(f"Success: {result['success']}")
-    print(f"Workers: {result['workers_used']}")
-    print(f"\nSynthesis:\n{result['synthesis']}")
-
-asyncio.run(main())
-```
-
-### Using the Demo Script
+## COMMANDS
 
 ```bash
-# Run the demo
+# Local dev
+pip install -r requirements.txt
+cd backend && uvicorn main:app --reload --port 8000
+
+# Full stack (Docker)
+docker-compose up --build                     # All services
+docker-compose --profile with-ollama up       # Include local Ollama
+
+# Tests
+pytest                                        # Full suite (coverage on backend/ + src/)
+pytest tests/unit/                            # Unit only
+pytest -m "not requires_ollama"               # Skip Ollama-dependent tests
+
+# Start scripts
+./start.sh                                    # Linux/Mac
+.\start.ps1                                   # Windows (sets YOLO mode)
+
+# Swarm demo
 python src/swarm_demo.py
-
-# Or use the module
-python -m src.swarm_demo
 ```
 
-### API Integration
+## SERVICES (docker-compose)
 
-```bash
-# Execute via API
-curl -X POST http://localhost:8000/api/swarm/execute \
-  -H "Content-Type: application/json" \
-  -d '{"task": "Review authentication code", "verbose": true}'
+| Service | Image | Port | Purpose |
+|---------|-------|------|---------|
+| backend | Custom (Python 3.11) | 8000 | FastAPI server |
+| frontend | nginx:alpine | 3000/80 | Static file serving |
+| chromadb | chromadb/chroma | 8001 | Vector store for RAG |
+| redis | redis:7-alpine | 6379 | Caching (password: `antigravity`) |
+| ollama | ollama/ollama | 11434 | Local AI (optional profile) |
 
-# Get agent capabilities
-curl http://localhost:8000/api/swarm/capabilities
-```
+## NOTES
 
-## Workflow Patterns
-
-### 1. Sequential Processing
-Tasks are delegated to agents one at a time:
-
-```
-User Task → Router → Coder → Reviewer → Researcher → Router → Final Result
-```
-
-### 2. Parallel Processing (Future)
-Multiple agents work simultaneously:
-
-```
-                ┌─→ Coder
-User Task → Router ─→ Reviewer  → Router → Final Result
-                └─→ Researcher
-```
-
-## Message Bus Protocol
-
-### Message Format
-
-```python
-{
-    "sender": "AgentName",
-    "content": "Message content",
-    "timestamp": "2024-01-01T00:00:00",
-    "metadata": {
-        "delegation_plan": {...},
-        "success": true
-    }
-}
-```
-
-### Message Flow
-
-1. **User → Bus**: User task sent to message bus
-2. **Router → Bus**: Delegation plan published
-3. **Workers → Bus**: Execution results published
-4. **Router → Bus**: Final synthesis published
-
-## Configuration
-
-### Environment Variables
-
-```bash
-# No specific configuration required
-# Swarm system uses default settings
-```
-
-### Agent Customization
-
-Extend the base agent class:
-
-```python
-from src.agents.base_agent import BaseAgent
-
-class MyCustomAgent(BaseAgent):
-    def __init__(self):
-        super().__init__(name="CustomAgent", role="Custom Processing")
-    
-    async def execute(self, task, context=None):
-        # Your implementation
-        return {"success": True, "output": "..."}
-```
-
-## Extending the System
-
-### Adding New Agents
-
-1. Create agent class in `src/agents/`
-2. Inherit from `BaseAgent`
-3. Implement `execute()` method
-4. Register with router
-
-```python
-from src.agents.base_agent import BaseAgent
-
-class DeployAgent(BaseAgent):
-    def __init__(self):
-        super().__init__(name="Deployer", role="Deployment")
-    
-    async def execute(self, task, context=None):
-        # Deployment logic
-        pass
-```
-
-### Custom Delegation Logic
-
-Modify `RouterAgent._analyze_task()` to add custom routing:
-
-```python
-def _analyze_task(self, task):
-    delegation = {}
-    
-    # Custom keyword detection
-    if "deploy" in task.lower():
-        delegation["Deployer"] = "Handle deployment"
-    
-    return delegation
-```
-
-## Best Practices
-
-### 1. Task Description
-- Be specific about requirements
-- Include context when needed
-- Specify constraints clearly
-
-### 2. Agent Selection
-- Let router handle delegation automatically
-- Don't micromanage agent selection
-- Trust the keyword-based routing
-
-### 3. Error Handling
-- Check `success` field in results
-- Review individual worker results
-- Use `verbose=True` for debugging
-
-### 4. Performance
-- Reset orchestrator between unrelated tasks
-- Monitor message bus growth
-- Clear history periodically
-
-## Troubleshooting
-
-### Issue: Agent Not Selected
-
-**Problem**: Expected agent not included in delegation plan
-
-**Solutions:**
-- Add keywords to task description
-- Check router keyword mappings
-- Review `delegation_plan` in results
-
-### Issue: Poor Result Quality
-
-**Problem**: Synthesis doesn't meet expectations
-
-**Solutions:**
-- Provide more context in task
-- Use `verbose=True` to see intermediate steps
-- Review individual worker outputs
-
-### Issue: Slow Execution
-
-**Problem**: Task takes too long
-
-**Solutions:**
-- Reduce task complexity
-- Split into smaller tasks
-- Check for blocking operations
-
-## API Reference
-
-### SwarmOrchestrator
-
-```python
-orchestrator = SwarmOrchestrator()
-
-# Execute task
-result = await orchestrator.execute(
-    user_task: str,
-    verbose: bool = True
-) -> Dict[str, Any]
-
-# Get message log
-messages = orchestrator.get_message_log() -> List[Dict]
-
-# Get capabilities
-capabilities = orchestrator.get_agent_capabilities() -> Dict[str, str]
-
-# Reset state
-orchestrator.reset()
-```
-
-### MessageBus
-
-```python
-bus = MessageBus()
-
-# Send message
-message = bus.send(
-    sender: str,
-    content: str,
-    metadata: Optional[Dict] = None
-) -> Message
-
-# Get messages
-all_messages = bus.get_all_messages() -> List[Message]
-context = bus.get_context_for(agent_name: str, last_n: int) -> List[Message]
-
-# Clear
-bus.clear()
-```
-
-## Performance Metrics
-
-- **Average execution time**: 2-5 seconds per task
-- **Message overhead**: Minimal (~100ms)
-- **Memory usage**: Low (~10MB per orchestrator)
-- **Scalability**: Handles 100+ concurrent tasks
-
-## Future Enhancements
-
-- [ ] Parallel agent execution
-- [ ] Agent learning from past executions
-- [ ] Dynamic agent registration
-- [ ] Persistent message bus
-- [ ] Agent health monitoring
-- [ ] Load balancing across agents
-- [ ] Multi-language support
-
-## Related Documentation
-
-- [Quick Start Guide](./QUICK_START.md)
-- [Sandbox System](./SANDBOX.md)
-- [MCP Integration](./MCP_INTEGRATION.md)
-- [API Reference](../../API_QUICK_REFERENCE.md)
-
----
-
-**Version**: 1.0  
-**Last Updated**: January 2024  
-**Status**: Production Ready
+- `backend/main.py` is 2955 lines — search by endpoint path, not scrolling
+- Frontend has NO package.json, NO node_modules — it's pure HTML/CSS/JS served by nginx
+- `src/config.py` uses `pydantic-settings` with `.env` file — check `.env.example` for all vars
+- `backend/agent/orchestrator.py` has response caching with TTL (default 300s, configurable via `CACHE_TTL_SECONDS`)
+- Signal handlers (SIGTERM/SIGINT) for graceful shutdown with 30s timeout
+- `tests/conftest.py` adds both project root AND `backend/` to `sys.path`
+- The `data/` directory exists but is empty — used for runtime data storage

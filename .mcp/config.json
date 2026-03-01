@@ -1,107 +1,218 @@
 {
   "mcpServers": {
+
     "filesystem": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-filesystem", "."]
     },
+
     "git": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-git", "--repository", "."]
     },
-    "github": {
-      "command": "npx",
-      "args": ["-y", "@github/mcp-server"],
-      "env": { "GITHUB_TOKEN": "${GITHUB_TOKEN}" }
-    },
-    "python-analysis": {
-      "command": "python",
-      "args": ["-m", "mcp_server_python_analysis"],
-      "env": { "PROJECT_PATH": "." }
-    },
+
     "memory": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-memory"]
     },
+
     "sequential-thinking": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-sequential-thinking"]
     },
-    "sqlite": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-sqlite", "--db-path", "./data.db"]
-    },
-    "puppeteer": {
-      "command": "npx",
-      "args": ["-y", "@anthropic/server-puppeteer"]
-    },
-    "playwright": {
-      "command": "npx",
-      "args": ["-y", "@playwright/mcp"]
-    },
+
     "fetch": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-fetch"]
     },
-    "docker": {
-      "command": "npx",
-      "args": ["-y", "mcp-server-docker"]
-    },
+
     "time": {
       "command": "npx",
       "args": ["-y", "@modelcontextprotocol/server-time"]
     },
-    "brave-search": {
+
+    "sqlite": {
       "command": "npx",
-      "args": ["-y", "@brave/brave-search-mcp"],
-      "env": { "BRAVE_API_KEY": "${BRAVE_API_KEY}" }
+      "args": ["-y", "@modelcontextprotocol/server-sqlite", "--db-path", "./data.db"]
     },
+
     "context7": {
       "command": "npx",
       "args": ["-y", "@upstash/context7-mcp"],
-      "env": { "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}" }
+      "env": {
+        "CONTEXT7_API_KEY": "ctx7sk-4b22e736-9f97-457b-a4ba-e2761a25b510"
+      }
     },
+
+    "brave-search": {
+      "command": "npx",
+      "args": ["-y", "@brave/brave-search-mcp"],
+      "env": {
+        "BRAVE_API_KEY": "BSAQ0gsYuaYuEZHayb_Ek1pnl1l2RiW"
+      }
+    },
+
     "exa": {
       "command": "npx",
       "args": ["-y", "exa-mcp-server"],
-      "env": { "EXA_API_KEY": "${EXA_API_KEY}" }
+      "env": {
+        "EXA_API_KEY": "6cdf50f2-7ff7-4461-bb07-1a987509305d"
+      }
     },
+
+    "tavily": {
+      "command": "npx",
+      "args": ["-y", "@tavily/mcp"],
+      "env": {
+        "TAVILY_API_KEY": "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"
+      }
+    },
+
+    "playwright": {
+      "command": "npx",
+      "args": ["-y", "@playwright/mcp"]
+    },
+
+    "puppeteer": {
+      "command": "npx",
+      "args": ["-y", "@anthropic/server-puppeteer"]
+    },
+
+    "docker": {
+      "command": "npx",
+      "args": ["-y", "mcp-server-docker"]
+    },
+
     "mermaid": {
       "command": "npx",
       "args": ["-y", "@narasimhaponnada/mermaid-mcp-server"]
     },
+
+    "yt-dlp": {
+      "command": "npx",
+      "args": ["-y", "mcp-server-yt-dlp"]
+    },
+
+    "python-analysis": {
+      "command": "python",
+      "args": ["-m", "mcp_server_python_analysis"],
+      "env": {
+        "PROJECT_PATH": "."
+      }
+    },
+
+    "github": {
+      "command": "npx",
+      "args": ["-y", "@github/mcp-server"],
+      "env": {
+        "GITHUB_TOKEN": "${GITHUB_TOKEN}"
+      }
+    },
+
+    "upstash": {
+      "command": "npx",
+      "args": ["-y", "@upstash/mcp-server"],
+      "env": {
+        "UPSTASH_REDIS_REST_URL": "https://07d04f4a-70c3-4dd4-a468-e8faac67bf3e.upstash.io",
+        "UPSTASH_REDIS_REST_TOKEN": "AdoCAAIncDJiMjdiYjVhZTJjMTQ0Mjk2OGQyYjI0ZGU4NjlmZWM4YnAyNTU4MTA"
+      }
+    },
+
+    "qdrant": {
+      "command": "uvx",
+      "args": ["mcp-server-qdrant"],
+      "env": {
+        "QDRANT_URL": "https://b7cf7be5-1417-49ae-abe2-1fe712ba393b.europe-west3-0.gcp.cloud.qdrant.io",
+        "QDRANT_API_KEY": "${QDRANT_API_KEY}",
+        "COLLECTION_NAME": "antigravity-agent-memory",
+        "EMBEDDING_PROVIDER": "fastembed"
+      }
+    },
+
+    "daytona": {
+      "command": "npx",
+      "args": ["-y", "@daytona/mcp"],
+      "env": {
+        "DAYTONA_API_KEY": "dtn_68b7b34b0ba64c6c06aa397f984a159f7be718f79782ffe914251dfd07043a10",
+        "DAYTONA_SERVER_URL": "https://app.daytona.io/api"
+      }
+    },
+
+    "n8n": {
+      "command": "npx",
+      "args": ["-y", "@n8n/mcp-server"],
+      "env": {
+        "N8N_API_KEY": "${N8N_API_KEY}",
+        "N8N_BASE_URL": "${N8N_BASE_URL}"
+      }
+    },
+
+    "postgres": {
+      "command": "npx",
+      "args": ["-y", "mcp-server-postgres"],
+      "env": {
+        "POSTGRES_CONNECTION_STRING": "${POSTGRES_CONNECTION_STRING}"
+      }
+    },
+
     "firecrawl": {
       "command": "npx",
       "args": ["-y", "firecrawl-mcp"],
-      "env": { "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}" }
+      "env": {
+        "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
+      }
     },
+
     "agentops": {
       "command": "npx",
       "args": ["-y", "agentops-mcp"],
-      "env": { "AGENTOPS_API_KEY": "${AGENTOPS_API_KEY}" }
-    },
-    "slack": {
-      "command": "npx",
-      "args": ["-y", "@modelcontextprotocol/server-slack"],
       "env": {
-        "SLACK_BOT_TOKEN": "${SLACK_BOT_TOKEN}",
-        "SLACK_TEAM_ID": "${SLACK_TEAM_ID}"
+        "AGENTOPS_API_KEY": "${AGENTOPS_API_KEY}"
       }
     },
-    "aws": {
+
+    "chroma": {
+      "command": "uvx",
+      "args": ["chroma-mcp", "--mode", "embedded", "--data-dir", "./.chroma"]
+    },
+
+    "taskmaster-ai": {
       "command": "npx",
-      "args": ["-y", "mcp-server-aws"],
+      "args": ["-y", "--package=task-master-ai", "task-master-ai"],
       "env": {
-        "AWS_ACCESS_KEY_ID": "${AWS_ACCESS_KEY_ID}",
-        "AWS_SECRET_ACCESS_KEY": "${AWS_SECRET_ACCESS_KEY}",
-        "AWS_REGION": "${AWS_REGION}"
+        "GEMINI_API_KEY": "AIzaSyAEZ6ttFSsd3W8Xv5As3AHIwWCeaFQ90qk"
       }
     },
-    "gitlab": {
+
+    "neon": {
       "command": "npx",
-      "args": ["-y", "mcp-server-gitlab"],
+      "args": ["-y", "@neondatabase/mcp-server-neon"],
       "env": {
-        "GITLAB_TOKEN": "${GITLAB_TOKEN}",
-        "GITLAB_URL": "${GITLAB_URL}"
+        "NEON_API_KEY": "${NEON_API_KEY}"
+      }
+    },
+
+    "openrouter": {
+      "command": "npx",
+      "args": ["-y", "openrouter-mcp"],
+      "env": {
+        "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}"
+      }
+    },
+
+    "linear": {
+      "command": "npx",
+      "args": ["-y", "linear-mcp-server"],
+      "env": {
+        "LINEAR_API_KEY": "${LINEAR_API_KEY}"
+      }
+    },
+
+    "notion": {
+      "command": "npx",
+      "args": ["-y", "@notionhq/notion-mcp-server"],
+      "env": {
+        "NOTION_API_KEY": "${NOTION_API_KEY}"
       }
     }
   }

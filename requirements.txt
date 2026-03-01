@@ -1,9 +1,7 @@
-google-genai>=1.0.0
-google-cloud-aiplatform>=1.38.0
-pydantic
-pydantic-settings
-python-dotenv
+# Root-level dependencies (dev tools + packages not in backend/requirements.txt)
+# NOTE: google-genai, google-cloud-aiplatform, pydantic, pydantic-settings,
+# python-dotenv, and pyngrok are already in backend/requirements.txt.
+# The Dockerfile installs BOTH files, so duplicates are harmless but redundant.
 pytest
-pyngrok>=7.0.0
 httpx
 mcp

@@ -16,3 +16,5 @@ cryptography
 pydantic-settings
 google-genai>=1.0.0
 google-cloud-aiplatform>=1.38.0
+aiohttp
+pyngrok>=7.0.0
