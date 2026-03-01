@@ -2,6 +2,57 @@
   "$schema": "https://modelcontextprotocol.io/schema/mcp.json",
   "description": "Enhanced MCP server configuration for GitHub Copilot - Antigravity Workspace Template. Includes 20+ servers for agents, multi-agents, coding, search, browser automation, and AI model bridges. See docs/MCP_SERVERS_CATALOG.md for the full catalog of 100+ servers.",
   "mcpServers": {
+    "tavily": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@tavily/mcp"],
+      "env": {
+        "TAVILY_API_KEY": "${TAVILY_API_KEY}"
+      },
+      "tools": ["tavily_search", "tavily_extract"]
+    },
+    "upstash": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/mcp-server"],
+      "env": {
+        "UPSTASH_REDIS_REST_URL": "${UPSTASH_REDIS_REST_URL}",
+        "UPSTASH_REDIS_REST_TOKEN": "${UPSTASH_REDIS_REST_TOKEN}"
+      },
+      "tools": ["redis_get", "redis_set", "redis_del", "redis_lpush", "redis_lrange", "redis_zadd", "redis_zrange", "redis_hset", "redis_hget", "redis_hgetall"]
+    },
+    "qdrant": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": ["mcp-server-qdrant"],
+      "env": {
+        "QDRANT_URL": "${QDRANT_URL}",
+        "QDRANT_API_KEY": "${QDRANT_API_KEY}",
+        "COLLECTION_NAME": "antigravity-agent-memory",
+        "EMBEDDING_PROVIDER": "fastembed"
+      },
+      "tools": ["qdrant_store", "qdrant_find"]
+    },
+    "daytona": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@daytona/mcp"],
+      "env": {
+        "DAYTONA_API_KEY": "${DAYTONA_API_KEY}",
+        "DAYTONA_SERVER_URL": "${DAYTONA_SERVER_URL}"
+      },
+      "tools": ["create_sandbox", "list_sandboxes", "delete_sandbox", "run_code", "upload_file", "download_file"]
+    },
+    "n8n": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@n8n/mcp-server"],
+      "env": {
+        "N8N_API_KEY": "${N8N_API_KEY}",
+        "N8N_BASE_URL": "${N8N_BASE_URL}"
+      },
+      "tools": ["list_workflows", "get_workflow", "create_workflow", "execute_workflow", "list_executions"]
+    },
     "filesystem": {
       "type": "stdio",
       "command": "npx",
@@ -90,7 +141,8 @@
       "command": "npx",
       "args": ["-y", "@brave/brave-search-mcp"],
       "env": {
-        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}",
+        "COPILOT_MCP_BRAVE_API_KEY": "${COPILOT_MCP_BRAVE_API_KEY}"
       },
       "tools": ["brave_web_search", "brave_local_search"]
     },
