@@ -55,8 +55,19 @@
 
 ## 🚀 One-Line Installation
 
+> ⚠️ **Security Note**: Piping a remote script directly into bash executes it without inspection. For better security, use the safer method below to download and review the script before running it.
+
 ### Local Installation (Ubuntu/Debian)
 
+**Safer method (recommended):**
+```bash
+# Download and inspect the script before executing
+curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install.sh -o install.sh
+less install.sh   # review the script
+bash install.sh
+```
+
+**Convenience one-liner** (use only if you trust the source):
 ```bash
 curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install.sh | bash
 ```
@@ -75,6 +86,15 @@ start.bat
 
 ### Remote VPS Installation (via SSH)
 
+**Safer method (recommended):**
+```bash
+# Download and inspect the script before executing
+curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh -o install-remote.sh
+less install-remote.sh   # review the script
+bash install-remote.sh
+```
+
+**Convenience one-liner** (use only if you trust the source):
 ```bash
 # Basic installation
 curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh | bash
@@ -893,8 +913,10 @@ antigravity-workspace-template/
 # 1. SSH into server
 ssh user@your-vps-ip
 
-# 2. Run remote installer
-curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh | bash
+# 2. Run remote installer (safer: download, inspect, then execute)
+curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh -o install-remote.sh
+less install-remote.sh   # review before running
+bash install-remote.sh
 
 # 3. Configure
 ./configure.sh

@@ -53,7 +53,10 @@ The installer will:
 
 ```bash
 # On remote Ubuntu VPS
-curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh | bash
+# Safer: download and inspect the script before executing
+curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh -o install-remote.sh
+less install-remote.sh   # review before running
+bash install-remote.sh
 ```
 
 Includes firewall, nginx, and SSL setup!

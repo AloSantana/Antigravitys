@@ -5,16 +5,19 @@
 # Optimized for remote Ubuntu VPS deployment via SSH
 # Supports: Ubuntu 20.04+, Debian 11+
 #
-# Usage:
-#   Basic: curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh | bash
+# Usage (safer - download, inspect, then execute):
+#   curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh -o install-remote.sh
+#   less install-remote.sh  # review before running
+#   bash install-remote.sh
 #
 #   With auto-SSL for seecast.cloud:
-#   AUTO_SSL_DOMAIN=seecast.cloud AUTO_SSL_EMAIL=admin@seecast.cloud \
-#     curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh | bash
+#   AUTO_SSL_DOMAIN=seecast.cloud AUTO_SSL_EMAIL=admin@seecast.cloud bash install-remote.sh
 #
 #   With custom domain:
-#   EXTERNAL_HOST=yourdomain.com AUTO_SSL_EMAIL=you@example.com \
-#     curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh | bash
+#   EXTERNAL_HOST=yourdomain.com AUTO_SSL_EMAIL=you@example.com bash install-remote.sh
+#
+# Note: Running scripts piped directly from the internet (curl | bash) is
+# discouraged. Download and inspect this script before executing it.
 #
 # This script will:
 #   ✓ Install all system dependencies (Python, Node.js, Docker)
