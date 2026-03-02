@@ -50,6 +50,7 @@
 | **[docs/MASTER_AGENT_MISSION.md](docs/MASTER_AGENT_MISSION.md)** | **Optimized multi-phase agent mission prompt** | Full platform config |
 | **[COPILOT_SETUP.md](COPILOT_SETUP.md)** | GitHub Copilot agent setup | Copilot configuration |
 | **[GEMINI.md](GEMINI.md)** | Gemini AI agent instructions | Gemini integration |
+| **[docs/OH_MY_OPENCODE_SETUP.md](docs/OH_MY_OPENCODE_SETUP.md)** | Oh-My-OpenCode installation & setup | OpenCode plugin |
 | **[mission.md](mission.md)** | Project mission statement | Vision |
 
 ### GitHub Copilot Custom Agents
