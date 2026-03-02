@@ -15,6 +15,17 @@ The remote installer automatically detects and configures SSL for `seecast.cloud
 
 ### One-Line Installation with Auto-SSL
 
+> ⚠️ **Security Note**: Piping a remote script directly into bash executes it without inspection. Download and review the script first.
+
+**Safer method (recommended):**
+```bash
+# Download and inspect the script before executing
+curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh -o install-remote.sh
+less install-remote.sh   # review before running
+AUTO_SSL_DOMAIN=seecast.cloud AUTO_SSL_EMAIL=admin@seecast.cloud bash install-remote.sh
+```
+
+**Convenience one-liner** (use only if you trust the source):
 ```bash
 # For seecast.cloud domain
 AUTO_SSL_DOMAIN=seecast.cloud AUTO_SSL_EMAIL=admin@seecast.cloud \
@@ -317,12 +328,15 @@ sudo tar -czf letsencrypt-backup-$(date +%Y%m%d).tar.gz /etc/letsencrypt
 ### Installation Commands
 
 ```bash
+# Safer: download and inspect before executing
+curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh -o install-remote.sh
+less install-remote.sh   # review before running
+
 # Basic install
-curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh | bash
+bash install-remote.sh
 
 # With auto-SSL for seecast.cloud
-AUTO_SSL_DOMAIN=seecast.cloud AUTO_SSL_EMAIL=admin@seecast.cloud \
-  curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh | bash
+AUTO_SSL_DOMAIN=seecast.cloud AUTO_SSL_EMAIL=admin@seecast.cloud bash install-remote.sh
 
 # Manual SSL setup later
 sudo certbot --nginx -d yourdomain.com

@@ -19,12 +19,16 @@ A comprehensive guide for deploying Antigravity Workspace on a remote Ubuntu VPS
 
 The fastest way to deploy on a remote Ubuntu VPS:
 
+> ⚠️ **Security Note**: Piping a remote script directly into bash executes it without inspection. Use the safer method below to download and review the script first.
+
 ```bash
 # SSH into your VPS
 ssh user@your-vps-ip
 
-# Run the one-command installer
-curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh | bash
+# Safer: download and inspect the script before executing
+curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh -o install-remote.sh
+less install-remote.sh   # review before running
+bash install-remote.sh
 ```
 
 This will:
@@ -67,7 +71,10 @@ ssh user@your-vps-ip
 ### Step 2: Run Remote Installer
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh | bash
+# Safer: download and inspect the script before executing
+curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh -o install-remote.sh
+less install-remote.sh   # review before running
+bash install-remote.sh
 ```
 
 ### Step 3: Follow Prompts
