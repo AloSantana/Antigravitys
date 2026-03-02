@@ -130,11 +130,86 @@ services:
     profiles:
       - with-ollama
 
+  # ── Ecosystem profile ──────────────────────────────────────────────────────
+  # Start the full AI ecosystem alongside the main backend.
+  # Usage: docker compose --profile ecosystem up -d
+  #
+  # oh-my-opencode – Sisyphus agent harness
+  oh-my-opencode:
+    image: node:20-alpine
+    container_name: antigravity-oh-my-opencode
+    working_dir: /app
+    command: >
+      sh -c "[ -f package.json ] && npm install --silent && npx oh-my-opencode --port 9300 || { echo 'oh-my-opencode not installed in this image'; exit 1; }"
+    volumes:
+      - ./ecosystem/oh-my-opencode:/app:ro
+      - ./opencode.json:/app/opencode.json:ro
+      - ./.opencode/oh-my-opencode.json:/app/.opencode/oh-my-opencode.json:ro
+    ports:
+      - "9300:9300"
+    networks:
+      - antigravity-network
+    restart: unless-stopped
+    profiles:
+      - ecosystem
+
+  # OpenCode Agent Hub – core agent engine API
+  opencode-hub:
+    image: node:20-alpine
+    container_name: antigravity-opencode-hub
+    working_dir: /app
+    command: >
+      sh -c "[ -f package.json ] && npm install --silent && npx opencode serve --port 9100 || { echo 'opencode not installed in this image'; exit 1; }"
+    volumes:
+      - ./ecosystem/opencode:/app:ro
+      - ./opencode.json:/root/.config/opencode/opencode.json:ro
+    ports:
+      - "9100:9100"
+    networks:
+      - antigravity-network
+    restart: unless-stopped
+    profiles:
+      - ecosystem
+
+  # OpenClaw – personal AI assistant / message-routing gateway
+  openclaw-gateway:
+    image: node:20-alpine
+    container_name: antigravity-openclaw
+    working_dir: /app
+    command: >
+      sh -c "[ -f package.json ] && npm install --silent && npx openclaw --port 9200 || { echo 'openclaw not installed in this image'; exit 1; }"
+    volumes:
+      - ./ecosystem/openclaw:/app:ro
+    ports:
+      - "9200:9200"
+    networks:
+      - antigravity-network
+    restart: unless-stopped
+    profiles:
+      - ecosystem
+
+  # Swarm-Tools – multi-agent coordination SQLite interface
+  swarm-tools:
+    image: python:3.11-slim
+    container_name: antigravity-swarm-tools
+    working_dir: /app
+    command: >
+      sh -c "[ -f serve.py ] && pip install -r requirements.txt -q && python serve.py --db /swarm/swarm.db || { echo 'swarm-tools serve.py not found in this image'; exit 1; }"
+    volumes:
+      - ./ecosystem/swarm-tools:/app:ro
+      - swarm-db:/swarm
+    networks:
+      - antigravity-network
+    restart: unless-stopped
+    profiles:
+      - ecosystem
+
 volumes:
   app-data:      # Persistent app data (conversations.db, users.db, etc.)
   chroma-data:
   redis-data:
   ollama-data:
+  swarm-db:      # Swarm-Tools SQLite database (ecosystem profile)
 
 networks:
   antigravity-network:

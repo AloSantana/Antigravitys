@@ -292,7 +292,79 @@ curl "http://localhost:8000/api/artifacts/search?q=test"
 
 ---
 
-## 🎓 Next Steps
+## 🌐 Ecosystem Mode — Master Control Plane
+
+Antigravitys is the **central orchestrator** for a broader AI development
+ecosystem.  With a single flag you can boot the Sisyphus agent harness
+(`oh-my-opencode`), the multi-agent swarm (`swarm-tools`), the message-routing
+gateway (`openclaw`), and the OpenCode Agent Hub alongside the main workspace.
+
+### Step 1 — Bootstrap sister repositories
+
+```bash
+# Clone all ecosystem repos into ecosystem/
+./ecosystem-setup.sh
+
+# Update already-cloned repos
+./ecosystem-setup.sh --update
+
+# Symlink a local checkout instead of cloning
+./ecosystem-setup.sh --link ~/projects/openclaw
+```
+
+This creates an `ecosystem/` directory containing:
+
+| Directory | Repo | Purpose |
+|-----------|------|---------|
+| `ecosystem/oh-my-opencode` | AloSantana/oh-my-opencode | Sisyphus agent harness |
+| `ecosystem/opencode` | AloSantana/opencode | Core OpenCode engine |
+| `ecosystem/openclaw` | AloSantana/openclaw | Message-routing gateway |
+| `ecosystem/swarm-tools` | AloSantana/swarm-tools | Multi-agent coordination |
+
+### Step 2 — Start the full ecosystem (one command)
+
+```bash
+# Start Antigravitys + all ecosystem daemons
+./start.sh --ecosystem
+```
+
+The `--ecosystem` flag additionally starts:
+- **oh-my-opencode** harness on port **9300**
+- **OpenCode Agent Hub** on port **9100**
+- **OpenClaw gateway** on port **9200**
+- **Swarm-Tools** SQLite interface
+
+### Step 3 — Docker ecosystem mode
+
+```bash
+# Start core services + full ecosystem in containers
+docker compose --profile ecosystem up -d
+
+# Combined with other profiles (Redis, ChromaDB)
+docker compose --profile ecosystem --profile with-redis --profile with-chromadb up -d
+```
+
+### Step 4 — Manage OpenCode plugins via the API
+
+```bash
+# List installed plugins
+curl http://localhost:8000/api/ecosystem/plugins
+
+# Install a plugin from the marketplace
+curl -X POST http://localhost:8000/api/ecosystem/plugins \
+  -H "Content-Type: application/json" \
+  -d '{"plugin_name": "opencode-plugin-github"}'
+
+# Check full ecosystem status
+curl http://localhost:8000/api/ecosystem/status
+
+# Uninstall a plugin
+curl -X DELETE http://localhost:8000/api/ecosystem/plugins/opencode-plugin-github
+```
+
+---
+
+
 
 ### Explore Advanced Features
 

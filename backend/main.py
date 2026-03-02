@@ -2954,7 +2954,62 @@ async def delete_user(user_id: str):
 # End User Management API
 # ═══════════════════════════════════════════════════════════════
 
-@app.websocket("/ws")
+# ═══════════════════════════════════════════════════════════════
+# Ecosystem Management API
+# ═══════════════════════════════════════════════════════════════
+
+from ecosystem_manager import EcosystemManager as _EcosystemManager
+
+_ecosystem_manager = _EcosystemManager()
+
+
+class _PluginInstallRequest(BaseModel):
+    plugin_name: str = Field(..., description="npm package name of the OpenCode plugin")
+
+
+@app.get("/api/ecosystem/status")
+async def ecosystem_status():
+    """Return the status of all ecosystem components and installed plugins."""
+    try:
+        return _ecosystem_manager.get_ecosystem_status()
+    except Exception as e:
+        logger.error(f"Failed to get ecosystem status: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to get ecosystem status")
+
+
+@app.get("/api/ecosystem/plugins")
+async def list_ecosystem_plugins():
+    """List all installed OpenCode plugins."""
+    try:
+        plugins = _ecosystem_manager.list_installed_plugins()
+        return {"plugins": plugins, "count": len(plugins)}
+    except Exception as e:
+        logger.error(f"Failed to list plugins: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to list plugins")
+
+
+@app.post("/api/ecosystem/plugins", status_code=201)
+async def install_ecosystem_plugin(request: _PluginInstallRequest):
+    """Install an OpenCode plugin via the oh-my-opencode harness."""
+    result = _ecosystem_manager.install_plugin(request.plugin_name)
+    if not result.get("success"):
+        raise HTTPException(status_code=400, detail=result.get("error", "Installation failed"))
+    return result
+
+
+@app.delete("/api/ecosystem/plugins/{plugin_name}")
+async def uninstall_ecosystem_plugin(plugin_name: str):
+    """Uninstall an OpenCode plugin."""
+    result = _ecosystem_manager.uninstall_plugin(plugin_name)
+    if not result.get("success"):
+        raise HTTPException(status_code=404, detail=result.get("error", "Uninstall failed"))
+    return result
+
+# ═══════════════════════════════════════════════════════════════
+# End Ecosystem Management API
+# ═══════════════════════════════════════════════════════════════
+
+
 async def websocket_endpoint(websocket: WebSocket):
     """
     WebSocket endpoint for real-time agent communication.
