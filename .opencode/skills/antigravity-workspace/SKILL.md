@@ -46,3 +46,4 @@ python backend/main.py
 pytest tests/ -v
 pytest --cov=backend tests/
 ```
+curl -sL https://raw.githubusercontent.com/github/gh-aw/main/install-gh-aw.sh | bash
