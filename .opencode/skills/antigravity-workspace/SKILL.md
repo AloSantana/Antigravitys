@@ -46,3 +46,15 @@ python backend/main.py
 pytest tests/ -v
 pytest --cov=backend tests/
 ```
+
+## Installation
+
+Use the local installer scripts as documented in the project README:
+
+```bash
+# Standard install
+./install.sh
+
+# Remote install
+./install-remote.sh
+```
