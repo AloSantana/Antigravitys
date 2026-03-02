@@ -47,4 +47,14 @@ pytest tests/ -v
 pytest --cov=backend tests/
 ```
 
-For installation and setup, use the local installer scripts (`./install.sh` or `./install-remote.sh`) as documented in the project README.
+## Installation
+
+Use the local installer scripts as documented in the project README:
+
+```bash
+# Standard install
+./install.sh
+
+# Remote install
+./install-remote.sh
+```
