@@ -434,7 +434,11 @@ Output:
 
 ### Run Remote Installation
 ```bash
-curl -fsSL https://raw.githubusercontent.com/.../install-remote.sh | bash
+# Safer: download and inspect before running. Pin to a tag if available.
+curl -fsSL -o install-remote.sh https://raw.githubusercontent.com/.../install-remote.sh
+less install-remote.sh
+sha256sum install-remote.sh
+bash install-remote.sh
 ```
 
 ### Verify Fixes
