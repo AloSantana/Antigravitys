@@ -23,6 +23,13 @@ class Settings(BaseSettings):
     GOOGLE_API_KEY: str = ""
     GEMINI_API_KEY: str = ""  # Alias for compatibility
     GEMINI_MODEL_NAME: str = "gemini-2.0-flash-exp"
+
+    # Anthropic Configuration
+    ANTHROPIC_API_KEY: str = ""
+
+    # OpenRouter Configuration
+    OPENROUTER_API_KEY: str = ""
+    OPENROUTER_MODEL: str = "anthropic/claude-sonnet-4-5"
     
     # Agent Configuration
     AGENT_NAME: str = "AntigravityAgent"

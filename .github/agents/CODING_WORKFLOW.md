@@ -34,6 +34,43 @@ Time: 30-45 minutes | Quality: Production-secure
 Agents: code-reviewer → testing-stability-expert → docs-master
 ```
 
+## Swarm-Tools & Oh-My-OpenCode Integration Rules
+
+### 🐝 Swarm-Tools: Global Database Rule (MANDATORY)
+- **ALL swarm data must use the SINGLE global database** at `~/.config/swarm-tools/swarm.db`.
+- **Local `swarm.db` files are BANNED** — never create them inside the project.
+- **Use `HiveAdapter`** from `swarm-mail` programmatically for all swarm DB access:
+  ```python
+  from swarm_mail import HiveAdapter
+  hive = HiveAdapter()  # automatically targets ~/.config/swarm-tools/swarm.db
+  ```
+- **NEVER use `bd` CLI commands** — they are deprecated.
+
+### 🎣 Oh-My-OpenCode: Plugin Wrapper Rules
+- **Self-contained wrappers**: Plugin wrappers must not depend on each other's state.
+- **Do NOT import `opencode-swarm-plugin` directly** — the runtime loads it; direct imports cause double-init.
+- **Sisyphus hook tiers** (46 total):
+  | Tier | Hooks | Purpose |
+  |------|-------|---------|
+  | 0 | `on_session_start` | Load context, prime memory |
+  | 1 | `on_message_in`, `on_message_out` | Transform/log messages |
+  | 2 | `on_tool_call`, `on_tool_result` | Intercept tool calls |
+  | 3 | `on_session_end` | Persist state, sync swarm DB |
+
+### Swarm Workflow (OpenCode TUI)
+```
+/swarm "task"   → decompose + spawn parallel workers
+/hive           → query and manage task cells
+/inbox          → messages from other agents
+/status         → swarm coordination status
+/handoff        → end session with sync notes
+```
+
+### Python Swarm API (Backend)
+Use `POST /api/swarm/execute` for swarm tasks from the backend API.
+Use `src/swarm.py` SwarmOrchestrator directly in Python code.
+**Do NOT** bypass these interfaces with direct DB writes.
+
 ## Workflow 1: Feature Development (Full Cycle)
 
 ### Stage 1: Planning & Structure (5-10 min)

@@ -52,6 +52,28 @@ You have access to these MCP servers:
 - Identify security concerns
 - Recommend refactoring strategies
 
+### 5. Sisyphus Multi-Agent Orchestration
+You natively understand the **Sisyphus orchestration lifecycle** used by `oh-my-opencode`:
+
+#### Hook Tiers (46 total)
+| Tier | Hook(s) | When it fires |
+|------|---------|---------------|
+| 0 | `on_session_start` | Session opens — load context, prime memory |
+| 1 | `on_message_in`, `on_message_out` | Every message — transform/log |
+| 2 | `on_tool_call`, `on_tool_result` | Every tool invocation — intercept/audit |
+| 3 | `on_session_end` | Session closes — persist state, sync swarm DB |
+
+#### Swarm-Tools Architecture Constraints
+- **Single global DB**: `~/.config/swarm-tools/swarm.db` is the only allowed swarm store.
+- **HiveAdapter** (`from swarm_mail import HiveAdapter`) is the only programmatic interface.
+- **No `bd` CLI** in code — deprecated; use HiveAdapter instead.
+- **Self-contained wrappers**: Plugin wrappers must not import `opencode-swarm-plugin` directly.
+
+#### Antigravity ↔ Swarm-Tools Boundary
+- `src/swarm.py` SwarmOrchestrator = Python/backend swarm (in-memory, API-accessible via `POST /api/swarm/execute`)
+- `opencode-swarm-plugin` `/swarm` command = OpenCode-native swarm (persists to `.hive/`, backed by global `swarm.db`)
+- **Both complement each other** — design cross-agent workflows to use the appropriate layer.
+
 ## Architecture Analysis Framework
 
 ### Initial Assessment Checklist
