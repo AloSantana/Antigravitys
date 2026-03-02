@@ -46,6 +46,7 @@
 | **[ANTIGRAVITY_MASTER_GUIDE.md](ANTIGRAVITY_MASTER_GUIDE.md)** | Canonical MCP server setup guide | MCP + agents |
 | **[docs/MASTER_AI_AGENT_PROMPT.md](docs/MASTER_AI_AGENT_PROMPT.md)** | Master system prompt + full cross-platform integration guide (Antigravity + OpenCode + Gemini CLI) | All platforms |
 | **[docs/OPENCODE_INTEGRATION.md](docs/OPENCODE_INTEGRATION.md)** | OpenCode plugin ecosystem (oh-my-opencode, gsd-opencode, swarm-tools, opencode-sessions) | OpenCode |
+| **[docs/MASTER_AGENT_MISSION.md](docs/MASTER_AGENT_MISSION.md)** | **Optimized multi-phase agent mission prompt** | Full platform config |
 | **[COPILOT_SETUP.md](COPILOT_SETUP.md)** | GitHub Copilot agent setup | Copilot configuration |
 | **[GEMINI.md](GEMINI.md)** | Gemini AI agent instructions | Gemini integration |
 | **[mission.md](mission.md)** | Project mission statement | Vision |
@@ -170,10 +171,11 @@
 4. ✅ [TROUBLESHOOTING.md](TROUBLESHOOTING.md) — Troubleshooting
 
 ### For AI/Agent Development
-1. ✅ [ANTIGRAVITY_MASTER_GUIDE.md](ANTIGRAVITY_MASTER_GUIDE.md) — MCP + agent setup
-2. ✅ [.github/agents/README.md](.github/agents/README.md) — Agent catalogue
-3. ✅ [.github/agents/AGENT_ORCHESTRATION.md](.github/agents/AGENT_ORCHESTRATION.md) — Multi-agent workflows
-4. ✅ [GEMINI.md](GEMINI.md) — Gemini agent config
+1. ✅ [docs/MASTER_AGENT_MISSION.md](docs/MASTER_AGENT_MISSION.md) — **Complete multi-phase config mission prompt**
+2. ✅ [ANTIGRAVITY_MASTER_GUIDE.md](ANTIGRAVITY_MASTER_GUIDE.md) — MCP + agent setup
+3. ✅ [.github/agents/README.md](.github/agents/README.md) — Agent catalogue
+4. ✅ [.github/agents/AGENT_ORCHESTRATION.md](.github/agents/AGENT_ORCHESTRATION.md) — Multi-agent workflows
+5. ✅ [GEMINI.md](GEMINI.md) — Gemini agent config
 
 ---
 
