@@ -11,6 +11,7 @@ import os
 import logging
 import signal
 import asyncio
+import sqlite3
 from typing import Dict, Any, List, Optional
 from dotenv import load_dotenv
 from contextlib import asynccontextmanager
@@ -30,6 +31,7 @@ from security import (
 from settings_manager import SettingsManager
 from conversation_manager import ConversationManager
 from artifact_manager import ArtifactManager
+from user_manager import UserManager, VALID_ROLES as _USER_VALID_ROLES
 
 # Load environment variables
 load_dotenv()
@@ -60,6 +62,7 @@ settings_manager = None
 conversation_manager = None
 artifact_manager = None
 agent_manager_instance = None
+user_manager = None
 
 # Project root (parent of backend/)
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -88,7 +91,7 @@ async def lifespan(app: FastAPI):
     logger.info(f"Platform: {platform_info['platform']} ({platform_info['system']} {platform_info['release']})")
     
     # Initialize global components
-    global orchestrator, watcher, settings_manager, conversation_manager, artifact_manager, agent_manager_instance
+    global orchestrator, watcher, settings_manager, conversation_manager, artifact_manager, agent_manager_instance, user_manager
     
     # Initialize basic managers first
     try:
@@ -98,6 +101,7 @@ async def lifespan(app: FastAPI):
         os.makedirs(data_dir, exist_ok=True)
         conversation_manager = ConversationManager(db_path=os.path.join(data_dir, "conversations.db"))
         artifact_manager = ArtifactManager(artifacts_dir=os.path.join(project_root, "artifacts"))
+        user_manager = UserManager(db_path=os.path.join(data_dir, "users.db"))
         agent_manager_instance = AgentManager(agents_dir=os.path.join(project_root, ".github", "agents"))
         logger.info("Basic managers initialized")
     except Exception as e:
@@ -297,129 +301,10 @@ async def readiness_check():
     Kubernetes readiness probe - checks if app is ready to serve traffic.
     Returns detailed component health status.
     """
-    health_status: Dict[str, Any] = {
-        "status": "ready",
-        "components": {}
-    }
-    
-    all_healthy = True
-    
-    # Check watcher
-    try:
-        watcher_healthy = watcher.is_healthy()
-        health_status["components"]["watcher"] = {
-            "status": "healthy" if watcher_healthy else "unhealthy",
-            "running": watcher.is_running()
-        }
-        if not watcher_healthy:
-            all_healthy = False
-    except Exception as e:
-        logger.error(f"Error checking watcher health: {e}")
-        health_status["components"]["watcher"] = {
-            "status": "error",
-            "error": str(e)
-        }
-        all_healthy = False
-    
-    # Check ChromaDB / Vector Store
-    try:
-        from rag.store import VectorStore
-        test_store = VectorStore()
-        
-        # Test basic query
-        if test_store.collection:
-            # Simple test query
-            test_result = test_store.query([[0.1] * 384], n_results=1)
-            chromadb_healthy = test_result is not None
-            health_status["components"]["chromadb"] = {
-                "status": "healthy" if chromadb_healthy else "unhealthy",
-                "collection": "initialized" if test_store.collection else "not initialized"
-            }
-            if not chromadb_healthy:
-                all_healthy = False
-        else:
-            health_status["components"]["chromadb"] = {
-                "status": "unhealthy",
-                "collection": "not initialized"
-            }
-            all_healthy = False
-    except Exception as e:
-        logger.error(f"Error checking ChromaDB health: {e}")
-        health_status["components"]["chromadb"] = {
-            "status": "error",
-            "error": str(e)
-        }
-        all_healthy = False
-    
-    # Check cache
-    try:
-        if orchestrator:
-            cache_size = len(orchestrator._response_cache)
-            cache_hit_rate = orchestrator.get_cache_hit_rate()
-            health_status["components"]["cache"] = {
-                "status": "healthy",
-                "size": cache_size,
-                "hit_rate": f"{cache_hit_rate:.1%}"
-            }
-        else:
-            health_status["components"]["cache"] = {
-                "status": "unhealthy",
-                "error": "Orchestrator not initialized"
-            }
-            # If orchestrator is missing, that IS critical for readiness
-            all_healthy = False
-    except Exception as e:
-        logger.error(f"Error checking cache health: {e}")
-        health_status["components"]["cache"] = {
-            "status": "error",
-            "error": str(e)
-        }
-        # Cache error is not critical
-    
-    # Check disk space for drop_zone
-    try:
-        import shutil
-        disk_usage = shutil.disk_usage(watcher.watch_dir)
-        free_gb = disk_usage.free / (1024**3)
-        total_gb = disk_usage.total / (1024**3)
-        used_percent = (disk_usage.used / disk_usage.total) * 100
-        
-        disk_healthy = used_percent < 95  # Warn if >95% used
-        health_status["components"]["disk"] = {
-            "status": "healthy" if disk_healthy else "warning",
-            "free_gb": f"{free_gb:.2f}",
-            "total_gb": f"{total_gb:.2f}",
-            "used_percent": f"{used_percent:.1f}%"
-        }
-        if not disk_healthy:
-            logger.warning(f"Disk usage high: {used_percent:.1f}%")
-    except Exception as e:
-        logger.error(f"Error checking disk space: {e}")
-        health_status["components"]["disk"] = {
-            "status": "error",
-            "error": str(e)
-        }
-        # Disk check error is not critical for readiness
-    
-    # Check local LLM (optional - don't fail if not available)
-    try:
-        from agent.local_client import LocalClient
-        # Just check if we can create client, don't actually call it
-        test_client = LocalClient()
-        health_status["components"]["local_llm"] = {
-            "status": "available",
-            "note": "Not tested (expensive operation)"
-        }
-    except Exception as e:
-        health_status["components"]["local_llm"] = {
-            "status": "unavailable",
-            "error": str(e)
-        }
-        # LLM unavailability is not critical for basic readiness
-    
-    # Set overall status
-    health_status["status"] = "ready" if all_healthy else "degraded"
-    
+    from health_check import build_readiness_report
+
+    health_status, all_healthy = build_readiness_report(watcher, orchestrator)
+
     # Return 503 if not ready
     if not all_healthy:
         from fastapi import Response
@@ -428,7 +313,7 @@ async def readiness_check():
             status_code=503,
             media_type="application/json"
         )
-    
+
     return health_status
 
 @app.get("/config")
@@ -2886,6 +2771,187 @@ async def reset_rotator_stats(request: Request, service: Optional[str] = None):
 
 # ═══════════════════════════════════════════════════════════════
 # End Model Rotator API
+# ═══════════════════════════════════════════════════════════════
+
+# ═══════════════════════════════════════════════════════════════
+# User Management API
+# ═══════════════════════════════════════════════════════════════
+
+_role_pattern = "^(" + "|".join(sorted(_USER_VALID_ROLES)) + ")$"
+
+
+class UserCreate(BaseModel):
+    username: str = Field(..., min_length=3, max_length=64)
+    email: str = Field(..., min_length=5, max_length=254)
+    password: str = Field(..., min_length=8, max_length=128)
+    full_name: Optional[str] = Field(None, max_length=128)
+    role: str = Field("user", pattern=_role_pattern)
+    metadata: Dict[str, Any] = Field(default_factory=dict)
+
+
+class UserUpdate(BaseModel):
+    email: Optional[str] = Field(None, min_length=5, max_length=254)
+    full_name: Optional[str] = Field(None, max_length=128)
+    role: Optional[str] = Field(None, pattern=_role_pattern)
+    is_active: Optional[bool] = None
+    metadata: Optional[Dict[str, Any]] = None
+
+
+class PasswordUpdate(BaseModel):
+    new_password: str = Field(..., min_length=8, max_length=128)
+
+
+@app.post("/api/users", status_code=201)
+async def create_user(user: UserCreate):
+    """Create a new user account."""
+    if user_manager is None:
+        raise HTTPException(status_code=503, detail="User manager not available")
+    try:
+        created = user_manager.create_user(
+            username=user.username,
+            email=user.email,
+            password=user.password,
+            full_name=user.full_name,
+            role=user.role,
+            metadata=user.metadata,
+        )
+        return created
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except sqlite3.IntegrityError:
+        raise HTTPException(status_code=409, detail="Username or email already exists")
+    except Exception as e:
+        logger.error(f"Failed to create user: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to create user")
+
+
+@app.get("/api/users")
+async def list_users(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=100),
+    role: Optional[str] = Query(None),
+    is_active: Optional[bool] = Query(None),
+):
+    """List users with optional filtering and pagination."""
+    if user_manager is None:
+        raise HTTPException(status_code=503, detail="User manager not available")
+    try:
+        users, total = user_manager.list_users(
+            skip=skip, limit=limit, role=role, is_active=is_active
+        )
+        return {"users": users, "total": total, "skip": skip, "limit": limit}
+    except Exception as e:
+        logger.error(f"Failed to list users: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to list users")
+
+
+@app.get("/api/users/search")
+async def search_users(
+    q: str = Query(..., min_length=1),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=100),
+):
+    """Search users by username, email, or full name."""
+    if user_manager is None:
+        raise HTTPException(status_code=503, detail="User manager not available")
+    try:
+        users, total = user_manager.search_users(query=q, skip=skip, limit=limit)
+        return {"users": users, "total": total, "query": q}
+    except Exception as e:
+        logger.error(f"Failed to search users: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to search users")
+
+
+@app.get("/api/users/stats")
+async def get_user_stats():
+    """Return aggregate user statistics."""
+    if user_manager is None:
+        raise HTTPException(status_code=503, detail="User manager not available")
+    try:
+        return user_manager.get_statistics()
+    except Exception as e:
+        logger.error(f"Failed to get user statistics: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to retrieve user statistics")
+
+
+@app.get("/api/users/{user_id}")
+async def get_user(user_id: str):
+    """Retrieve a user by ID."""
+    if user_manager is None:
+        raise HTTPException(status_code=503, detail="User manager not available")
+    try:
+        user = user_manager.get_user(user_id)
+        if not user:
+            raise HTTPException(status_code=404, detail="User not found")
+        return user
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to get user {user_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to retrieve user")
+
+
+@app.patch("/api/users/{user_id}")
+async def update_user(user_id: str, updates: UserUpdate):
+    """Update an existing user's fields."""
+    if user_manager is None:
+        raise HTTPException(status_code=503, detail="User manager not available")
+    try:
+        updated = user_manager.update_user(
+            user_id=user_id,
+            email=updates.email,
+            full_name=updates.full_name,
+            role=updates.role,
+            is_active=updates.is_active,
+            metadata=updates.metadata,
+        )
+        if not updated:
+            raise HTTPException(status_code=404, detail="User not found")
+        return updated
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
+    except Exception as e:
+        logger.error(f"Failed to update user {user_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to update user")
+
+
+@app.post("/api/users/{user_id}/password")
+async def update_user_password(user_id: str, body: PasswordUpdate):
+    """Update a user's password."""
+    if user_manager is None:
+        raise HTTPException(status_code=503, detail="User manager not available")
+    try:
+        updated = user_manager.update_password(user_id=user_id, new_password=body.new_password)
+        if not updated:
+            raise HTTPException(status_code=404, detail="User not found")
+        return {"success": True, "message": "Password updated successfully"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to update password for user {user_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to update password")
+
+
+@app.delete("/api/users/{user_id}")
+async def delete_user(user_id: str):
+    """Delete a user account."""
+    if user_manager is None:
+        raise HTTPException(status_code=503, detail="User manager not available")
+    try:
+        deleted = user_manager.delete_user(user_id)
+        if not deleted:
+            raise HTTPException(status_code=404, detail="User not found")
+        return {"success": True, "message": f"User {user_id} deleted"}
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to delete user {user_id}: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Failed to delete user")
+
+# ═══════════════════════════════════════════════════════════════
+# End User Management API
 # ═══════════════════════════════════════════════════════════════
 
 @app.websocket("/ws")

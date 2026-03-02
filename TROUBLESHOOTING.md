@@ -1281,8 +1281,8 @@ Include:
 ### Where to Get Help
 
 - **Documentation**: [docs/](docs/) folder
-- **GitHub Issues**: https://github.com/primoscope/antigravity-workspace-template/issues
-- **Discussions**: https://github.com/primoscope/antigravity-workspace-template/discussions
+- **GitHub Issues**: https://github.com/AloSantana/Antigravitys/issues
+- **Discussions**: https://github.com/AloSantana/Antigravitys/discussions
 
 ---
 
@@ -1342,7 +1342,7 @@ rsync -av artifacts/ /backup/artifacts/
 
 Run the auto-issue finder: `python tools/auto_issue_finder.py --auto-fix`
 
-Or open an issue: https://github.com/primoscope/antigravity-workspace-template/issues
+Or open an issue: https://github.com/AloSantana/Antigravitys/issues
 
 [⬆ Back to Top](#-troubleshooting-guide)
 

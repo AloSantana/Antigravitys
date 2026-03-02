@@ -442,8 +442,8 @@ export PROJECT_PATH="/path/to/your/project"
 - [Server Repository Issues](https://github.com/modelcontextprotocol/servers/issues)
 
 ### Project-Specific Support
-- [Antigravity Template Issues](https://github.com/primoscope/antigravity-workspace-template/issues)
-- [Antigravity Template Discussions](https://github.com/primoscope/antigravity-workspace-template/discussions)
+- [Antigravity Template Issues](https://github.com/AloSantana/Antigravitys/issues)
+- [Antigravity Template Discussions](https://github.com/AloSantana/Antigravitys/discussions)
 
 ## Migration Guide
 

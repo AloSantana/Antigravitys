@@ -193,7 +193,7 @@
 1. ✅ Run auto-issue finder: `python tools/auto_issue_finder.py --verbose`
 2. ✅ Check [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 3. ✅ Review logs: `tail -f logs/backend.log`
-4. ✅ Search [GitHub Issues](https://github.com/primoscope/antigravity-workspace-template/issues)
+4. ✅ Search [GitHub Issues](https://github.com/AloSantana/Antigravitys/issues)
 5. ✅ Open new issue with diagnostic report
 
 ---
@@ -291,9 +291,9 @@ curl http://localhost:8000/performance/metrics | jq .
 
 ## 🔗 External Links
 
-- **GitHub Repository:** https://github.com/primoscope/antigravity-workspace-template
-- **Issues:** https://github.com/primoscope/antigravity-workspace-template/issues
-- **Discussions:** https://github.com/primoscope/antigravity-workspace-template/discussions
+- **GitHub Repository:** https://github.com/AloSantana/Antigravitys
+- **Issues:** https://github.com/AloSantana/Antigravitys/issues
+- **Discussions:** https://github.com/AloSantana/Antigravitys/discussions
 - **Gemini API:** https://aistudio.google.com/app/apikey
 - **GitHub Tokens:** https://github.com/settings/tokens
 - **Vertex AI Console:** https://console.cloud.google.com/

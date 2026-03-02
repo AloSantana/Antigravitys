@@ -33,8 +33,8 @@ Ensure you have:
 
 ```bash
 # Clone repository
-git clone https://github.com/primoscope/antigravity-workspace-template.git
-cd antigravity-workspace-template
+git clone https://github.com/AloSantana/Antigravitys.git
+cd Antigravitys
 
 # Run automated installer
 ./install.sh
@@ -53,7 +53,7 @@ The installer will:
 
 ```bash
 # On remote Ubuntu VPS
-curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AloSantana/Antigravitys/main/install-remote.sh | bash
 ```
 
 Includes firewall, nginx, and SSL setup!
@@ -573,8 +573,8 @@ Create comprehensive test suite:
 ## 💬 Get Help
 
 - **Documentation**: Check [docs/](docs/) folder
-- **Issues**: https://github.com/primoscope/antigravity-workspace-template/issues
-- **Discussions**: https://github.com/primoscope/antigravity-workspace-template/discussions
+- **Issues**: https://github.com/AloSantana/Antigravitys/issues
+- **Discussions**: https://github.com/AloSantana/Antigravitys/discussions
 - **Auto-Diagnostics**: Run `python tools/auto_issue_finder.py`
 
 ---

@@ -54,8 +54,8 @@ All critical issues for remote VPS deployment have been successfully resolved. T
 
 ### Local Installation
 ```bash
-git clone https://github.com/primoscope/antigravity-workspace-template.git
-cd antigravity-workspace-template
+git clone https://github.com/AloSantana/Antigravitys.git
+cd Antigravitys
 ./install.sh
 ./configure.sh
 ./start.sh
@@ -64,7 +64,7 @@ cd antigravity-workspace-template
 ### Remote VPS Installation  
 ```bash
 ssh user@your-vps-ip
-curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AloSantana/Antigravitys/main/install-remote.sh | bash
 nano .env  # Add your API keys
 ./start.sh
 # Access at http://your-vps-ip

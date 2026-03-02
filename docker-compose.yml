@@ -131,7 +131,7 @@ services:
       - with-ollama
 
 volumes:
-  app-data:      # Persistent app data (conversations.db, etc.)
+  app-data:      # Persistent app data (conversations.db, users.db, etc.)
   chroma-data:
   redis-data:
   ollama-data:
