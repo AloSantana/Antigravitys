@@ -9,6 +9,7 @@
 | Document | Description | For |
 |----------|-------------|-----|
 | **[README.md](README.md)** | Main project overview, features, installation | Everyone |
+| **[COMPLETE_SETUP_GUIDE.md](COMPLETE_SETUP_GUIDE.md)** | ⭐ All-in-one: install, configure OpenCode + Gemini CLI + Copilot, MCP, agents | Everyone |
 | **[QUICKSTART.md](QUICKSTART.md)** | 5-minute setup guide (GUI-first) | New users |
 | **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** | Comprehensive troubleshooting guide | When problems occur |
 | **[SETUP.md](SETUP.md)** | Detailed installation guide | Developers |

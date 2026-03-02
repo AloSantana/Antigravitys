@@ -1,6 +1,42 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "permission": "allow",
+  "autoshare": false,
+  "autoCompact": true,
+  "providers": {
+    "google": {
+      "apiKey": "${GEMINI_API_KEY}"
+    },
+    "anthropic": {
+      "apiKey": "${ANTHROPIC_API_KEY}"
+    },
+    "openai": {
+      "apiKey": "${OPENAI_API_KEY}"
+    },
+    "openrouter": {
+      "name": "OpenRouter",
+      "apiKey": "${OPENROUTER_API_KEY}",
+      "models": {
+        "anthropic/claude-sonnet-4-5": {},
+        "google/gemini-2.5-pro": {},
+        "openai/gpt-4o": {}
+      }
+    }
+  },
+  "agents": {
+    "coder": {
+      "model": "google/gemini-2.5-pro",
+      "maxTokens": 8000
+    },
+    "task": {
+      "model": "google/gemini-2.5-flash",
+      "maxTokens": 4000
+    },
+    "title": {
+      "model": "google/gemini-2.5-flash",
+      "maxTokens": 80
+    }
+  },
   "mcp": {
     "filesystem": {
       "type": "local",
@@ -15,7 +51,7 @@
     "git": {
       "type": "local",
       "command": [
-        "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+        "uvx",
         "mcp-server-git",
         "--repository",
         "."
@@ -43,7 +79,7 @@
     "fetch": {
       "type": "local",
       "command": [
-        "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+        "uvx",
         "mcp-server-fetch"
       ],
       "enabled": false
@@ -51,7 +87,7 @@
     "time": {
       "type": "local",
       "command": [
-        "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+        "uvx",
         "mcp-server-time"
       ],
       "enabled": false
@@ -163,7 +199,7 @@
     "python-analysis": {
       "type": "local",
       "command": [
-        "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+        "uvx",
         "python-lsp-mcp"
       ],
       "enabled": false,
@@ -192,19 +228,20 @@
       ],
       "enabled": false,
       "environment": {
-        "UPSTASH_EMAIL": "${UPSTASH_EMAIL}",
-        "UPSTASH_API_KEY": "${UPSTASH_API_KEY}"
+        "UPSTASH_REDIS_REST_URL": "${UPSTASH_REDIS_REST_URL}",
+        "UPSTASH_REDIS_REST_TOKEN": "${UPSTASH_REDIS_REST_TOKEN}",
+        "QSTASH_TOKEN": "${QSTASH_TOKEN}"
       }
     },
     "qdrant": {
       "type": "local",
       "command": [
-        "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+        "uvx",
         "mcp-server-qdrant"
       ],
       "enabled": false,
       "environment": {
-        "QDRANT_URL": "https://b7cf7be5-1417-49ae-abe2-1fe712ba393b.europe-west3-0.gcp.cloud.qdrant.io",
+        "QDRANT_URL": "${QDRANT_URL}",
         "QDRANT_API_KEY": "${QDRANT_API_KEY}",
         "COLLECTION_NAME": "antigravity-agent-memory",
         "EMBEDDING_PROVIDER": "fastembed"
@@ -213,14 +250,14 @@
     "daytona": {
       "type": "local",
       "command": [
-        "C:\\Users\\primo\\AppData\\Roaming\\bin\\daytona\\daytona.exe",
-        "mcp",
-        "start"
+        "npx",
+        "-y",
+        "@daytona/mcp"
       ],
       "enabled": false,
       "environment": {
         "DAYTONA_API_KEY": "${DAYTONA_API_KEY}",
-        "DAYTONA_SERVER_URL": "https://app.daytona.io/api"
+        "DAYTONA_SERVER_URL": "${DAYTONA_SERVER_URL}"
       }
     },
     "n8n": {
@@ -275,7 +312,7 @@
     "chroma": {
       "type": "local",
       "command": [
-        "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+        "uvx",
         "chroma-mcp",
         "--mode",
         "embedded",
