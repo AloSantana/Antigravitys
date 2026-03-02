@@ -2,6 +2,9 @@
 # NOTE: google-genai, google-cloud-aiplatform, pydantic, pydantic-settings,
 # python-dotenv, and pyngrok are already in backend/requirements.txt.
 # The Dockerfile installs BOTH files, so duplicates are harmless but redundant.
+-r backend/requirements.txt
 pytest
+pytest-asyncio
+pytest-cov
 httpx
 mcp

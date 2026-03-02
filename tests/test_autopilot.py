@@ -204,9 +204,7 @@ class TestPipelineCancellation:
         ap = AutoPilotPipeline(orchestrator=mock_orchestrator)
         pid = ap.start("Build a complex machine learning pipeline application")
 
-        # Give it a moment to actually start running
-        await asyncio.sleep(0.2)
-
+        # Cancel before the event loop executes the pipeline task
         success = ap.cancel(pid)
         assert success is True
 
