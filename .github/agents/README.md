@@ -352,7 +352,7 @@ With this configuration, you can expect:
 - **Agent Issues**: Check individual agent documentation
 - **MCP Issues**: See [MCP README](.mcp/README.md)
 - **Workflow Questions**: See [AGENT_ORCHESTRATION.md](.github/agents/AGENT_ORCHESTRATION.md)
-- **Project Issues**: [Open an issue](https://github.com/primoscope/antigravity-workspace-template/issues)
+- **Project Issues**: [Open an issue](https://github.com/AloSantana/Antigravitys/issues)
 
 ---
 

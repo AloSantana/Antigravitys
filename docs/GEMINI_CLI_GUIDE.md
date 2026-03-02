@@ -342,8 +342,8 @@ In VS Code with GitHub Copilot:
 
 ## 🆘 Support
 
-- **Issues**: https://github.com/primoscope/antigravity-workspace-template/issues
-- **Discussions**: https://github.com/primoscope/antigravity-workspace-template/discussions
+- **Issues**: https://github.com/AloSantana/Antigravitys/issues
+- **Discussions**: https://github.com/AloSantana/Antigravitys/discussions
 
 ---
 

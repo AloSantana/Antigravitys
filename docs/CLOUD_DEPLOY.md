@@ -49,7 +49,7 @@ For cloud deployment, the backend serves both the API and the frontend static fi
 
 1. Click the deploy button:
 
-   [![Deploy to DigitalOcean](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/primoscope/antigravity-workspace-template/tree/main)
+   [![Deploy to DigitalOcean](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/AloSantana/Antigravitys/tree/main)
 
 2. **Configure the App:**
    - Authorize GitHub access if prompted
@@ -131,7 +131,7 @@ Or via Dashboard:
 
 1. Click the deploy button:
 
-   [![Run on Google Cloud](https://deploy.cloud.run/button.svg)](https://deploy.cloud.run/?git_repo=https://github.com/primoscope/antigravity-workspace-template)
+   [![Run on Google Cloud](https://deploy.cloud.run/button.svg)](https://deploy.cloud.run/?git_repo=https://github.com/AloSantana/Antigravitys)
 
 2. **Configure Deployment:**
    - Sign in to Google Cloud
@@ -484,8 +484,8 @@ curl https://your-app-url.com/config
    ```
 
 3. **Community Support:**
-   - GitHub Issues: [primoscope/antigravity-workspace-template](https://github.com/primoscope/antigravity-workspace-template/issues)
-   - Discussions: [GitHub Discussions](https://github.com/primoscope/antigravity-workspace-template/discussions)
+   - GitHub Issues: [AloSantana/Antigravitys](https://github.com/AloSantana/Antigravitys/issues)
+   - Discussions: [GitHub Discussions](https://github.com/AloSantana/Antigravitys/discussions)
 
 ---
 

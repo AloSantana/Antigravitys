@@ -58,7 +58,7 @@
 ### Local Installation (Ubuntu/Debian)
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AloSantana/Antigravitys/main/install.sh | bash
 ```
 
 ### Windows Installation (PowerShell) ✅ *[Phase 4 - NEW]*
@@ -77,13 +77,13 @@ start.bat
 
 ```bash
 # Basic installation
-curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AloSantana/Antigravitys/main/install-remote.sh | bash
 ```
 
 ```bash
 # With automatic SSL for your domain
 AUTO_SSL_DOMAIN=yourdomain.com AUTO_SSL_EMAIL=admin@yourdomain.com \
-  curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh | bash
+  curl -fsSL https://raw.githubusercontent.com/AloSantana/Antigravitys/main/install-remote.sh | bash
 ```
 
 > **💡 Tip**: The remote installer automatically configures firewall, nginx, and SSL with Let's Encrypt!
@@ -102,7 +102,7 @@ Deploy Antigravity Workspace to the cloud with a single click. The web UI will b
 
 ### DigitalOcean App Platform
 
-[![Deploy to DigitalOcean](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/primoscope/antigravity-workspace-template/tree/main)
+[![Deploy to DigitalOcean](https://www.deploytodo.com/do-btn-blue.svg)](https://cloud.digitalocean.com/apps/new?repo=https://github.com/AloSantana/Antigravitys/tree/main)
 
 **What you get:**
 - ✅ Managed container running the full workspace
@@ -115,7 +115,7 @@ Deploy Antigravity Workspace to the cloud with a single click. The web UI will b
 
 ### Google Cloud Run
 
-[![Run on Google Cloud](https://deploy.cloud.run/button.svg)](https://deploy.cloud.run/?git_repo=https://github.com/primoscope/antigravity-workspace-template)
+[![Run on Google Cloud](https://deploy.cloud.run/button.svg)](https://deploy.cloud.run/?git_repo=https://github.com/AloSantana/Antigravitys)
 
 **What you get:**
 - ✅ Serverless container with auto-scaling (scales to zero)
@@ -380,8 +380,8 @@ Production-ready WebSocket handling:
 
 #### 1. Clone Repository
 ```bash
-git clone https://github.com/primoscope/antigravity-workspace-template.git
-cd antigravity-workspace-template
+git clone https://github.com/AloSantana/Antigravitys.git
+cd Antigravitys
 ```
 
 #### 2. Run Installer
@@ -894,7 +894,7 @@ antigravity-workspace-template/
 ssh user@your-vps-ip
 
 # 2. Run remote installer
-curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AloSantana/Antigravitys/main/install-remote.sh | bash
 
 # 3. Configure
 ./configure.sh
@@ -1011,14 +1011,14 @@ MIT License - see [LICENSE](LICENSE) file for details.
 - **[Full Documentation](docs/)**: Complete guides
 
 ### Community
-- **Issues**: https://github.com/primoscope/antigravity-workspace-template/issues
-- **Discussions**: https://github.com/primoscope/antigravity-workspace-template/discussions
+- **Issues**: https://github.com/AloSantana/Antigravitys/issues
+- **Discussions**: https://github.com/AloSantana/Antigravitys/discussions
 - **Pull Requests**: Contributions welcome!
 
 ### Getting Help
 
 1. Check [Troubleshooting Guide](TROUBLESHOOTING.md)
-2. Search [existing issues](https://github.com/primoscope/antigravity-workspace-template/issues)
+2. Search [existing issues](https://github.com/AloSantana/Antigravitys/issues)
 3. Run auto-issue finder: `python tools/auto_issue_finder.py`
 4. Check logs: `tail -f logs/backend.log`
 5. Open a new issue with details
