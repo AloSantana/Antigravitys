@@ -26,7 +26,7 @@
                     <span>Online</span>
                 </div>
                 <div class="badge" style="background: var(--bg-tertiary); border-color: var(--border-color); color: var(--text-secondary);">
-                    <span id="agentCount">7</span> Agents
+                    <span id="agentCount">8</span> Agents
                 </div>
             </div>
         </div>
@@ -82,7 +82,7 @@
             <div class="content-panel active" id="chat-panel">
                 <div class="chat-container" id="chat">
                     <div class="message system">
-                        🚀 Antigravity Workspace initialized with 7 custom AI agents. Select an agent and start coding!
+                        🚀 Antigravity Workspace initialized with 8 custom AI agents. Select an agent and start coding!
                     </div>
                 </div>
             </div>
@@ -1112,6 +1112,15 @@ for i in range(5):
             <div class="panel-section">
                 <div class="panel-section-title">🤖 Available Agents</div>
                 <div id="agentsList">
+                    <div class="agent-card" data-agent="jules">
+                        <div class="agent-name">⭐ Jules</div>
+                        <div class="agent-expertise">Code quality &amp; collaboration</div>
+                        <div class="agent-tools">
+                            <span class="tool-badge">Refactoring</span>
+                            <span class="tool-badge">Review</span>
+                            <span class="tool-badge">Tests</span>
+                        </div>
+                    </div>
                     <div class="agent-card selected" data-agent="full-stack-developer">
                         <div class="agent-name">Full-Stack Developer</div>
                         <div class="agent-expertise">End-to-end web applications</div>
@@ -1182,6 +1191,45 @@ for i in range(5):
 
         <!-- Input Area -->
         <div class="input-area">
+            <!-- Dual-Agent Mode Bar -->
+            <div class="dual-agent-bar">
+                <label class="dual-agent-toggle-row">
+                    <input type="checkbox" id="dualAgentToggle">
+                    <span class="dual-agent-toggle-label">🤝 Dual-Agent Mode</span>
+                </label>
+                <div class="dual-agent-settings" id="dualAgentSettings">
+                    <div class="dual-agent-group">
+                        <div class="dual-agent-group-label">Collaborating Partners</div>
+                        <div class="dual-agent-partners">
+                            <label class="partner-checkbox-label">
+                                <input type="checkbox" class="partner-checkbox" value="rapid-implementer"> rapid-implementer
+                            </label>
+                            <label class="partner-checkbox-label">
+                                <input type="checkbox" class="partner-checkbox" value="testing-stability-expert"> testing-stability-expert
+                            </label>
+                            <label class="partner-checkbox-label">
+                                <input type="checkbox" class="partner-checkbox" value="architect"> architect
+                            </label>
+                            <label class="partner-checkbox-label">
+                                <input type="checkbox" class="partner-checkbox" value="code-reviewer"> code-reviewer
+                            </label>
+                        </div>
+                    </div>
+                    <div class="dual-agent-group">
+                        <div class="dual-agent-group-label">Collaboration Mode</div>
+                        <div class="mode-radio-group">
+                            <label class="mode-radio-label">
+                                <input type="radio" name="collab-mode" value="sequential" checked> Sequential
+                            </label>
+                            <label class="mode-radio-label">
+                                <input type="radio" name="collab-mode" value="parallel"> Parallel
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- Input Row -->
+            <div class="input-row">
             <input type="file" id="fileInput" multiple style="display: none;" onchange="handleFileSelect(this.files)">
             <button class="icon-btn" onclick="document.getElementById('fileInput').click()" title="Upload Files">
                 📎
@@ -1193,6 +1241,7 @@ for i in range(5):
             <button onclick="sendMessage()">
                 Send ✨
             </button>
+            </div>
         </div>
     </div>
 

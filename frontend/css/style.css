@@ -51,7 +51,7 @@ body {
 .app-container {
     display: grid;
     grid-template-columns: 280px 1fr 350px;
-    grid-template-rows: 60px 1fr 50px;
+    grid-template-rows: 60px 1fr auto;
     height: 100vh;
     gap: 1px;
     background: var(--border-color);
@@ -461,8 +461,10 @@ body {
     backdrop-filter: blur(12px);
     padding: 16px 24px;
     display: flex;
-    gap: 16px;
-    align-items: center;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0;
+    min-height: 50px;
     border-top: 1px solid var(--border-color);
     z-index: 50;
 }
@@ -574,7 +576,7 @@ button:active {
 @media (max-width: 1024px) {
     .app-container {
         grid-template-columns: 1fr;
-        grid-template-rows: 60px 1fr 60px;
+        grid-template-rows: 60px 1fr auto;
     }
     
     .sidebar, .right-panel {
@@ -584,4 +586,162 @@ button:active {
     .input-area {
         padding: 12px;
     }
+}
+
+/* Dual-Agent Mode */
+.input-row {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+.dual-agent-bar {
+    width: 100%;
+    margin-bottom: 10px;
+}
+
+.dual-agent-toggle-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    cursor: pointer;
+    user-select: none;
+}
+
+.dual-agent-toggle-row input[type="checkbox"] {
+    accent-color: var(--accent-blue);
+    width: 15px;
+    height: 15px;
+    cursor: pointer;
+    padding: 0;
+}
+
+.dual-agent-toggle-label {
+    font-weight: 600;
+    color: var(--accent-blue);
+}
+
+.dual-agent-settings {
+    display: none;
+    margin-top: 10px;
+    padding: 12px 14px;
+    background: rgba(59, 130, 246, 0.07);
+    border: 1px solid rgba(59, 130, 246, 0.25);
+    border-radius: 8px;
+    gap: 16px;
+    flex-wrap: wrap;
+}
+
+.dual-agent-settings.visible {
+    display: flex;
+}
+
+.dual-agent-group {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.dual-agent-group-label {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--text-secondary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.dual-agent-partners {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.partner-checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 4px 10px;
+    transition: border-color 0.2s;
+}
+
+.partner-checkbox-label:hover {
+    border-color: var(--accent-blue);
+}
+
+.partner-checkbox-label input[type="checkbox"] {
+    accent-color: var(--accent-blue);
+    cursor: pointer;
+    padding: 0;
+    width: 13px;
+    height: 13px;
+}
+
+.mode-radio-group {
+    display: flex;
+    gap: 12px;
+}
+
+.mode-radio-label {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.8rem;
+    color: var(--text-primary);
+    cursor: pointer;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
+    padding: 4px 10px;
+    transition: border-color 0.2s;
+}
+
+.mode-radio-label:hover {
+    border-color: var(--accent-blue);
+}
+
+.mode-radio-label input[type="radio"] {
+    accent-color: var(--accent-blue);
+    cursor: pointer;
+    padding: 0;
+}
+
+.handoff-btn {
+    display: inline-block;
+    margin-top: 6px;
+    padding: 3px 10px;
+    font-size: 0.75rem;
+    background: rgba(139, 92, 246, 0.15);
+    border: 1px solid rgba(139, 92, 246, 0.4);
+    border-radius: 5px;
+    color: #a78bfa;
+    cursor: pointer;
+    font-family: var(--font-code);
+    transition: background 0.2s;
+}
+
+.handoff-btn:hover {
+    background: rgba(139, 92, 246, 0.3);
+}
+
+.dual-agent-result {
+    border-left: 3px solid var(--accent-blue);
+    padding-left: 10px;
+    margin-bottom: 10px;
+}
+
+.dual-agent-result-header {
+    font-size: 0.75rem;
+    font-weight: 700;
+    color: var(--accent-blue);
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
