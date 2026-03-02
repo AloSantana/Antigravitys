@@ -61,3 +61,17 @@ __pycache__/
 *.db
 *.db-journal
 nul
+
+# Test output artifacts (prevent re-accumulation)
+pytest_report*.txt
+pytest_out*.txt
+pytest_output*.txt
+auto_issue_report*.txt
+auto_issue_report*.md
+checklist_out*.txt
+checklist_output*.txt
+ruff_errors.txt
+
+# Backup and old file variants
+*.old
+*.backup
