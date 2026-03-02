@@ -9,7 +9,7 @@
 | Document | Description | For |
 |----------|-------------|-----|
 | **[README.md](README.md)** | Main project overview, features, installation | Everyone |
-| **[COMPLETE_SETUP_GUIDE.md](COMPLETE_SETUP_GUIDE.md)** | ⭐ All-in-one: install, configure OpenCode + Gemini CLI + Copilot, MCP, agents | Everyone |
+| **[docs/COMPLETE_SETUP_GUIDE.md](docs/COMPLETE_SETUP_GUIDE.md)** | ⭐ All-in-one: install, configure OpenCode + Gemini CLI + Copilot, MCP, agents | Everyone |
 | **[QUICKSTART.md](QUICKSTART.md)** | 5-minute setup guide (GUI-first) | New users |
 | **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** | Comprehensive troubleshooting guide | When problems occur |
 | **[SETUP.md](SETUP.md)** | Detailed installation guide | Developers |
@@ -51,6 +51,8 @@
 | **[COPILOT_SETUP.md](COPILOT_SETUP.md)** | GitHub Copilot agent setup | Copilot configuration |
 | **[GEMINI.md](GEMINI.md)** | Gemini AI agent instructions | Gemini integration |
 | **[docs/OH_MY_OPENCODE_SETUP.md](docs/OH_MY_OPENCODE_SETUP.md)** | Oh-My-OpenCode installation & setup | OpenCode plugin |
+| **[docs/OH_MY_OPENCODE_QUICK_REFERENCE.md](docs/OH_MY_OPENCODE_QUICK_REFERENCE.md)** | Oh-My-OpenCode quick reference card | OpenCode plugin |
+| **[docs/OPENCODE_README.md](docs/OPENCODE_README.md)** | OpenCode workspace overview & commands | OpenCode |
 | **[mission.md](mission.md)** | Project mission statement | Vision |
 
 ### GitHub Copilot Custom Agents
