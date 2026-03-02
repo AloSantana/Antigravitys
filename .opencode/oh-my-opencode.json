@@ -1,0 +1,55 @@
+{
+  "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/refs/heads/dev/schema/oh-my-opencode.json",
+  "agents": {
+    "multimodal-looker": {
+      "model": "google/antigravity-gemini-3-flash",
+      "comment": "Using Antigravity Gemini for visual engineering tasks"
+    },
+    "sisyphus": {
+      "comment": "Main orchestrator - uses Claude Opus 4.6, Kimi K2.5, or GLM 5 based on availability"
+    },
+    "prometheus": {
+      "comment": "Strategic planner - auto-switches between Claude and GPT prompts"
+    },
+    "hephaestus": {
+      "comment": "Deep autonomous worker - requires GPT-5.3-codex"
+    },
+    "oracle": {
+      "comment": "Architecture and debugging - prefers GPT-5.2"
+    },
+    "explore": {
+      "comment": "Fast codebase search - uses lightweight models for speed"
+    },
+    "librarian": {
+      "comment": "Documentation search - uses free-tier models"
+    }
+  },
+  "features": {
+    "intent_gate": true,
+    "hash_anchored_edit": true,
+    "lsp_integration": true,
+    "background_agents": true,
+    "todo_enforcer": true,
+    "comment_checker": true,
+    "tmux_integration": true
+  },
+  "mcps": {
+    "exa": {
+      "enabled": true,
+      "comment": "Web search via Exa"
+    },
+    "context7": {
+      "enabled": true,
+      "comment": "Official documentation search"
+    },
+    "grep_app": {
+      "enabled": true,
+      "comment": "GitHub code search"
+    }
+  },
+  "settings": {
+    "auto_ultrawork": false,
+    "ralph_loop_max_iterations": 50,
+    "parallel_agent_limit": 5
+  }
+}

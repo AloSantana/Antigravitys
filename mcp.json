@@ -13,7 +13,7 @@
     },
     "git": {
       "transport": "stdio",
-      "command": "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+      "command": "uvx",
       "args": [
         "mcp-server-git",
         "--repository",
@@ -43,7 +43,7 @@
     },
     "fetch": {
       "transport": "stdio",
-      "command": "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+      "command": "uvx",
       "args": [
         "mcp-server-fetch"
       ],
@@ -51,7 +51,7 @@
     },
     "time": {
       "transport": "stdio",
-      "command": "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+      "command": "uvx",
       "args": [
         "mcp-server-time"
       ],
@@ -169,7 +169,7 @@
     },
     "python-analysis": {
       "transport": "stdio",
-      "command": "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+      "command": "uvx",
       "args": [
         "python-lsp-mcp"
       ],
@@ -198,19 +198,20 @@
         "@upstash/mcp-server"
       ],
       "env": {
-        "UPSTASH_EMAIL": "${UPSTASH_EMAIL}",
-        "UPSTASH_API_KEY": "${UPSTASH_API_KEY}"
+        "UPSTASH_REDIS_REST_URL": "${UPSTASH_REDIS_REST_URL}",
+        "UPSTASH_REDIS_REST_TOKEN": "${UPSTASH_REDIS_REST_TOKEN}",
+        "QSTASH_TOKEN": "${QSTASH_TOKEN}"
       },
       "enabled": false
     },
     "qdrant": {
       "transport": "stdio",
-      "command": "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+      "command": "uvx",
       "args": [
         "mcp-server-qdrant"
       ],
       "env": {
-        "QDRANT_URL": "https://b7cf7be5-1417-49ae-abe2-1fe712ba393b.europe-west3-0.gcp.cloud.qdrant.io",
+        "QDRANT_URL": "${QDRANT_URL}",
         "QDRANT_API_KEY": "${QDRANT_API_KEY}",
         "COLLECTION_NAME": "antigravity-agent-memory",
         "EMBEDDING_PROVIDER": "fastembed"
@@ -219,14 +220,14 @@
     },
     "daytona": {
       "transport": "stdio",
-      "command": "C:\\Users\\primo\\AppData\\Roaming\\bin\\daytona\\daytona.exe",
+      "command": "npx",
       "args": [
-        "mcp",
-        "start"
+        "-y",
+        "@daytona/mcp"
       ],
       "env": {
         "DAYTONA_API_KEY": "${DAYTONA_API_KEY}",
-        "DAYTONA_SERVER_URL": "https://app.daytona.io/api"
+        "DAYTONA_SERVER_URL": "${DAYTONA_SERVER_URL}"
       },
       "enabled": false
     },
@@ -281,7 +282,7 @@
     },
     "chroma": {
       "transport": "stdio",
-      "command": "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+      "command": "uvx",
       "args": [
         "chroma-mcp",
         "--mode",
