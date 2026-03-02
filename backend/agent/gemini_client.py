@@ -28,7 +28,7 @@ class GeminiClient:
             return
             
         self.client = genai.Client(api_key=api_key)
-        self.model_name = 'gemini-2.0-flash'
+        self.model_name = 'gemini-2.5-flash'  # Latest stable model (was gemini-2.0-flash)
         self.embed_model_name = "models/text-embedding-004"
         # Rate limiting
         self._last_request_time = 0
