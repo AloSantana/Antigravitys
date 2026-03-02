@@ -16,6 +16,8 @@
 7. [Service Setup Checklists](#7-service-setup-checklists)
 8. [Agent Workflow Patterns](#8-agent-workflow-patterns)
 
+> **OpenCode Plugin Integration**: See [`docs/OPENCODE_INTEGRATION.md`](docs/OPENCODE_INTEGRATION.md) for the complete guide to setting up **oh-my-opencode** (Sisyphus agent), **gsd-opencode** (spec-driven dev), **swarm-tools**, and all related OpenCode plugins with Antigravity.
+
 ---
 
 ## 1. LLM System Prompt

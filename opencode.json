@@ -1,6 +1,9 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "permission": "allow",
+  "plugins": [
+    "oh-my-opencode"
+  ],
   "mcp": {
     "filesystem": {
       "type": "local",
@@ -15,7 +18,7 @@
     "git": {
       "type": "local",
       "command": [
-        "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+        "uvx",
         "mcp-server-git",
         "--repository",
         "."
@@ -43,7 +46,7 @@
     "fetch": {
       "type": "local",
       "command": [
-        "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+        "uvx",
         "mcp-server-fetch"
       ],
       "enabled": false
@@ -51,7 +54,7 @@
     "time": {
       "type": "local",
       "command": [
-        "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+        "uvx",
         "mcp-server-time"
       ],
       "enabled": false
@@ -84,7 +87,7 @@
       "command": [
         "npx",
         "-y",
-        "@brave/brave-search-mcp-server"
+        "@brave/brave-search-mcp"
       ],
       "enabled": false,
       "environment": {
@@ -163,7 +166,7 @@
     "python-analysis": {
       "type": "local",
       "command": [
-        "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+        "uvx",
         "python-lsp-mcp"
       ],
       "enabled": false,
@@ -176,7 +179,7 @@
       "command": [
         "npx",
         "-y",
-        "@modelcontextprotocol/server-github"
+        "@github/mcp-server"
       ],
       "enabled": false,
       "environment": {
@@ -199,12 +202,12 @@
     "qdrant": {
       "type": "local",
       "command": [
-        "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+        "uvx",
         "mcp-server-qdrant"
       ],
       "enabled": false,
       "environment": {
-        "QDRANT_URL": "https://b7cf7be5-1417-49ae-abe2-1fe712ba393b.europe-west3-0.gcp.cloud.qdrant.io",
+        "QDRANT_URL": "${QDRANT_URL}",
         "QDRANT_API_KEY": "${QDRANT_API_KEY}",
         "COLLECTION_NAME": "antigravity-agent-memory",
         "EMBEDDING_PROVIDER": "fastembed"
@@ -213,14 +216,14 @@
     "daytona": {
       "type": "local",
       "command": [
-        "C:\\Users\\primo\\AppData\\Roaming\\bin\\daytona\\daytona.exe",
+        "daytona",
         "mcp",
         "start"
       ],
       "enabled": false,
       "environment": {
         "DAYTONA_API_KEY": "${DAYTONA_API_KEY}",
-        "DAYTONA_SERVER_URL": "https://app.daytona.io/api"
+        "DAYTONA_SERVER_URL": "${DAYTONA_SERVER_URL}"
       }
     },
     "n8n": {
@@ -275,7 +278,7 @@
     "chroma": {
       "type": "local",
       "command": [
-        "C:\\Users\\primo\\.local\\bin\\uvx.exe",
+        "uvx",
         "chroma-mcp",
         "--mode",
         "embedded",
