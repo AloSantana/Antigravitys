@@ -1,4 +1,4 @@
-# Antigravity Workspace Template
+# Antigravity Workspace — Master Control Plane
 
 <div align="center">
 
@@ -10,11 +10,57 @@
 
 **A production-ready, enterprise-grade AI-powered development workspace with intelligent agents, persistent conversation history, artifact management, real-time performance monitoring, and comprehensive diagnostic tools.**
 
-[Quick Start](#-quick-start) • [Features](#-features) • [Documentation](#-documentation) • [Architecture](#-architecture) • [Support](#-support)
+**Antigravitys is the main entry point, orchestrator, and control plane for the entire AI ecosystem** — integrating OpenCode plugins, the OpenClaw deployment gateway, the CopilotKit Agentic UI, and the Swarm-Tools multi-agent coordination layer from a single command.
+
+[Quick Start](#-quick-start) • [Ecosystem Mode](#-ecosystem-mode) • [Features](#-features) • [Documentation](#-documentation) • [Architecture](#-architecture) • [Support](#-support)
 
 </div>
 
 ---
+
+## 🌐 Ecosystem Mode
+
+Antigravitys orchestrates a broader AI development ecosystem through a single command:
+
+```bash
+# Bootstrap all sister repos (oh-my-opencode, opencode, openclaw, swarm-tools)
+./ecosystem-setup.sh
+
+# Start Antigravitys + all ecosystem daemons
+./start.sh --ecosystem
+
+# Or with Docker (full ecosystem profile)
+docker compose --profile ecosystem up -d
+```
+
+| Component | Purpose | Default Port |
+|-----------|---------|-------------|
+| **Antigravitys** | FastAPI backend + Web UI (you are here) | 8000 |
+| **oh-my-opencode** | Sisyphus agent harness | 9300 |
+| **OpenCode Agent Hub** | Core OpenCode engine | 9100 |
+| **OpenClaw gateway** | Message-routing / personal AI gateway | 9200 |
+| **Swarm-Tools** | Multi-agent SQLite coordination layer | — |
+
+### Plugin Management API
+
+```bash
+# List installed OpenCode plugins
+curl http://localhost:8000/api/ecosystem/plugins
+
+# Install a plugin from the marketplace (opencode.cafe)
+curl -X POST http://localhost:8000/api/ecosystem/plugins \
+  -H "Content-Type: application/json" \
+  -d '{"plugin_name": "opencode-plugin-github"}'
+
+# Full ecosystem component status
+curl http://localhost:8000/api/ecosystem/status
+```
+
+📖 **[Full Ecosystem Setup Guide → QUICKSTART.md#ecosystem-mode](QUICKSTART.md#-ecosystem-mode--master-control-plane)**
+
+---
+
+
 
 ## 🌟 What's New
 
