@@ -41,10 +41,16 @@ python backend/main.py
 - `POST /settings` - Update settings
 - `GET /performance/metrics` - Performance data
 
+## Installation
+```bash
+# Linux/Mac
+./install.sh
+# or remote install with SSL support
+./install-remote.sh
+```
+
 ## Testing
 ```bash
 pytest tests/ -v
 pytest --cov=backend tests/
 ```
-
-For installation and setup, use the local installer scripts (`./install.sh` or `./install-remote.sh`) as documented in the project README.
