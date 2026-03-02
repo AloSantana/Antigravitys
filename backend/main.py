@@ -301,129 +301,10 @@ async def readiness_check():
     Kubernetes readiness probe - checks if app is ready to serve traffic.
     Returns detailed component health status.
     """
-    health_status: Dict[str, Any] = {
-        "status": "ready",
-        "components": {}
-    }
-    
-    all_healthy = True
-    
-    # Check watcher
-    try:
-        watcher_healthy = watcher.is_healthy()
-        health_status["components"]["watcher"] = {
-            "status": "healthy" if watcher_healthy else "unhealthy",
-            "running": watcher.is_running()
-        }
-        if not watcher_healthy:
-            all_healthy = False
-    except Exception as e:
-        logger.error(f"Error checking watcher health: {e}")
-        health_status["components"]["watcher"] = {
-            "status": "error",
-            "error": str(e)
-        }
-        all_healthy = False
-    
-    # Check ChromaDB / Vector Store
-    try:
-        from rag.store import VectorStore
-        test_store = VectorStore()
-        
-        # Test basic query
-        if test_store.collection:
-            # Simple test query
-            test_result = test_store.query([[0.1] * 384], n_results=1)
-            chromadb_healthy = test_result is not None
-            health_status["components"]["chromadb"] = {
-                "status": "healthy" if chromadb_healthy else "unhealthy",
-                "collection": "initialized" if test_store.collection else "not initialized"
-            }
-            if not chromadb_healthy:
-                all_healthy = False
-        else:
-            health_status["components"]["chromadb"] = {
-                "status": "unhealthy",
-                "collection": "not initialized"
-            }
-            all_healthy = False
-    except Exception as e:
-        logger.error(f"Error checking ChromaDB health: {e}")
-        health_status["components"]["chromadb"] = {
-            "status": "error",
-            "error": str(e)
-        }
-        all_healthy = False
-    
-    # Check cache
-    try:
-        if orchestrator:
-            cache_size = len(orchestrator._response_cache)
-            cache_hit_rate = orchestrator.get_cache_hit_rate()
-            health_status["components"]["cache"] = {
-                "status": "healthy",
-                "size": cache_size,
-                "hit_rate": f"{cache_hit_rate:.1%}"
-            }
-        else:
-            health_status["components"]["cache"] = {
-                "status": "unhealthy",
-                "error": "Orchestrator not initialized"
-            }
-            # If orchestrator is missing, that IS critical for readiness
-            all_healthy = False
-    except Exception as e:
-        logger.error(f"Error checking cache health: {e}")
-        health_status["components"]["cache"] = {
-            "status": "error",
-            "error": str(e)
-        }
-        # Cache error is not critical
-    
-    # Check disk space for drop_zone
-    try:
-        import shutil
-        disk_usage = shutil.disk_usage(watcher.watch_dir)
-        free_gb = disk_usage.free / (1024**3)
-        total_gb = disk_usage.total / (1024**3)
-        used_percent = (disk_usage.used / disk_usage.total) * 100
-        
-        disk_healthy = used_percent < 95  # Warn if >95% used
-        health_status["components"]["disk"] = {
-            "status": "healthy" if disk_healthy else "warning",
-            "free_gb": f"{free_gb:.2f}",
-            "total_gb": f"{total_gb:.2f}",
-            "used_percent": f"{used_percent:.1f}%"
-        }
-        if not disk_healthy:
-            logger.warning(f"Disk usage high: {used_percent:.1f}%")
-    except Exception as e:
-        logger.error(f"Error checking disk space: {e}")
-        health_status["components"]["disk"] = {
-            "status": "error",
-            "error": str(e)
-        }
-        # Disk check error is not critical for readiness
-    
-    # Check local LLM (optional - don't fail if not available)
-    try:
-        from agent.local_client import LocalClient
-        # Just check if we can create client, don't actually call it
-        test_client = LocalClient()
-        health_status["components"]["local_llm"] = {
-            "status": "available",
-            "note": "Not tested (expensive operation)"
-        }
-    except Exception as e:
-        health_status["components"]["local_llm"] = {
-            "status": "unavailable",
-            "error": str(e)
-        }
-        # LLM unavailability is not critical for basic readiness
-    
-    # Set overall status
-    health_status["status"] = "ready" if all_healthy else "degraded"
-    
+    from health_check import build_readiness_report
+
+    health_status, all_healthy = build_readiness_report(watcher, orchestrator)
+
     # Return 503 if not ready
     if not all_healthy:
         from fastapi import Response
@@ -432,7 +313,7 @@ async def readiness_check():
             status_code=503,
             media_type="application/json"
         )
-    
+
     return health_status
 
 @app.get("/config")
