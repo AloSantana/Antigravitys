@@ -13,7 +13,9 @@
     },
     "git": {
       "transport": "stdio",
+
       "command": "uvx",
+
       "args": [
         "mcp-server-git",
         "--repository",
@@ -43,7 +45,9 @@
     },
     "fetch": {
       "transport": "stdio",
+
       "command": "uvx",
+
       "args": [
         "mcp-server-fetch"
       ],
@@ -51,7 +55,9 @@
     },
     "time": {
       "transport": "stdio",
+
       "command": "uvx",
+
       "args": [
         "mcp-server-time"
       ],
@@ -169,7 +175,9 @@
     },
     "python-analysis": {
       "transport": "stdio",
+
       "command": "uvx",
+
       "args": [
         "python-lsp-mcp"
       ],
@@ -198,20 +206,26 @@
         "@upstash/mcp-server"
       ],
       "env": {
+
         "UPSTASH_REDIS_REST_URL": "${UPSTASH_REDIS_REST_URL}",
         "UPSTASH_REDIS_REST_TOKEN": "${UPSTASH_REDIS_REST_TOKEN}",
         "QSTASH_TOKEN": "${QSTASH_TOKEN}"
+
       },
       "enabled": false
     },
     "qdrant": {
       "transport": "stdio",
+
       "command": "uvx",
+
       "args": [
         "mcp-server-qdrant"
       ],
       "env": {
+
         "QDRANT_URL": "${QDRANT_URL}",
+
         "QDRANT_API_KEY": "${QDRANT_API_KEY}",
         "COLLECTION_NAME": "antigravity-agent-memory",
         "EMBEDDING_PROVIDER": "fastembed"
@@ -220,6 +234,7 @@
     },
     "daytona": {
       "transport": "stdio",
+
       "command": "npx",
       "args": [
         "-y",
@@ -228,6 +243,7 @@
       "env": {
         "DAYTONA_API_KEY": "${DAYTONA_API_KEY}",
         "DAYTONA_SERVER_URL": "${DAYTONA_SERVER_URL}"
+
       },
       "enabled": false
     },
@@ -282,7 +298,9 @@
     },
     "chroma": {
       "transport": "stdio",
+
       "command": "uvx",
+
       "args": [
         "chroma-mcp",
         "--mode",
@@ -360,4 +378,6 @@
       "description": "Docker Open Agent Gateway (sandboxed.sh/docker-mcp multiplexer)"
     }
   }
+
 }
+
