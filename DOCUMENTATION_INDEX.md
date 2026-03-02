@@ -46,6 +46,7 @@
 | **[ANTIGRAVITY_MASTER_GUIDE.md](ANTIGRAVITY_MASTER_GUIDE.md)** | Canonical MCP server setup guide | MCP + agents |
 | **[COPILOT_SETUP.md](COPILOT_SETUP.md)** | GitHub Copilot agent setup | Copilot configuration |
 | **[GEMINI.md](GEMINI.md)** | Gemini AI agent instructions | Gemini integration |
+| **[docs/OH_MY_OPENCODE_SETUP.md](docs/OH_MY_OPENCODE_SETUP.md)** | Oh-My-OpenCode installation & setup | OpenCode plugin |
 | **[mission.md](mission.md)** | Project mission statement | Vision |
 
 ### GitHub Copilot Custom Agents
