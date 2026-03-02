@@ -46,4 +46,5 @@ python backend/main.py
 pytest tests/ -v
 pytest --cov=backend tests/
 ```
-curl -sL https://raw.githubusercontent.com/github/gh-aw/main/install-gh-aw.sh | bash
+
+For installation and setup, use the local installer scripts (`./install.sh` or `./install-remote.sh`) as documented in the project README.
