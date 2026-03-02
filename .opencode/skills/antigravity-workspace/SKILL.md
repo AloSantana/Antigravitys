@@ -41,6 +41,15 @@ python backend/main.py
 - `POST /settings` - Update settings
 - `GET /performance/metrics` - Performance data
 
+## Installation
+```bash
+# For local installation (see README for details):
+./install.sh
+
+# For remote VPS deployment:
+./install-remote.sh
+```
+
 ## Testing
 ```bash
 pytest tests/ -v
