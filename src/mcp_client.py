@@ -92,6 +92,20 @@ class MCPClientManager:
             tasks = []
             for name, server_cfg in servers_config.items():
                 if server_cfg.get("enabled", True):
+                    # Gracefully skip servers whose required env vars are missing
+                    server_env = server_cfg.get("env", {})
+                    missing_env_vars = [
+                        ref[2:-1]
+                        for ref in server_env.values()
+                        if isinstance(ref, str) and ref.startswith("${") and ref.endswith("}")
+                        and not os.getenv(ref[2:-1])
+                    ]
+                    if missing_env_vars:
+                        logger.info(
+                            f"Skipping MCP server '{name}': required env vars not set: "
+                            f"{missing_env_vars}"
+                        )
+                        continue
                     config = MCPServerConfig(
                         name=name,
                         transport=server_cfg.get("transport", "stdio"),

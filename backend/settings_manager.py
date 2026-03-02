@@ -26,6 +26,9 @@ class SettingsManager:
     # Environment variables that should never be exposed
     SENSITIVE_VARS: Set[str] = {
         'GEMINI_API_KEY',
+        'ANTHROPIC_API_KEY',
+        'OPENAI_API_KEY',
+        'OPENROUTER_API_KEY',
         'VERTEX_API_KEY',
         'GOOGLE_APPLICATION_CREDENTIALS',
         'COPILOT_MCP_GITHUB_TOKEN',
@@ -52,6 +55,27 @@ class SettingsManager:
             'description': 'Google Cloud Vertex AI models',
             'requires_key': True,
             'key_var': 'VERTEX_API_KEY'
+        },
+        {
+            'id': 'anthropic',
+            'name': 'Anthropic Claude',
+            'description': 'Anthropic Claude models (claude-sonnet, claude-opus)',
+            'requires_key': True,
+            'key_var': 'ANTHROPIC_API_KEY'
+        },
+        {
+            'id': 'openai',
+            'name': 'OpenAI',
+            'description': 'OpenAI GPT models (GPT-4, GPT-4o)',
+            'requires_key': True,
+            'key_var': 'OPENAI_API_KEY'
+        },
+        {
+            'id': 'openrouter',
+            'name': 'OpenRouter',
+            'description': 'OpenRouter — access 200+ models via a single API',
+            'requires_key': True,
+            'key_var': 'OPENROUTER_API_KEY'
         },
         {
             'id': 'ollama',
