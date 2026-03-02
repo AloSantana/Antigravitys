@@ -1112,6 +1112,15 @@ for i in range(5):
             <div class="panel-section">
                 <div class="panel-section-title">🤖 Available Agents</div>
                 <div id="agentsList">
+                    <div class="agent-card" data-agent="jules">
+                        <div class="agent-name">Jules (Anthropic) ⭐</div>
+                        <div class="agent-expertise">Code quality &amp; collaboration</div>
+                        <div class="agent-tools">
+                            <span class="tool-badge">Review</span>
+                            <span class="tool-badge">Refactor</span>
+                            <span class="tool-badge">Orchestration</span>
+                        </div>
+                    </div>
                     <div class="agent-card selected" data-agent="full-stack-developer">
                         <div class="agent-name">Full-Stack Developer</div>
                         <div class="agent-expertise">End-to-end web applications</div>
@@ -1176,6 +1185,27 @@ for i in range(5):
                         <div class="stat-value">100%</div>
                         <div class="stat-label">Uptime</div>
                     </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dual-Agent Mode -->
+        <div class="dual-agent-bar">
+            <label class="dual-agent-toggle-label">
+                <input type="checkbox" id="dualAgentToggle" onchange="toggleDualAgentSettings()">
+                🤝 Enable Dual-Agent Mode
+            </label>
+            <div id="dualAgentSettings" class="dual-agent-settings" style="display:none;">
+                <div class="dual-agent-partners">
+                    <span class="dual-agent-label">Collaborating Partners:</span>
+                    <label><input type="checkbox" class="partner-checkbox" value="rapid-implementer"> rapid-implementer</label>
+                    <label><input type="checkbox" class="partner-checkbox" value="testing-stability-expert"> testing-stability-expert</label>
+                    <label><input type="checkbox" class="partner-checkbox" value="architect"> architect</label>
+                </div>
+                <div class="dual-agent-mode-group">
+                    <span class="dual-agent-label">Mode:</span>
+                    <label><input type="radio" name="collabMode" value="sequential" checked> Sequential</label>
+                    <label><input type="radio" name="collabMode" value="parallel"> Parallel</label>
                 </div>
             </div>
         </div>

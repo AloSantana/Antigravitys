@@ -258,10 +258,73 @@
             chat.scrollTop = chat.scrollHeight;
         }
 
+        function toggleDualAgentSettings() {
+            const enabled = document.getElementById('dualAgentToggle').checked;
+            document.getElementById('dualAgentSettings').style.display = enabled ? 'flex' : 'none';
+        }
+
         function sendMessage() {
             const input = document.getElementById("input");
             const text = input.value.trim();
-            if (text) {
+            if (!text) return;
+
+            const dualEnabled = document.getElementById('dualAgentToggle').checked;
+
+            if (dualEnabled) {
+                // Collect selected partner agents (deduplicated)
+                const partners = Array.from(document.querySelectorAll('.partner-checkbox:checked')).map(el => el.value);
+                const agents = [...new Set([selectedAgent, ...partners])];
+                const mode = document.querySelector('input[name="collabMode"]:checked').value;
+
+                if (agents.length < 2) {
+                    addMessage("Please select at least one collaborating partner to use Dual-Agent Mode.", "system");
+                    return;
+                }
+
+                addMessage(text, "user");
+                input.value = "";
+
+                const thinkingEl = document.createElement("div");
+                thinkingEl.id = "thinking";
+                thinkingEl.className = "message agent";
+                thinkingEl.innerHTML = `<span class="message-source">Dual-Agent (${mode})</span><span class="thinking-dots">Thinking</span>`;
+                document.getElementById('chat').appendChild(thinkingEl);
+                document.getElementById('chat').scrollTop = document.getElementById('chat').scrollHeight;
+
+                fetch(`${API_BASE}/api/agents/collaborate`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ request: text, agents: agents, mode: mode })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    const thinking = document.getElementById("thinking");
+                    if (thinking) thinking.remove();
+
+                    const results = data.results || {};
+                    const chat = document.getElementById('chat');
+                    const msg = document.createElement("div");
+                    msg.className = "message agent";
+
+                    const itemsHTML = Object.entries(results).map(([agent, result]) => `
+                        <div class="dual-agent-result-item">
+                            <div class="dual-agent-result-agent">${escapeHtml(agent)}</div>
+                            <div class="dual-agent-result-content">${escapeHtml(typeof result === "string" ? result : JSON.stringify(result, null, 2))}</div>
+                        </div>
+                    `).join('');
+
+                    msg.innerHTML = `<span class="message-source">Dual-Agent (${escapeHtml(mode)})</span><div class="dual-agent-results">${itemsHTML || escapeHtml(JSON.stringify(data))}</div>`;
+                    chat.appendChild(msg);
+                    chat.scrollTop = chat.scrollHeight;
+                    messageCount++;
+                    document.getElementById('messagesCount').textContent = messageCount;
+                })
+                .catch(err => {
+                    const thinking = document.getElementById("thinking");
+                    if (thinking) thinking.remove();
+                    addMessage(`Dual-Agent error: ${escapeHtml(err.message)}`, "system");
+                });
+            } else {
                 ws.send(`@${selectedAgent} ${text}`);
                 addMessage(text, "user");
                 showThinking();
