@@ -123,6 +123,7 @@
 | **[COPILOT_SETUP.md](COPILOT_SETUP.md)** | GitHub Copilot setup | Copilot integration |
 | **[docs/VERTEX_AI_SETUP.md](docs/VERTEX_AI_SETUP.md)** | Vertex AI setup | Enterprise AI |
 | **[docs/GEMINI_CLI_GUIDE.md](docs/GEMINI_CLI_GUIDE.md)** | Gemini CLI guide | CLI usage |
+| **[docs/GIT_COMMANDS_GUIDE.md](docs/GIT_COMMANDS_GUIDE.md)** | Basic Git commands with examples | Version control |
 | **[.env.example](.env.example)** | Environment variables reference | Configuration |
 
 ### Windows-Specific
