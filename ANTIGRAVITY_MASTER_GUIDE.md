@@ -2,6 +2,10 @@
 
 > **All-in-one reference for setting up, configuring, and prompting the full
 > Antigravity / OpenCode multi-agent stack with every integrated service.**
+>
+> 📖 **Comprehensive platform integration guide**: [`docs/MASTER_AI_AGENT_PROMPT.md`](docs/MASTER_AI_AGENT_PROMPT.md) —
+> all forked repos (oh-my-opencode, swarm-tools, opencode-sessions, gsd-opencode),
+> cross-platform model routing, automated workflow patterns, and master system prompt.
 
 ---
 
@@ -15,6 +19,8 @@
 6. [Gemini CLI Configuration](#6-gemini-cli-configuration)
 7. [Service Setup Checklists](#7-service-setup-checklists)
 8. [Agent Workflow Patterns](#8-agent-workflow-patterns)
+
+> **OpenCode Plugin Integration**: See [`docs/OPENCODE_INTEGRATION.md`](docs/OPENCODE_INTEGRATION.md) for the complete guide to setting up **oh-my-opencode** (Sisyphus agent), **gsd-opencode** (spec-driven dev), **swarm-tools**, and all related OpenCode plugins with Antigravity.
 
 ---
 

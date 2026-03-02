@@ -9,6 +9,7 @@ from dataclasses import dataclass
 from .gemini_client import GeminiClient
 from .local_client import LocalClient
 from .vertex_client import VertexClient
+from .openrouter_client import OpenRouterClient
 from rag.store import VectorStore
 from utils.debug_logger import get_debug_logger
 
@@ -40,9 +41,10 @@ class Orchestrator:
         self.gemini = GeminiClient(self.gemini_api_key)
         self.vertex = VertexClient(self.vertex_api_key)
         self.local = LocalClient()
+        self.openrouter = OpenRouterClient()
         self.store = VectorStore()
         self.debug_logger = get_debug_logger()
-        
+
         # Active model selection from environment
         self.active_model = os.getenv("ACTIVE_MODEL", "auto").lower()
         
@@ -358,6 +360,9 @@ class Orchestrator:
                     response = await self._delegate_to_vertex(augmented_request)
                 else:
                     response = await self._delegate_to_gemini(augmented_request)
+        elif self.active_model == "openrouter":
+            self.debug_logger.log_info("model_selection", "Using OpenRouter (explicit setting)", {"active_model": self.active_model})
+            response = await self._delegate_to_openrouter(augmented_request)
         else:
             # Auto mode: delegate based on complexity heuristics
             self.debug_logger.log_info("model_selection", f"Using auto mode (complexity: {complexity})", {"active_model": "auto", "complexity": complexity})
@@ -442,6 +447,12 @@ class Orchestrator:
         self.debug_logger.log_info("delegate_local", "Delegating to Local LLM...")
         response = await self.local.generate(request)
         return {"source": "Local", "response": response}
+
+    async def _delegate_to_openrouter(self, request: str):
+        """Delegate request to OpenRouter (200+ models)."""
+        self.debug_logger.log_info("delegate_openrouter", "Delegating to OpenRouter...")
+        response = await self.openrouter.generate(request)
+        return {"source": "OpenRouter", "response": response}
 
     # Dual-Agent Coordination Methods
 

@@ -44,6 +44,8 @@
 |----------|-------------|-------|
 | **[AGENTS.md](AGENTS.md)** | Workspace structure map for AI agents | Codebase overview |
 | **[ANTIGRAVITY_MASTER_GUIDE.md](ANTIGRAVITY_MASTER_GUIDE.md)** | Canonical MCP server setup guide | MCP + agents |
+| **[docs/MASTER_AI_AGENT_PROMPT.md](docs/MASTER_AI_AGENT_PROMPT.md)** | Master system prompt + full cross-platform integration guide (Antigravity + OpenCode + Gemini CLI) | All platforms |
+| **[docs/OPENCODE_INTEGRATION.md](docs/OPENCODE_INTEGRATION.md)** | OpenCode plugin ecosystem (oh-my-opencode, gsd-opencode, swarm-tools, opencode-sessions) | OpenCode |
 | **[COPILOT_SETUP.md](COPILOT_SETUP.md)** | GitHub Copilot agent setup | Copilot configuration |
 | **[GEMINI.md](GEMINI.md)** | Gemini AI agent instructions | Gemini integration |
 | **[mission.md](mission.md)** | Project mission statement | Vision |

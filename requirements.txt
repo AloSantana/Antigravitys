@@ -3,5 +3,7 @@
 # python-dotenv, and pyngrok are already in backend/requirements.txt.
 # The Dockerfile installs BOTH files, so duplicates are harmless but redundant.
 pytest
+pytest-cov
+pytest-asyncio
 httpx
 mcp
