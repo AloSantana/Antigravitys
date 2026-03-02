@@ -240,12 +240,44 @@
             } else {
                 msg.innerHTML = `<span class="message-source">${source}</span>${text}`;
             }
+
+            // Add "Handoff to Jules" button after each code block in agent messages
+            if (sender === "agent") {
+                msg.querySelectorAll("pre, code:not(pre > code)").forEach(function(codeEl) {
+                    const btn = document.createElement("button");
+                    btn.className = "handoff-btn";
+                    btn.title = "Send this code to Jules for review";
+                    btn.textContent = "⭐ Handoff to Jules";
+                    btn.onclick = function() { handoffToJules(codeEl.textContent); };
+                    codeEl.insertAdjacentElement("afterend", btn);
+                });
+            }
             
             chat.appendChild(msg);
             chat.scrollTop = chat.scrollHeight;
             
             messageCount++;
             document.getElementById('messagesCount').textContent = messageCount;
+        }
+
+        async function handoffToJules(codeSnippet) {
+            addMessage("⭐ Handing off to Jules for code review...", "system");
+            try {
+                const res = await fetch(`${API_BASE}/api/agents/handoff`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({
+                        from_agent: selectedAgent,
+                        to_agent: "jules",
+                        context: { code: codeSnippet },
+                        reason: "code review requested"
+                    })
+                });
+                const data = await res.json();
+                addMessage(data.response || JSON.stringify(data), "agent");
+            } catch (err) {
+                addMessage(`❌ Failed to handoff code to Jules: ${err}`, "system");
+            }
         }
 
         function showThinking() {
@@ -261,13 +293,85 @@
         function sendMessage() {
             const input = document.getElementById("input");
             const text = input.value.trim();
-            if (text) {
+            if (!text) return;
+
+            const dualAgentToggle = document.getElementById("dualAgentToggle");
+
+            if (dualAgentToggle && dualAgentToggle.checked) {
+                // Dual-Agent Mode: collect partners and collaboration mode
+                const partnerCheckboxes = document.querySelectorAll(".partner-checkbox:checked");
+                const partners = Array.from(partnerCheckboxes).map(cb => cb.value);
+                const agents = [selectedAgent, ...partners];
+                const modeRadio = document.querySelector("input[name='collab-mode']:checked");
+                const mode = modeRadio ? modeRadio.value : "sequential";
+
+                addMessage(text, "user");
+                input.value = "";
+
+                const thinkingMsg = document.createElement("div");
+                thinkingMsg.id = "thinking";
+                thinkingMsg.className = "message agent";
+                thinkingMsg.innerHTML = `<span class="message-source">🤝 Dual-Agent (${agents.join(", ")})</span><span class="thinking-dots">Thinking</span>`;
+                document.getElementById("chat").appendChild(thinkingMsg);
+                document.getElementById("chat").scrollTop = document.getElementById("chat").scrollHeight;
+
+                fetch(`${API_BASE}/api/agents/collaborate`, {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ request: text, agents: agents, mode: mode })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    const thinking = document.getElementById("thinking");
+                    if (thinking) thinking.remove();
+
+                    const chat = document.getElementById("chat");
+                    const wrapper = document.createElement("div");
+                    wrapper.className = "message agent";
+
+                    const results = data.results || {};
+                    if (Object.keys(results).length === 0) {
+                        wrapper.innerHTML = `<span class="message-source">🤝 Dual-Agent</span>${data.response || JSON.stringify(data)}`;
+                    } else {
+                        let html = `<span class="message-source">🤝 Dual-Agent Results (${mode})</span>`;
+                        for (const [agentName, agentResult] of Object.entries(results)) {
+                            const resultText = typeof agentResult === "string" ? agentResult : JSON.stringify(agentResult, null, 2);
+                            html += `<div class="dual-agent-result">
+                                <div class="dual-agent-result-header">@${agentName}</div>
+                                <div>${resultText}</div>
+                            </div>`;
+                        }
+                        wrapper.innerHTML = html;
+                    }
+
+                    chat.appendChild(wrapper);
+                    chat.scrollTop = chat.scrollHeight;
+                    messageCount++;
+                    document.getElementById("messagesCount").textContent = messageCount;
+                })
+                .catch(err => {
+                    const thinking = document.getElementById("thinking");
+                    if (thinking) thinking.remove();
+                    addMessage(`❌ Dual-agent error: ${err}`, "system");
+                });
+            } else {
+                // Standard single-agent flow
                 ws.send(`@${selectedAgent} ${text}`);
                 addMessage(text, "user");
                 showThinking();
                 input.value = "";
             }
         }
+
+        // Toggle dual-agent settings panel visibility
+        document.getElementById("dualAgentToggle").addEventListener("change", function() {
+            const settings = document.getElementById("dualAgentSettings");
+            if (this.checked) {
+                settings.classList.add("visible");
+            } else {
+                settings.classList.remove("visible");
+            }
+        });
 
         document.getElementById("input").addEventListener("keypress", function(event) {
             if (event.key === "Enter") sendMessage();
