@@ -26,7 +26,9 @@ from security import (
     get_allowed_origins, 
     validate_required_env_vars,
     validate_upload_file,
-    validate_message_length
+    validate_message_length,
+    create_access_token,
+    decode_access_token,
 )
 from settings_manager import SettingsManager
 from conversation_manager import ConversationManager
@@ -3068,6 +3070,48 @@ async def delete_user(user_id: str):
     except Exception as e:
         logger.error(f"Failed to delete user {user_id}: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Failed to delete user")
+
+
+# ═══════════════════════════════════════════════════════════════
+# Authentication API
+# ═══════════════════════════════════════════════════════════════
+
+
+class LoginRequest(BaseModel):
+    username: str = Field(..., min_length=1, max_length=64)
+    password: str = Field(..., min_length=1, max_length=128)
+
+
+@app.post("/api/auth/login")
+@limiter.limit("10/minute")
+async def login(request: Request, body: LoginRequest):
+    """
+    Authenticate a user and return a JWT access token.
+
+    Accepts a username and password, verifies the credentials, and returns
+    a bearer token that can be used to access protected endpoints.
+
+    Raises:
+        401: If credentials are invalid or the account is inactive.
+        503: If the user manager is not available.
+    """
+    if user_manager is None:
+        raise HTTPException(status_code=503, detail="User manager not available")
+    try:
+        user = user_manager.verify_credentials(body.username, body.password)
+    except Exception as e:
+        logger.error(f"Error during login for '{body.username}': {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Login failed")
+
+    if user is None:
+        raise HTTPException(status_code=401, detail="Invalid credentials")
+
+    token = create_access_token(
+        subject=user["id"],
+        extra_claims={"username": user["username"], "role": user["role"]},
+    )
+    return {"access_token": token, "token_type": "bearer"}
+
 
 # ═══════════════════════════════════════════════════════════════
 # End User Management API

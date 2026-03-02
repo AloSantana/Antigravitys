@@ -495,6 +495,56 @@ class UserManager:
             logger.error(f"Failed to verify password for user {user_id}: {e}", exc_info=True)
             raise
 
+    def verify_credentials(self, username: str, password: str) -> Optional[Dict[str, Any]]:
+        """
+        Verify a user's credentials by username and return the user if valid.
+
+        Uses a constant-time comparison to prevent timing attacks.
+
+        Args:
+            username: Username string
+            password: Plain-text password to verify
+
+        Returns:
+            User data dict (without password fields) if credentials are valid,
+            None otherwise
+        """
+        try:
+            with sqlite3.connect(self.db_path) as conn:
+                conn.row_factory = sqlite3.Row
+                cursor = conn.cursor()
+                cursor.execute(
+                    "SELECT id, username, email, full_name, role, is_active, "
+                    "hashed_password, password_salt, created_at, updated_at, metadata "
+                    "FROM users WHERE username = ?",
+                    (username,),
+                )
+                row = cursor.fetchone()
+
+            if row is None:
+                # Perform a constant-time dummy hash to avoid timing-based user
+                # enumeration; scrypt cost must match real password verification.
+                _hash_password(password, salt=secrets.token_hex(32))
+                return None
+
+            expected, _ = _hash_password(password, salt=row["password_salt"])
+            if not secrets.compare_digest(expected, row["hashed_password"]):
+                return None
+
+            if not row["is_active"]:
+                return None
+
+            user = dict(row)
+            user.pop("hashed_password", None)
+            user.pop("password_salt", None)
+            user["is_active"] = bool(user["is_active"])
+            user["metadata"] = json.loads(user["metadata"] or "{}")
+            return user
+
+        except sqlite3.Error as e:
+            logger.error(f"Failed to verify credentials for '{username}': {e}", exc_info=True)
+            raise
+
     # ------------------------------------------------------------------
     # Search & statistics
     # ------------------------------------------------------------------

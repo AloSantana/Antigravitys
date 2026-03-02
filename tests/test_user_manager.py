@@ -448,3 +448,34 @@ class TestGetStatistics:
 class TestValidRoles:
     def test_valid_roles_set(self):
         assert VALID_ROLES == {"admin", "user", "viewer"}
+
+
+# ---------------------------------------------------------------------------
+# verify_credentials
+# ---------------------------------------------------------------------------
+
+class TestVerifyCredentials:
+    def test_valid_credentials_returns_user(self, manager):
+        _make_user(manager, "authuser", email="auth@ex.com", password="S3cureP@ss!")
+        user = manager.verify_credentials("authuser", "S3cureP@ss!")
+        assert user is not None
+        assert user["username"] == "authuser"
+
+    def test_valid_credentials_excludes_password_fields(self, manager):
+        _make_user(manager, "safeuser", email="safe@ex.com")
+        user = manager.verify_credentials("safeuser", "S3cureP@ss!")
+        assert user is not None
+        assert "hashed_password" not in user
+        assert "password_salt" not in user
+
+    def test_wrong_password_returns_none(self, manager):
+        _make_user(manager, "wrongpw", email="wrongpw@ex.com")
+        assert manager.verify_credentials("wrongpw", "WrongPassword!") is None
+
+    def test_unknown_username_returns_none(self, manager):
+        assert manager.verify_credentials("nonexistent", "anypassword") is None
+
+    def test_inactive_user_returns_none(self, manager):
+        user = _make_user(manager, "inactive", email="inactive@ex.com")
+        manager.update_user(user["id"], is_active=False)
+        assert manager.verify_credentials("inactive", "S3cureP@ss!") is None
