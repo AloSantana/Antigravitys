@@ -552,6 +552,140 @@ class TestSecurityMeasures:
         assert response.status_code in [200, 400]
 
 
+class TestMultiModelAPIKeyParsing:
+    """Test that multi-model API keys are parsed and validated correctly."""
+
+    MULTI_MODEL_KEYS = [
+        "GEMINI_API_KEY",
+        "ANTHROPIC_API_KEY",
+        "OPENAI_API_KEY",
+        "OPENROUTER_API_KEY",
+    ]
+
+    def test_all_model_keys_in_sensitive_vars(self):
+        """Ensure all provider keys are treated as sensitive."""
+        manager = SettingsManager()
+        for key in self.MULTI_MODEL_KEYS:
+            assert key in manager.SENSITIVE_VARS, (
+                f"{key} must be in SettingsManager.SENSITIVE_VARS"
+            )
+
+    def test_multi_model_keys_recognised_in_available_models(self):
+        """Ensure the model list covers all four providers."""
+        manager = SettingsManager()
+        models = manager.get_available_models()
+        model_key_vars = {m["key_var"] for m in models if m.get("key_var")}
+        for key in ("GEMINI_API_KEY", "ANTHROPIC_API_KEY", "OPENAI_API_KEY", "OPENROUTER_API_KEY"):
+            assert key in model_key_vars, (
+                f"{key} is not referenced by any model in AVAILABLE_MODELS"
+            )
+
+    def test_model_keys_not_exposed_without_sensitive_flag(self, monkeypatch):
+        """Sensitive keys must not appear in the default settings when include_sensitive=False."""
+        # Inject fake keys into environment
+        monkeypatch.setenv("GEMINI_API_KEY", "AIzaSyFakeGeminiKey12345")
+        monkeypatch.setenv("ANTHROPIC_API_KEY", "sk-ant-FakeAnthropicKey12345")
+        monkeypatch.setenv("OPENAI_API_KEY", "sk-FakeOpenAIKey12345")
+        monkeypatch.setenv("OPENROUTER_API_KEY", "or-FakeOpenRouterKey12345")
+
+        manager = SettingsManager()
+        settings = manager.get_settings(include_sensitive=False)
+        body = json.dumps(settings)
+
+        for fake_value in [
+            "AIzaSyFakeGeminiKey12345",
+            "sk-ant-FakeAnthropicKey12345",
+            "sk-FakeOpenAIKey12345",
+            "or-FakeOpenRouterKey12345",
+        ]:
+            assert fake_value not in body, (
+                f"Raw key '{fake_value}' must not appear when include_sensitive=False"
+            )
+
+    def test_src_config_has_anthropic_key(self):
+        """Verify src/config.py Settings class declares ANTHROPIC_API_KEY."""
+        from src.config import Settings
+        # Pydantic Settings fields are in model_fields for v2 or __fields__ for v1
+        fields = getattr(Settings, "model_fields", None) or getattr(Settings, "__fields__", {})
+        assert "ANTHROPIC_API_KEY" in fields, (
+            "src/config.py Settings must declare ANTHROPIC_API_KEY"
+        )
+        assert "OPENROUTER_API_KEY" in fields, (
+            "src/config.py Settings must declare OPENROUTER_API_KEY"
+        )
+
+
+class TestMCPConfigSecurity:
+    """Test MCP configuration files contain no hardcoded secrets."""
+
+    MCP_CONFIG_FILES = [
+        Path(__file__).parent.parent / ".github" / "copilot" / "mcp.json",
+        Path(__file__).parent.parent / "opencode.json",
+    ]
+
+    def _load_json(self, path: Path) -> dict:
+        """Load and parse a JSON config file."""
+        if not path.exists():
+            pytest.skip(f"Config file not found: {path}")
+        with open(path) as f:
+            return json.load(f)
+
+    def test_mcp_json_no_hardcoded_secrets(self):
+        """mcp.json env values must use ${VAR} references, not literal secrets."""
+        data = self._load_json(self.MCP_CONFIG_FILES[0])
+        servers = data.get("mcpServers", {})
+        self._assert_no_literal_secrets(servers, str(self.MCP_CONFIG_FILES[0]))
+
+    def test_opencode_json_no_hardcoded_secrets(self):
+        """opencode.json provider/env values must use ${VAR} references, not literal secrets."""
+        data = self._load_json(self.MCP_CONFIG_FILES[1])
+        # Check mcp section
+        mcp_servers = data.get("mcp", {})
+        self._assert_no_literal_secrets(mcp_servers, str(self.MCP_CONFIG_FILES[1]))
+        # Check provider section
+        for provider, cfg in data.get("provider", {}).items():
+            if isinstance(cfg, dict) and "apiKey" in cfg:
+                api_key = cfg["apiKey"]
+                assert isinstance(api_key, str) and api_key.startswith("${"), (
+                    f"opencode.json provider '{provider}' apiKey must use ${{VAR}} syntax, got: {api_key!r}"
+                )
+
+    def test_mcp_json_has_core_unauthenticated_servers(self):
+        """mcp.json must contain the required core unauthenticated MCP servers."""
+        data = self._load_json(self.MCP_CONFIG_FILES[0])
+        servers = set(data.get("mcpServers", {}).keys())
+        required = {"filesystem", "git", "github", "memory", "sequential-thinking",
+                    "sqlite", "fetch", "time", "playwright", "mermaid", "docker"}
+        missing = required - servers
+        assert not missing, f"mcp.json is missing required MCP servers: {missing}"
+
+    def test_opencode_json_has_filesystem_server(self):
+        """opencode.json must include the filesystem MCP server."""
+        data = self._load_json(self.MCP_CONFIG_FILES[1])
+        mcp = data.get("mcp", {})
+        assert "filesystem" in mcp, (
+            "opencode.json mcp section must include the 'filesystem' server"
+        )
+
+    @staticmethod
+    def _assert_no_literal_secrets(servers: dict, source: str) -> None:
+        """Assert that no env value in a server map is a literal non-template secret."""
+        secret_prefixes = ("AIzaSy", "sk-", "ghp_", "ghs_", "github_pat_", "xoxb-", "xoxp-")
+        for server_name, server_cfg in servers.items():
+            env = server_cfg.get("env", {}) if isinstance(server_cfg, dict) else {}
+            for var, value in env.items():
+                if not isinstance(value, str):
+                    continue
+                # ${VAR} template references are allowed
+                if value.startswith("${") and value.endswith("}"):
+                    continue
+                for prefix in secret_prefixes:
+                    assert not value.startswith(prefix), (
+                        f"{source}: server '{server_name}' env var '{var}' contains a "
+                        f"hardcoded secret (starts with '{prefix}'). Use ${{VAR}} instead."
+                    )
+
+
 # Run pytest with coverage
 if __name__ == "__main__":
     pytest.main([__file__, "-v", "--tb=short"])

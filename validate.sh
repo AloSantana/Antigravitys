@@ -352,6 +352,37 @@ validate_scripts() {
     done
 }
 
+# Validate swarm-tools global database structure
+validate_swarm_tools() {
+    print_section "Swarm-Tools Global Database"
+
+    SWARM_DB_DIR="${HOME}/.config/swarm-tools"
+
+    if [ -d "$SWARM_DB_DIR" ]; then
+        check_pass "Global swarm-tools config directory exists: $SWARM_DB_DIR"
+        if [ -f "$SWARM_DB_DIR/swarm.db" ]; then
+            check_pass "Global swarm.db exists at $SWARM_DB_DIR/swarm.db"
+        else
+            check_warn "Global swarm.db not yet created (expected at $SWARM_DB_DIR/swarm.db — will be created on first swarm use)"
+        fi
+    else
+        check_warn "Global swarm-tools directory not found: $SWARM_DB_DIR"
+        check_warn "  Create with: mkdir -p $SWARM_DB_DIR"
+        check_warn "  NOTE: local swarm.db files inside the project are BANNED — always use $SWARM_DB_DIR/swarm.db"
+    fi
+
+    # Ensure no rogue local swarm.db files exist in the project
+    LOCAL_DBS=$(find "$SCRIPT_DIR" -maxdepth 4 -name "swarm.db" ! -path "*/.git/*" 2>/dev/null | head -5)
+    if [ -n "$LOCAL_DBS" ]; then
+        check_fail "Forbidden local swarm.db file(s) found inside project (use ~/.config/swarm-tools/swarm.db instead):"
+        echo "$LOCAL_DBS" | while read -r f; do
+            echo "    $f"
+        done
+    else
+        check_pass "No forbidden local swarm.db files found in project tree"
+    fi
+}
+
 # Print summary
 print_summary() {
     echo ""
@@ -402,6 +433,7 @@ main() {
     validate_services
     validate_web_interface
     validate_scripts
+    validate_swarm_tools
     
     print_summary
 }

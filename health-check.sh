@@ -217,6 +217,36 @@ for doc in "${REQUIRED_DOCS[@]}"; do
     fi
 done
 
+# Check 11: Swarm-Tools Global Database
+echo ""
+echo "11. Checking swarm-tools global database..."
+SWARM_DB_DIR="${HOME}/.config/swarm-tools"
+if [ -d "$SWARM_DB_DIR" ]; then
+    success "Global swarm-tools directory exists: $SWARM_DB_DIR"
+    if [ -f "$SWARM_DB_DIR/swarm.db" ]; then
+        success "Global swarm.db found at $SWARM_DB_DIR/swarm.db"
+    else
+        warning "swarm.db not yet created at $SWARM_DB_DIR/swarm.db (will be created on first swarm use)"
+    fi
+else
+    warning "Swarm-tools global directory not found: $SWARM_DB_DIR"
+    echo "   Create with: mkdir -p $SWARM_DB_DIR"
+    echo "   NOTE: local swarm.db files inside the project are BANNED — always use $SWARM_DB_DIR/swarm.db"
+fi
+
+# Check 12: No forbidden local swarm.db files
+echo ""
+echo "12. Checking for forbidden local swarm.db files..."
+LOCAL_SWARM_DBS=$(find . -maxdepth 4 -name "swarm.db" ! -path "./.git/*" 2>/dev/null | head -5)
+if [ -n "$LOCAL_SWARM_DBS" ]; then
+    error "Forbidden local swarm.db file(s) found inside project (must use ~/.config/swarm-tools/swarm.db):"
+    echo "$LOCAL_SWARM_DBS" | while read -r f; do
+        echo "   $f"
+    done
+else
+    success "No forbidden local swarm.db files found in project"
+fi
+
 # Summary
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

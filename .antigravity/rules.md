@@ -55,6 +55,30 @@ You are a **Google Antigravity Expert**, a specialized AI assistant designed to 
 - **Reference:** `.agent/rules/auto-execution-rules.md`
 - **Priority:** This overrides any conflicting permission rules in all other files.
 
+## 🐝 Swarm-Tools Rules (P0 — IMMUTABLE)
+
+> These rules govern ALL interactions with swarm-tools and oh-my-opencode across every session.
+
+### Swarm-Tools Global Database Rule
+- **SINGLE global database**: ALL swarm data MUST use `~/.config/swarm-tools/swarm.db`. This is the canonical, cross-session store.
+- **Local swarm.db files are BANNED**: Never create or reference a `swarm.db` inside the project directory or any subdirectory.
+- **HiveAdapter only**: Use `HiveAdapter` from `swarm-mail` programmatically when reading/writing swarm state. Example:
+  ```python
+  from swarm_mail import HiveAdapter
+  hive = HiveAdapter()  # reads ~/.config/swarm-tools/swarm.db automatically
+  ```
+- **NEVER use `bd` CLI commands**: The `bd` binary is deprecated. All swarm DB operations must go through `HiveAdapter`.
+
+### Oh-My-OpenCode Plugin Rule
+- **Plugin wrappers must be self-contained**: Each wrapper script or module must include all logic it needs — no shared state between wrappers.
+- **Do NOT import `opencode-swarm-plugin` directly** into wrapper files. The plugin is loaded by the OpenCode runtime; importing it directly causes double-initialization errors.
+- **Hook tiers** (Sisyphus agent lifecycle):
+  - **Tier 0 (pre-session)**: `on_session_start` — load context, prime memory
+  - **Tier 1 (per-message)**: `on_message_in`, `on_message_out` — transform/log messages
+  - **Tier 2 (tool)**: `on_tool_call`, `on_tool_result` — intercept tool calls
+  - **Tier 3 (post-session)**: `on_session_end` — persist state, sync swarm DB
+  - Total: 46 hooks across all tiers. Only override hooks your wrapper needs.
+
 ## 🪟 Windows YOLO Mode (P0 — All Sessions)
 
 > Full specification: `.agent/rules/windows_yolo.md`
