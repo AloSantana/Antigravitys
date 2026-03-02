@@ -4,12 +4,88 @@ Provides input validation, rate limiting, and authentication helpers.
 """
 
 import os
+import secrets
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
-from typing import List
+from typing import Any, Dict, List, Optional
+
+import jwt
 from fastapi import HTTPException, UploadFile
 import logging
 
 logger = logging.getLogger(__name__)
+
+# ---------------------------------------------------------------------------
+# JWT configuration
+# ---------------------------------------------------------------------------
+
+# Secret key for signing tokens — must be set in production via the JWT_SECRET_KEY
+# environment variable.  When the variable is absent a random key is generated at
+# startup, which means all tokens are invalidated on every process restart.
+_JWT_SECRET_KEY: str = os.getenv("JWT_SECRET_KEY", "")
+if not _JWT_SECRET_KEY:
+    _JWT_SECRET_KEY = secrets.token_hex(32)
+    logger.warning(
+        "JWT_SECRET_KEY is not set. A random key has been generated for this "
+        "process instance. All tokens will be invalidated on restart. "
+        "Set JWT_SECRET_KEY in your environment for production use."
+    )
+_JWT_ALGORITHM: str = "HS256"
+_JWT_ACCESS_TOKEN_EXPIRE_MINUTES: int = int(
+    os.getenv("JWT_ACCESS_TOKEN_EXPIRE_MINUTES", "60")
+)
+
+
+def create_access_token(
+    subject: str,
+    extra_claims: Optional[Dict[str, Any]] = None,
+    expires_delta: Optional[timedelta] = None,
+) -> str:
+    """
+    Create a signed JWT access token.
+
+    Args:
+        subject: The token subject (typically user ID or username).
+        extra_claims: Optional additional claims to embed in the token payload.
+        expires_delta: Optional custom expiry duration; defaults to
+            ``JWT_ACCESS_TOKEN_EXPIRE_MINUTES`` env variable (default 60 min).
+
+    Returns:
+        Encoded JWT string.
+    """
+    expire = datetime.now(tz=timezone.utc) + (
+        expires_delta
+        if expires_delta is not None
+        else timedelta(minutes=_JWT_ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+    payload: Dict[str, Any] = {"sub": subject, "exp": expire}
+    if extra_claims:
+        payload.update(extra_claims)
+    return jwt.encode(payload, _JWT_SECRET_KEY, algorithm=_JWT_ALGORITHM)
+
+
+def decode_access_token(token: str) -> Dict[str, Any]:
+    """
+    Decode and validate a JWT access token.
+
+    Args:
+        token: The encoded JWT string.
+
+    Returns:
+        Decoded payload dictionary.
+
+    Raises:
+        HTTPException 401: If the token is expired or invalid.
+    """
+    try:
+        payload: Dict[str, Any] = jwt.decode(
+            token, _JWT_SECRET_KEY, algorithms=[_JWT_ALGORITHM]
+        )
+        return payload
+    except jwt.ExpiredSignatureError:
+        raise HTTPException(status_code=401, detail="Token has expired")
+    except jwt.InvalidTokenError:
+        raise HTTPException(status_code=401, detail="Invalid token")
 
 # Constants
 MAX_FILE_SIZE = int(os.getenv("MAX_FILE_SIZE", 10 * 1024 * 1024))  # 10MB default
