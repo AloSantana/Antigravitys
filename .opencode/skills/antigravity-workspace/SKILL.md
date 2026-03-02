@@ -43,9 +43,10 @@ python backend/main.py
 
 ## Installation
 ```bash
-# Use the local installer scripts (see README for details)
+# For local installation (see README for details):
 ./install.sh
-# or for remote install:
+
+# For remote VPS deployment:
 ./install-remote.sh
 ```
 
