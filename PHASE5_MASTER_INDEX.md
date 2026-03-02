@@ -271,7 +271,7 @@ python tools/auto_issue_finder.py
 
 - **Documentation Index:** [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md)
 - **Troubleshooting:** [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
-- **GitHub Issues:** https://github.com/primoscope/antigravity-workspace-template/issues
+- **GitHub Issues:** https://github.com/AloSantana/Antigravitys/issues
 - **Auto Diagnostics:** `python tools/auto_issue_finder.py`
 
 ---

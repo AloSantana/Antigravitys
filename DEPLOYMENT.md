@@ -25,8 +25,8 @@ Complete guide for deploying Antigravity Workspace to production.
 
 ```bash
 # 1. Clone repository
-git clone https://github.com/primoscope/antigravity-workspace-template.git
-cd antigravity-workspace-template
+git clone https://github.com/AloSantana/Antigravitys.git
+cd Antigravitys
 
 # 2. Run installer
 sudo ./install.sh
@@ -67,8 +67,8 @@ curl -fsSL https://get.docker.com | sh
 sudo usermod -aG docker $USER
 
 # 5. Clone and setup
-git clone https://github.com/primoscope/antigravity-workspace-template.git
-cd antigravity-workspace-template
+git clone https://github.com/AloSantana/Antigravitys.git
+cd Antigravitys
 
 # 6. Create virtual environment
 python3 -m venv venv
@@ -131,7 +131,7 @@ server {
     
     # Frontend
     location / {
-        root /path/to/antigravity-workspace-template/frontend;
+        root /path/to/Antigravitys/frontend;
         index index.html;
         try_files $uri $uri/ =404;
     }
@@ -222,7 +222,7 @@ version: '3.8'
 
 services:
   backend:
-    image: ghcr.io/primoscope/antigravity-workspace-template:latest
+    image: ghcr.io/AloSantana/Antigravitys:latest
     restart: always
     environment:
       - GEMINI_API_KEY=${GEMINI_API_KEY}
@@ -603,5 +603,5 @@ Before going live:
 **Ready for production!** 🚀
 
 For support:
-- Issues: https://github.com/primoscope/antigravity-workspace-template/issues
-- Discussions: https://github.com/primoscope/antigravity-workspace-template/discussions
+- Issues: https://github.com/AloSantana/Antigravitys/issues
+- Discussions: https://github.com/AloSantana/Antigravitys/discussions

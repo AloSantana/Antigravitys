@@ -6,15 +6,15 @@
 # Supports: Ubuntu 20.04+, Debian 11+
 #
 # Usage:
-#   Basic: curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh | bash
+#   Basic: curl -fsSL https://raw.githubusercontent.com/AloSantana/Antigravitys/main/install-remote.sh | bash
 #
 #   With auto-SSL for seecast.cloud:
 #   AUTO_SSL_DOMAIN=seecast.cloud AUTO_SSL_EMAIL=admin@seecast.cloud \
-#     curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh | bash
+#     curl -fsSL https://raw.githubusercontent.com/AloSantana/Antigravitys/main/install-remote.sh | bash
 #
 #   With custom domain:
 #   EXTERNAL_HOST=yourdomain.com AUTO_SSL_EMAIL=you@example.com \
-#     curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh | bash
+#     curl -fsSL https://raw.githubusercontent.com/AloSantana/Antigravitys/main/install-remote.sh | bash
 #
 # This script will:
 #   ✓ Install all system dependencies (Python, Node.js, Docker)
@@ -37,7 +37,7 @@ NC='\033[0m' # No Color
 # Script configuration
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 LOG_FILE="${SCRIPT_DIR}/install-remote.log"
-REPO_URL="https://github.com/primoscope/antigravity-workspace-template.git"
+REPO_URL="https://github.com/AloSantana/Antigravitys.git"
 
 # Auto-SSL configuration for seecast.cloud
 AUTO_SSL_DOMAIN="${AUTO_SSL_DOMAIN:-}"

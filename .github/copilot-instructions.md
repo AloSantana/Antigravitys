@@ -782,8 +782,8 @@ When creating or reviewing PRs:
 - **Agent Docs**: `.github/agents/README.md`
 - **MCP Docs**: `.mcp/README.md` 
 - **Workflow Guides**: `.github/agents/CODING_WORKFLOW.md`
-- **Issues**: https://github.com/primoscope/antigravity-workspace-template/issues
-- **Discussions**: https://github.com/primoscope/antigravity-workspace-template/discussions
+- **Issues**: https://github.com/AloSantana/Antigravitys/issues
+- **Discussions**: https://github.com/AloSantana/Antigravitys/discussions
 
 ---
 

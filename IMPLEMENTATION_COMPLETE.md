@@ -164,7 +164,7 @@ All objectives from the problem statement have been successfully implemented:
 
 ### 1. One-Command Installation
 ```bash
-curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AloSantana/Antigravitys/main/install.sh | bash
 ```
 
 ### 2. Interactive Configuration
@@ -440,8 +440,8 @@ This implementation successfully transforms the Antigravity Workspace Template i
 ## 📞 Support
 
 For questions or issues:
-- **GitHub Issues**: https://github.com/primoscope/antigravity-workspace-template/issues
-- **Discussions**: https://github.com/primoscope/antigravity-workspace-template/discussions
+- **GitHub Issues**: https://github.com/AloSantana/Antigravitys/issues
+- **Discussions**: https://github.com/AloSantana/Antigravitys/discussions
 - **Documentation**: See README.md and guides
 
 ---

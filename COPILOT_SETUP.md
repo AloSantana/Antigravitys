@@ -381,7 +381,7 @@ echo "Try: @agent:repo-optimizer Analyze this repository structure"
 ## Getting Help
 
 - **Documentation**: Check `.github/agents/` and `.mcp/` directories
-- **Issues**: https://github.com/primoscope/antigravity-workspace-template/issues
+- **Issues**: https://github.com/AloSantana/Antigravitys/issues
 - **MCP Docs**: https://modelcontextprotocol.io/
 - **Copilot Docs**: https://docs.github.com/copilot
 

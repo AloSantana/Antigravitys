@@ -24,7 +24,7 @@ The fastest way to deploy on a remote Ubuntu VPS:
 ssh user@your-vps-ip
 
 # Run the one-command installer
-curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AloSantana/Antigravitys/main/install-remote.sh | bash
 ```
 
 This will:
@@ -67,7 +67,7 @@ ssh user@your-vps-ip
 ### Step 2: Run Remote Installer
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/primoscope/antigravity-workspace-template/main/install-remote.sh | bash
+curl -fsSL https://raw.githubusercontent.com/AloSantana/Antigravitys/main/install-remote.sh | bash
 ```
 
 ### Step 3: Follow Prompts
@@ -82,7 +82,7 @@ The installer will ask you:
 After installation, edit `.env`:
 
 ```bash
-cd antigravity-workspace-template
+cd Antigravitys
 nano .env
 ```
 
@@ -109,8 +109,8 @@ If you prefer manual installation or the one-command installer fails:
 ```bash
 # Clone to your home directory
 cd ~
-git clone https://github.com/primoscope/antigravity-workspace-template.git
-cd antigravity-workspace-template
+git clone https://github.com/AloSantana/Antigravitys.git
+cd Antigravitys
 ```
 
 ### 2. Run Standard Install
@@ -642,10 +642,10 @@ mkdir -p ~/backups
 
 # Backup important data
 tar -czf ~/backups/antigravity-$(date +%Y%m%d).tar.gz \
-  ~/antigravity-workspace-template/.env \
-  ~/antigravity-workspace-template/drop_zone \
-  ~/antigravity-workspace-template/data.db \
-  ~/antigravity-workspace-template/logs
+  ~/Antigravitys/.env \
+  ~/Antigravitys/drop_zone \
+  ~/Antigravitys/data.db \
+  ~/Antigravitys/logs
 
 # Copy to local machine
 scp user@your-vps-ip:~/backups/antigravity-*.tar.gz ./
@@ -655,10 +655,10 @@ scp user@your-vps-ip:~/backups/antigravity-*.tar.gz ./
 
 ```bash
 # Extract backup
-tar -xzf antigravity-20240206.tar.gz -C ~/antigravity-workspace-template
+tar -xzf antigravity-20240206.tar.gz -C ~/Antigravitys
 
 # Restart services
-cd ~/antigravity-workspace-template
+cd ~/Antigravitys
 ./stop.sh && ./start.sh
 ```
 
@@ -667,7 +667,7 @@ cd ~/antigravity-workspace-template
 ### Update to Latest Version
 
 ```bash
-cd ~/antigravity-workspace-template
+cd ~/Antigravitys
 
 # Backup first
 tar -czf ~/backup-before-update.tar.gz .env drop_zone data.db
@@ -690,8 +690,8 @@ pip install -r backend/requirements.txt
 
 ### Getting Help
 
-- **GitHub Issues**: https://github.com/primoscope/antigravity-workspace-template/issues
-- **Discussions**: https://github.com/primoscope/antigravity-workspace-template/discussions
+- **GitHub Issues**: https://github.com/AloSantana/Antigravitys/issues
+- **Discussions**: https://github.com/AloSantana/Antigravitys/discussions
 - **Documentation**: See other files in `docs/`
 
 ### Common Commands Reference
