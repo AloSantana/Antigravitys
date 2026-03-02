@@ -175,7 +175,7 @@ class AutoPilotPipeline:
     def cancel(self, pipeline_id: str) -> bool:
         """Cancel a running pipeline."""
         pipeline = self._pipelines.get(pipeline_id)
-        if not pipeline or pipeline.status != PipelineStatus.RUNNING:
+        if not pipeline or pipeline.status not in (PipelineStatus.CREATED, PipelineStatus.RUNNING):
             return False
 
         # Cancel the async task
@@ -203,6 +203,8 @@ class AutoPilotPipeline:
     async def _run_pipeline(self, pipeline_id: str):
         """Execute pipeline stages sequentially."""
         pipeline = self._pipelines[pipeline_id]
+        if pipeline.status == PipelineStatus.CANCELLED:
+            return
         pipeline.status = PipelineStatus.RUNNING
 
         accumulated_context = f"Goal: {pipeline.goal}\n"

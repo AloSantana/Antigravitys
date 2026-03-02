@@ -435,7 +435,7 @@ class TestSettingsIntegration:
         settings_dict = test_settings.model_dump()
         
         assert isinstance(settings_dict, dict)
-        assert settings_dict['GOOGLE_API_KEY'] == 'test_key'
+        assert settings_dict['GOOGLE_API_KEY'] == 'test_key_do_not_use_in_prod'
         assert settings_dict['AGENT_NAME'] == 'TestAgent'
         assert settings_dict['DEBUG_MODE'] is True
 

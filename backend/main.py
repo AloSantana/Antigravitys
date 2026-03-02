@@ -1077,6 +1077,66 @@ async def create_conversation(request: Request, data: ConversationCreate):
             detail="Failed to create conversation"
         )
 
+@app.get("/api/conversations/search")
+@limiter.limit("30/minute")
+async def search_conversations(request: Request, q: str, skip: int = 0, limit: int = 20):
+    """
+    Search conversations.
+    
+    Args:
+        q: Search query
+        skip: Number of records to skip
+        limit: Maximum number of records to return
+        
+    Returns:
+        Matching conversations
+    """
+    try:
+        if not q or len(q) < 2:
+            raise HTTPException(
+                status_code=400,
+                detail="Search query must be at least 2 characters"
+            )
+        
+        conversations, total = conversation_manager.search_conversations(
+            query=q,
+            skip=skip,
+            limit=min(limit, 100)
+        )
+        
+        return {
+            "conversations": conversations,
+            "total": total,
+            "query": q
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to search conversations: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to search conversations"
+        )
+
+@app.get("/api/conversations/stats")
+@limiter.limit("10/minute")
+async def get_conversation_stats(request: Request):
+    """
+    Get conversation statistics.
+    
+    Returns:
+        Statistics about conversations
+    """
+    try:
+        stats = conversation_manager.get_statistics()
+        return stats
+    except Exception as e:
+        logger.error(f"Failed to get conversation stats: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail="Failed to retrieve statistics"
+        )
+
 @app.get("/api/conversations/{conversation_id}")
 @limiter.limit("60/minute")
 async def get_conversation(request: Request, conversation_id: str, include_messages: bool = True):
@@ -1238,66 +1298,6 @@ async def export_conversation(request: Request, conversation_id: str):
         raise HTTPException(
             status_code=500,
             detail="Failed to export conversation"
-        )
-
-@app.get("/api/conversations/search")
-@limiter.limit("30/minute")
-async def search_conversations(request: Request, q: str, skip: int = 0, limit: int = 20):
-    """
-    Search conversations.
-    
-    Args:
-        q: Search query
-        skip: Number of records to skip
-        limit: Maximum number of records to return
-        
-    Returns:
-        Matching conversations
-    """
-    try:
-        if not q or len(q) < 2:
-            raise HTTPException(
-                status_code=400,
-                detail="Search query must be at least 2 characters"
-            )
-        
-        conversations, total = conversation_manager.search_conversations(
-            query=q,
-            skip=skip,
-            limit=min(limit, 100)
-        )
-        
-        return {
-            "conversations": conversations,
-            "total": total,
-            "query": q
-        }
-    except HTTPException:
-        raise
-    except Exception as e:
-        logger.error(f"Failed to search conversations: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to search conversations"
-        )
-
-@app.get("/api/conversations/stats")
-@limiter.limit("10/minute")
-async def get_conversation_stats(request: Request):
-    """
-    Get conversation statistics.
-    
-    Returns:
-        Statistics about conversations
-    """
-    try:
-        stats = conversation_manager.get_statistics()
-        return stats
-    except Exception as e:
-        logger.error(f"Failed to get conversation stats: {e}", exc_info=True)
-        raise HTTPException(
-            status_code=500,
-            detail="Failed to retrieve statistics"
         )
 
 # ═══════════════════════════════════════════════════════════════
