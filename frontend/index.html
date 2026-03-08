@@ -815,11 +815,22 @@ Example: Create a REST API for user management with authentication, tests, and d
                                 <span>🚀</span>
                                 <span>Execute with Swarm</span>
                             </button>
-                            <button class="swarm-execute-btn" id="swarmReportBtn" onclick="generateSwarmReport()" disabled
-                                style="flex:1;min-width:180px;background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-secondary);">
-                                <span>📄</span>
-                                <span>Generate Report</span>
-                            </button>
+                            <!-- Export Report split button -->
+                            <div id="swarmReportWrapper" style="position:relative;flex:1;min-width:180px;display:flex;">
+                                <button class="swarm-execute-btn" id="swarmReportBtn" onclick="generateSwarmReport('md')" disabled
+                                    style="flex:1;background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-secondary);border-right:none;border-radius:8px 0 0 8px;">
+                                    <span>📄</span>
+                                    <span>Export Report</span>
+                                </button>
+                                <button id="swarmReportDropdownBtn" onclick="toggleReportDropdown()" disabled
+                                    style="background:var(--bg-secondary);border:1px solid var(--border);border-left:1px solid var(--border-muted,#555);color:var(--text-secondary);padding:0 10px;border-radius:0 8px 8px 0;cursor:pointer;font-size:0.9rem;"
+                                    title="Choose export format">▾</button>
+                                <div id="reportFormatDropdown" style="display:none;position:absolute;top:calc(100% + 4px);right:0;min-width:160px;background:var(--bg-elevated,#1e1e2e);border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.3);z-index:999;overflow:hidden;">
+                                    <button onclick="generateSwarmReport('md'); toggleReportDropdown();" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;background:transparent;border:none;color:var(--text-primary,#cdd6f4);cursor:pointer;font-size:0.88rem;text-align:left;" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='transparent'">📝 Markdown (.md)</button>
+                                    <button onclick="generateSwarmReport('html'); toggleReportDropdown();" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;background:transparent;border:none;color:var(--text-primary,#cdd6f4);cursor:pointer;font-size:0.88rem;text-align:left;" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='transparent'">🌐 HTML Document (.html)</button>
+                                    <button onclick="generateSwarmReport('pdf'); toggleReportDropdown();" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;background:transparent;border:none;color:var(--text-primary,#cdd6f4);cursor:pointer;font-size:0.88rem;text-align:left;" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='transparent'">🖨️ PDF (Print Dialog)</button>
+                                </div>
+                            </div>
                             <button class="swarm-execute-btn" onclick="clearSwarmResults()"
                                 style="flex:0 0 auto;background:transparent;border:1px solid var(--border);color:var(--text-muted);">
                                 🗑️ Clear

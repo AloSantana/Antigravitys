@@ -2060,11 +2060,13 @@
                 swarmState.lastResult = data;
                 displaySwarmResults(data);
                 
-                // Enable report button
+                // Enable report buttons
                 const reportBtn = document.getElementById('swarmReportBtn');
+                const reportDropBtn = document.getElementById('swarmReportDropdownBtn');
                 reportBtn.disabled = false;
                 reportBtn.style.background = '';
                 reportBtn.style.color = '';
+                if (reportDropBtn) { reportDropBtn.disabled = false; reportDropBtn.style.color = ''; }
                 
             } catch (error) {
                 console.error('Error executing swarm:', error);
@@ -2105,9 +2107,14 @@
             if (resetReportBtn) {
                 swarmState.lastResult = null;
                 const reportBtn = document.getElementById('swarmReportBtn');
+                const reportDropBtn = document.getElementById('swarmReportDropdownBtn');
                 reportBtn.disabled = true;
                 reportBtn.style.background = 'var(--bg-secondary)';
                 reportBtn.style.color = 'var(--text-secondary)';
+                if (reportDropBtn) { reportDropBtn.disabled = true; reportDropBtn.style.color = 'var(--text-secondary)'; }
+                // Close dropdown if open
+                const dd = document.getElementById('reportFormatDropdown');
+                if (dd) dd.style.display = 'none';
             }
         }
 
@@ -2215,86 +2222,150 @@
             viewToggle.style.display = 'inline-block';
         }
 
-        // Generate and download a Markdown report from the last swarm execution
-        function generateSwarmReport() {
+        // Toggle the report format dropdown
+        function toggleReportDropdown() {
+            const dd = document.getElementById('reportFormatDropdown');
+            if (!dd) return;
+            dd.style.display = dd.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            const wrapper = document.getElementById('swarmReportWrapper');
+            if (wrapper && !wrapper.contains(e.target)) {
+                const dd = document.getElementById('reportFormatDropdown');
+                if (dd) dd.style.display = 'none';
+            }
+        });
+
+        // Generate and download a report from the last swarm execution
+        // format: 'md' (Markdown), 'html' (styled HTML), 'pdf' (print dialog)
+        async function generateSwarmReport(format) {
             const data = swarmState.lastResult;
             if (!data) {
                 alert('No execution results to export. Run a task first.');
                 return;
             }
 
-            const now = new Date().toISOString();
-            const lines = [
-                `# Antigravity Multi-Agent Swarm — Execution Report`,
-                ``,
-                `**Generated:** ${now}  `,
-                `**Priority:** ${data.priority || 'NORMAL'}  `,
-                `**Wall Time:** ${data.wall_time_ms != null ? data.wall_time_ms + ' ms' : '—'}  `,
-                `**Cache:** ${data.from_cache ? '⚡ Hit (cached result)' : 'Miss (fresh execution)'}  `,
-                `**Messages exchanged:** ${data.message_count || 0}  `,
-                ``,
-                `---`,
-                ``,
-                `## Task`,
-                ``,
-                `> ${(data.task || '').replace(/\n/g, '\n> ')}`,
-                ``,
-                `---`,
-                ``,
-                `## Delegation Plan`,
-                ``,
-            ];
+            const ts = Date.now();
 
-            if (data.delegation_plan) {
-                Object.entries(data.delegation_plan).forEach(([agent, task]) => {
-                    const conf = data.confidence_scores ? data.confidence_scores[agent] : null;
-                    const confStr = conf != null ? ` *(${Math.round(conf * 100)}% confidence)*` : '';
-                    lines.push(`### ${agent}${confStr}`);
-                    lines.push(``);
-                    lines.push(task);
-                    lines.push(``);
-                });
-            }
-
-            lines.push(`---`);
-            lines.push(``);
-            lines.push(`## Agent Results`);
-            lines.push(``);
-
-            if (data.agent_results) {
-                Object.entries(data.agent_results).forEach(([agent, result]) => {
-                    const status = result.success !== false ? '✓ Success' : '✗ Error';
-                    const ms = result.execution_time_ms != null ? ` — ${result.execution_time_ms} ms` : '';
-                    lines.push(`### ${agent} — ${status}${ms}`);
-                    lines.push(``);
-                    lines.push('```');
-                    lines.push(result.output || '');
-                    lines.push('```');
-                    lines.push(``);
-                });
-            }
-
-            if (data.synthesis) {
+            if (!format || format === 'md') {
+                // ── Markdown export (client-side, no API call) ──
+                const now = new Date().toISOString();
+                const lines = [
+                    `# Antigravity Multi-Agent Swarm — Execution Report`,
+                    ``,
+                    `**Generated:** ${now}  `,
+                    `**Priority:** ${data.priority || 'NORMAL'}  `,
+                    `**Wall Time:** ${data.wall_time_ms != null ? data.wall_time_ms + ' ms' : '—'}  `,
+                    `**Cache:** ${data.from_cache ? '⚡ Hit (cached result)' : 'Miss (fresh execution)'}  `,
+                    `**Messages exchanged:** ${data.message_count || 0}  `,
+                    ``,
+                    `---`,
+                    ``,
+                    `## Task`,
+                    ``,
+                    `> ${(data.task || '').replace(/\n/g, '\n> ')}`,
+                    ``,
+                    `---`,
+                    ``,
+                    `## Delegation Plan`,
+                    ``,
+                ];
+                if (data.delegation_plan) {
+                    Object.entries(data.delegation_plan).forEach(([agent, task]) => {
+                        const conf = data.confidence_scores ? data.confidence_scores[agent] : null;
+                        const confStr = conf != null ? ` *(${Math.round(conf * 100)}% confidence)*` : '';
+                        lines.push(`### ${agent}${confStr}`);
+                        lines.push(``);
+                        lines.push(task);
+                        lines.push(``);
+                    });
+                }
                 lines.push(`---`);
                 lines.push(``);
-                lines.push(`## Final Synthesis`);
+                lines.push(`## Agent Results`);
                 lines.push(``);
-                lines.push(data.synthesis);
-                lines.push(``);
+                if (data.agent_results) {
+                    Object.entries(data.agent_results).forEach(([agent, result]) => {
+                        const status = result.success !== false ? '✓ Success' : '✗ Error';
+                        const ms = result.execution_time_ms != null ? ` — ${result.execution_time_ms} ms` : '';
+                        lines.push(`### ${agent} — ${status}${ms}`);
+                        lines.push(``);
+                        lines.push('```');
+                        lines.push(result.output || '');
+                        lines.push('```');
+                        lines.push(``);
+                    });
+                }
+                if (data.synthesis) {
+                    lines.push(`---`);
+                    lines.push(``);
+                    lines.push(`## Final Synthesis`);
+                    lines.push(``);
+                    lines.push(data.synthesis);
+                    lines.push(``);
+                }
+                lines.push(`---`);
+                lines.push(`*Report generated by Antigravity Multi-Agent Swarm*`);
+                const blob = new Blob([lines.join('\n')], { type: 'text/markdown' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `swarm-report-${ts}.md`;
+                a.click();
+                URL.revokeObjectURL(url);
+                showNotification('Markdown report downloaded', 'success');
+                return;
             }
 
-            lines.push(`---`);
-            lines.push(`*Report generated by Antigravity Multi-Agent Swarm*`);
+            // ── HTML / PDF export — call backend to generate styled document ──
+            try {
+                const payload = {
+                    task: data.task || '',
+                    priority: data.priority || 'NORMAL',
+                    wall_time_ms: data.wall_time_ms ?? null,
+                    from_cache: !!data.from_cache,
+                    message_count: data.message_count || 0,
+                    delegation_plan: data.delegation_plan || null,
+                    confidence_scores: data.confidence_scores || null,
+                    agent_results: data.agent_results || null,
+                    synthesis: data.synthesis || null,
+                    format: format,  // 'html' or 'pdf'
+                };
+                const resp = await fetch(`${API_BASE}/swarm/report`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload),
+                });
+                if (!resp.ok) throw new Error(`Server error ${resp.status}`);
+                const htmlContent = await resp.text();
 
-            const markdown = lines.join('\n');
-            const blob = new Blob([markdown], { type: 'text/markdown' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = `swarm-report-${Date.now()}.md`;
-            a.click();
-            URL.revokeObjectURL(url);
-            showNotification('Report downloaded', 'success');
+                if (format === 'pdf') {
+                    // Open in new window — the HTML auto-triggers window.print()
+                    const win = window.open('', '_blank');
+                    if (!win) {
+                        alert('Pop-up blocked. Please allow pop-ups for this site and try again.');
+                        return;
+                    }
+                    win.document.write(htmlContent);
+                    win.document.close();
+                    showNotification('PDF print dialog opened in new window', 'success');
+                } else {
+                    // Download HTML file
+                    const blob = new Blob([htmlContent], { type: 'text/html' });
+                    const url = URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `swarm-report-${ts}.html`;
+                    a.click();
+                    URL.revokeObjectURL(url);
+                    showNotification('HTML report downloaded', 'success');
+                }
+            } catch (err) {
+                console.error('Report generation failed:', err);
+                showNotification(`Failed to generate report: ${err.message}`, 'error');
+            }
         }
 
         // Load agent capabilities
