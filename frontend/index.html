@@ -34,7 +34,15 @@
         <!-- Left Sidebar - File Explorer -->
         <div class="sidebar">
             <div class="sidebar-section">
-                <div class="section-title">📂 Project Files</div>
+                <div class="section-title" style="display:flex;align-items:center;justify-content:space-between;">
+                    <span>📂 Project Files</span>
+                    <div style="display:flex;gap:6px;">
+                        <button onclick="fetchFiles()" title="Refresh file list"
+                            style="background:transparent;border:none;cursor:pointer;font-size:0.8rem;padding:2px 5px;border-radius:4px;color:var(--text-muted);" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-muted)'">🔄</button>
+                        <button onclick="indexRepoFiles()" id="indexRepoBtn" title="Copy project source files into drop_zone for RAG analysis"
+                            style="background:transparent;border:none;cursor:pointer;font-size:0.8rem;padding:2px 5px;border-radius:4px;color:var(--text-muted);" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-muted)'">📥 Index</button>
+                    </div>
+                </div>
                 <div class="file-tree" id="fileTree">
                     <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.875rem;">
                         Loading files...
@@ -92,6 +100,7 @@
                 <div class="editor-container">
                     <div class="editor-toolbar">
                         <div class="editor-info" id="editorInfo">No file selected</div>
+                        <button class="icon-btn" id="analyzeFileBtn" onclick="analyzeCurrentFileWithSwarm()" title="Analyze this file with the multi-agent swarm" style="display:none;">🐝 Analyze</button>
                         <button class="icon-btn" onclick="saveFile()">💾 Save</button>
                     </div>
                     <textarea id="codeEditor"></textarea>

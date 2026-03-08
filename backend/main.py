@@ -391,6 +391,141 @@ async def upload_files(request: Request, files: list[UploadFile] = File(...)):
         "files": uploaded_files
     }
 
+
+@app.get("/api/files/read")
+@limiter.limit("60/minute")
+async def read_file_content(request: Request, path: str = Query(..., min_length=1)):
+    """
+    Read the content of a file inside the drop_zone.
+
+    Args:
+        path: Relative path to the file within the drop_zone directory
+
+    Returns:
+        File name and UTF-8 decoded content
+    """
+    try:
+        watch_dir_abs = os.path.abspath(watcher.watch_dir if watcher else os.path.join(project_root, "drop_zone"))
+        # Resolve to absolute, preventing path traversal
+        requested = os.path.abspath(os.path.join(watch_dir_abs, path))
+        if not requested.startswith(watch_dir_abs + os.sep) and requested != watch_dir_abs:
+            raise HTTPException(status_code=400, detail="Invalid path: directory traversal detected")
+        if not os.path.isfile(requested):
+            raise HTTPException(status_code=404, detail="File not found")
+
+        file_size = os.path.getsize(requested)
+        max_read = 1 * 1024 * 1024  # 1 MB cap for preview
+        with open(requested, "r", encoding="utf-8", errors="replace") as f:
+            content = f.read(max_read)
+        truncated = file_size > max_read
+
+        return {
+            "name": os.path.basename(requested),
+            "path": path,
+            "size": file_size,
+            "content": content,
+            "truncated": truncated,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to read file '{path}': {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to read file: {str(e)}")
+
+
+class RepoIndexRequest(BaseModel):
+    """Request body for repo indexing."""
+    directories: List[str] = Field(
+        default=["src", "backend", "docs", ".github/agents"],
+        description="Project-relative directories to index (relative to project root)"
+    )
+    extensions: List[str] = Field(
+        default=[".py", ".js", ".ts", ".md", ".txt", ".json", ".yaml", ".yml", ".html", ".css"],
+        description="File extensions to include"
+    )
+    overwrite: bool = Field(default=False, description="Overwrite existing files in drop_zone")
+
+
+@app.post("/api/repo/index")
+@limiter.limit("5/minute")
+async def index_repo_files(request: Request, body: RepoIndexRequest = RepoIndexRequest()):
+    """
+    Copy project source files into the drop_zone so they are automatically
+    ingested into the RAG knowledge base.
+
+    Only files within the project root are accessible. Files are copied with
+    a flattened name (path separators replaced with '__') to avoid collisions.
+
+    Returns:
+        Summary of files copied / skipped / failed
+    """
+    try:
+        watch_dir_abs = os.path.abspath(watcher.watch_dir if watcher else os.path.join(project_root, "drop_zone"))
+        allowed_ext = {ext.lower() if ext.startswith(".") else f".{ext.lower()}" for ext in body.extensions}
+
+        # Validate requested directories — must stay inside project root
+        safe_dirs: List[str] = []
+        for rel_dir in body.directories:
+            candidate = os.path.abspath(os.path.join(project_root, rel_dir))
+            if not candidate.startswith(project_root):
+                logger.warning(f"Skipping directory outside project root: {rel_dir}")
+                continue
+            if os.path.isdir(candidate):
+                safe_dirs.append(candidate)
+
+        copied: List[str] = []
+        skipped: List[str] = []
+        failed: List[str] = []
+
+        for source_dir in safe_dirs:
+            for root, _dirs, files in os.walk(source_dir):
+                # Skip hidden dirs and common noise
+                _dirs[:] = [d for d in _dirs if not d.startswith(".") and d not in ("__pycache__", "node_modules", ".venv", "venv")]
+                for filename in files:
+                    ext = os.path.splitext(filename)[1].lower()
+                    if ext not in allowed_ext:
+                        continue
+
+                    src_path = os.path.join(root, filename)
+
+                    # Build a unique flat name: relative path with / → __
+                    rel = os.path.relpath(src_path, project_root)
+                    flat_name = rel.replace(os.sep, "__")
+
+                    dest_path = os.path.join(watch_dir_abs, flat_name)
+
+                    try:
+                        if os.path.exists(dest_path) and not body.overwrite:
+                            skipped.append(rel)
+                            continue
+                        # Only copy text-readable files up to 2 MB
+                        if os.path.getsize(src_path) > 2 * 1024 * 1024:
+                            skipped.append(f"{rel} (too large)")
+                            continue
+                        import shutil as _shutil
+                        _shutil.copy2(src_path, dest_path)
+                        copied.append(rel)
+                    except Exception as copy_err:
+                        logger.warning(f"Failed to copy {rel}: {copy_err}")
+                        failed.append(rel)
+
+        logger.info(f"Repo index: {len(copied)} copied, {len(skipped)} skipped, {len(failed)} failed")
+        return {
+            "message": f"Indexed {len(copied)} file(s) into drop_zone for RAG analysis",
+            "copied": copied,
+            "skipped": skipped,
+            "failed": failed,
+            "total_copied": len(copied),
+            "total_skipped": len(skipped),
+            "total_failed": len(failed),
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to index repo files: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to index repo files: {str(e)}")
+
+
 @app.post("/agent/ask")
 @limiter.limit("30/minute")
 async def ask_agent(request: Request, query: str):

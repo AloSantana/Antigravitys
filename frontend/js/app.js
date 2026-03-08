@@ -419,9 +419,11 @@
                 const div = document.createElement("div");
                 div.className = "file-item";
                 const icon = item.type === "directory" ? "📁" : "📄";
-                div.innerHTML = `<span class="file-icon">${icon}</span><span>${item.name}</span>`;
+                div.innerHTML = `<span class="file-icon">${icon}</span><span>${escapeHtml(item.name)}</span>`;
                 
                 if (item.type === "file") {
+                    div.style.cursor = 'pointer';
+                    div.title = item.name;
                     div.addEventListener('click', () => loadFile(item));
                 }
                 
@@ -439,7 +441,7 @@
                 node.children.forEach(child => createNode(child, container));
                 document.getElementById('filesCount').textContent = countFiles(node);
             } else {
-                container.innerHTML = '<div style="padding: 10px; text-align: center; color: var(--text-muted); font-size: 0.875rem;">Drop zone is empty</div>';
+                container.innerHTML = '<div style="padding: 10px; text-align: center; color: var(--text-muted); font-size: 0.875rem;">Drop zone is empty.<br><small>Use <strong>📥 Index</strong> to import project files.</small></div>';
             }
         }
 
@@ -452,18 +454,81 @@
             return count;
         }
 
-        function loadFile(file) {
+        // Track which file is open in the editor
+        let _currentEditorFile = null;
+
+        async function loadFile(file) {
             // Switch to editor tab
             switchPanel('editor');
-            document.getElementById('editorInfo').textContent = file.name;
-            // In a real implementation, we would load the file content here
-            editor.setValue(`// Content of ${file.name}\n// Loading...`);
+            document.getElementById('editorInfo').textContent = file.name + ' (loading…)';
+            editor.setValue('');
+
+            try {
+                const res = await fetch(`${API_BASE}/api/files/read?path=${encodeURIComponent(file.rel_path || file.path || file.name)}`);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+
+                editor.setValue(data.content || '');
+                const sizeKB = (data.size / 1024).toFixed(1);
+                const truncNote = data.truncated ? ' [preview — truncated]' : '';
+                document.getElementById('editorInfo').textContent = `${data.name} (${sizeKB} KB)${truncNote}`;
+                _currentEditorFile = data;
+
+                // Show/hide analyze button
+                document.getElementById('analyzeFileBtn').style.display = 'inline-flex';
+            } catch (err) {
+                console.error('Failed to load file:', err);
+                editor.setValue(`// Failed to load ${file.name}\n// ${err.message}`);
+                document.getElementById('editorInfo').textContent = file.name + ' (error)';
+                _currentEditorFile = null;
+                document.getElementById('analyzeFileBtn').style.display = 'none';
+            }
         }
 
         function saveFile() {
             const content = editor.getValue();
             addMessage("💾 File saved successfully", "system");
             console.log("Saving file:", content);
+        }
+
+        // Analyze the currently open file using the multi-agent swarm
+        async function analyzeCurrentFileWithSwarm() {
+            if (!_currentEditorFile) {
+                showNotification('No file open in the editor', 'error');
+                return;
+            }
+            const task = `Analyze the following file and provide a detailed review of its quality, potential issues, and improvement suggestions.\n\nFile: ${_currentEditorFile.name}\n\n\`\`\`\n${_currentEditorFile.content.slice(0, 8000)}\n\`\`\``;
+            // Switch to swarm panel and pre-fill the task input
+            switchPanel('swarm');
+            const taskInput = document.getElementById('swarmTaskInput');
+            taskInput.value = task;
+            showNotification(`Ready to analyze ${_currentEditorFile.name} — press Execute`, 'success');
+        }
+
+        // Copy project source files into the drop_zone for RAG indexing
+        async function indexRepoFiles() {
+            const btn = document.getElementById('indexRepoBtn');
+            const originalText = btn.textContent;
+            btn.textContent = '⏳';
+            btn.disabled = true;
+
+            try {
+                const res = await fetch(`${API_BASE}/repo/index`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ overwrite: false }),
+                });
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                const data = await res.json();
+                showNotification(`${data.message} (${data.total_skipped} already present)`, 'success');
+                fetchFiles();
+            } catch (err) {
+                console.error('Failed to index repo files:', err);
+                showNotification(`Failed to index files: ${err.message}`, 'error');
+            } finally {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            }
         }
 
         function updateConnectionStatus(connected) {
