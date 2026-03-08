@@ -1946,7 +1946,9 @@
 
         let swarmState = {
             executing: false,
-            currentTask: null
+            currentTask: null,
+            lastResult: null,
+            viewMode: 'formatted'  // 'formatted' | 'raw'
         };
 
         // Execute swarm task
@@ -1966,21 +1968,23 @@
             
             const executeBtn = document.getElementById('swarmExecuteBtn');
             const verbose = document.getElementById('swarmVerbose').checked;
+            const priority = document.getElementById('swarmPriority').value;
             
             try {
                 swarmState.executing = true;
+                swarmState.lastResult = null;
                 executeBtn.disabled = true;
                 executeBtn.innerHTML = '<span>⏳</span><span>Executing...</span>';
                 
                 // Clear previous results
-                clearSwarmResults();
+                clearSwarmResults(false);
                 
                 const response = await fetch(`${API_BASE}/swarm/execute`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ task, verbose })
+                    body: JSON.stringify({ task, verbose, priority })
                 });
                 
                 if (!response.ok) {
@@ -1988,7 +1992,14 @@
                 }
                 
                 const data = await response.json();
+                swarmState.lastResult = data;
                 displaySwarmResults(data);
+                
+                // Enable report button
+                const reportBtn = document.getElementById('swarmReportBtn');
+                reportBtn.disabled = false;
+                reportBtn.style.background = '';
+                reportBtn.style.color = '';
                 
             } catch (error) {
                 console.error('Error executing swarm:', error);
@@ -2001,9 +2012,11 @@
         }
 
         // Clear swarm results
-        function clearSwarmResults() {
+        function clearSwarmResults(resetReportBtn = true) {
             const planDisplay = document.getElementById('swarmPlanDisplay');
             const resultsDisplay = document.getElementById('swarmResultsDisplay');
+            const statsBar = document.getElementById('swarmStatsBar');
+            const viewToggle = document.getElementById('swarmResultsViewToggle');
             
             planDisplay.classList.remove('active');
             planDisplay.innerHTML = `
@@ -2018,56 +2031,205 @@
                     Results will appear here after execution
                 </div>
             `;
+            
+            statsBar.style.display = 'none';
+            viewToggle.style.display = 'none';
+            swarmState.viewMode = 'formatted';
+            viewToggle.textContent = '📊 Raw JSON';
+
+            if (resetReportBtn) {
+                swarmState.lastResult = null;
+                const reportBtn = document.getElementById('swarmReportBtn');
+                reportBtn.disabled = true;
+                reportBtn.style.background = 'var(--bg-secondary)';
+                reportBtn.style.color = 'var(--text-secondary)';
+            }
+        }
+
+        // Toggle between formatted and raw JSON view
+        function toggleSwarmView() {
+            if (!swarmState.lastResult) return;
+            const toggle = document.getElementById('swarmResultsViewToggle');
+            if (swarmState.viewMode === 'formatted') {
+                swarmState.viewMode = 'raw';
+                toggle.textContent = '✨ Formatted';
+                renderSwarmRaw(swarmState.lastResult);
+            } else {
+                swarmState.viewMode = 'formatted';
+                toggle.textContent = '📊 Raw JSON';
+                renderSwarmFormatted(swarmState.lastResult);
+            }
+        }
+
+        function renderSwarmRaw(data) {
+            const resultsDisplay = document.getElementById('swarmResultsDisplay');
+            resultsDisplay.innerHTML = `<pre style="font-size:0.78rem;overflow-x:auto;white-space:pre-wrap;word-break:break-all;">${escapeHtml(JSON.stringify(data, null, 2))}</pre>`;
+        }
+
+        function renderSwarmFormatted(data) {
+            const resultsDisplay = document.getElementById('swarmResultsDisplay');
+            let html = '';
+
+            // Per-agent results
+            if (data.agent_results && Object.keys(data.agent_results).length > 0) {
+                Object.entries(data.agent_results).forEach(([agent, result]) => {
+                    const conf = data.confidence_scores ? data.confidence_scores[agent] : null;
+                    const confBadge = conf != null
+                        ? `<span style="margin-left:8px;padding:2px 7px;background:rgba(99,102,241,0.15);border-radius:10px;font-size:0.75rem;color:#818cf8;">${Math.round(conf * 100)}% conf.</span>`
+                        : '';
+                    const ms = result.execution_time_ms != null ? `<span style="margin-left:8px;font-size:0.75rem;color:var(--text-muted);">⏱ ${result.execution_time_ms} ms</span>` : '';
+                    const status = result.success !== false;
+                    html += `
+                        <div class="swarm-result-item" style="margin-bottom:12px;">
+                            <div class="swarm-result-header">
+                                <div class="swarm-result-agent">${escapeHtml(agent)}${confBadge}</div>
+                                <div style="display:flex;align-items:center;gap:4px;">
+                                    ${ms}
+                                    <div class="swarm-result-status ${status ? '' : 'error'}">${status ? '✓ Success' : '✗ Error'}</div>
+                                </div>
+                            </div>
+                            <div class="swarm-result-content" style="white-space:pre-wrap;max-height:300px;overflow-y:auto;">${escapeHtml(result.output || '')}</div>
+                        </div>`;
+                });
+            }
+
+            // Synthesis
+            if (data.synthesis) {
+                html += `
+                    <div class="swarm-result-item" style="border:1px solid rgba(99,102,241,0.3);background:rgba(99,102,241,0.05);">
+                        <div class="swarm-result-header">
+                            <div class="swarm-result-agent" style="color:#818cf8;">🔮 Final Synthesis</div>
+                            <div class="swarm-result-status">✓ Complete</div>
+                        </div>
+                        <div class="swarm-result-content" style="white-space:pre-wrap;">${escapeHtml(data.synthesis)}</div>
+                    </div>`;
+            }
+
+            resultsDisplay.innerHTML = html || '<div style="padding:20px;text-align:center;color:var(--text-muted);">No results</div>';
         }
 
         // Display swarm results
         function displaySwarmResults(data) {
             const planDisplay = document.getElementById('swarmPlanDisplay');
+            const statsBar = document.getElementById('swarmStatsBar');
+            const viewToggle = document.getElementById('swarmResultsViewToggle');
             const resultsDisplay = document.getElementById('swarmResultsDisplay');
             
-            // Display delegation plan if available
-            if (data.delegation_plan) {
+            // Stats bar
+            if (data.wall_time_ms != null || data.message_count != null) {
+                document.getElementById('swarmWallTime').textContent = data.wall_time_ms != null ? `${data.wall_time_ms} ms` : '—';
+                document.getElementById('swarmMsgCount').textContent = data.message_count != null ? data.message_count : '—';
+                document.getElementById('swarmCacheStatus').textContent = data.from_cache ? '⚡ Hit' : '〇 Miss';
+                document.getElementById('swarmCacheStatus').style.color = data.from_cache ? '#34d399' : 'var(--text-muted)';
+                document.getElementById('swarmPriorityDisplay').textContent = data.priority || '—';
+                statsBar.style.display = 'flex';
+            }
+
+            // Delegation plan
+            if (data.delegation_plan && Object.keys(data.delegation_plan).length > 0) {
                 planDisplay.classList.add('active');
-                const planHTML = Object.entries(data.delegation_plan).map(([agent, task]) => `
-                    <div class="swarm-plan-item">
-                        <div class="swarm-plan-agent">${agent}</div>
-                        <div class="swarm-plan-task">${escapeHtml(task)}</div>
-                    </div>
-                `).join('');
+                const planHTML = Object.entries(data.delegation_plan).map(([agent, task]) => {
+                    const conf = data.confidence_scores ? data.confidence_scores[agent] : null;
+                    const confBadge = conf != null
+                        ? `<span style="margin-left:8px;padding:2px 7px;background:rgba(99,102,241,0.15);border-radius:10px;font-size:0.75rem;color:#818cf8;">${Math.round(conf * 100)}%</span>`
+                        : '';
+                    return `
+                        <div class="swarm-plan-item">
+                            <div class="swarm-plan-agent">${escapeHtml(agent)}${confBadge}</div>
+                            <div class="swarm-plan-task">${escapeHtml(task)}</div>
+                        </div>`;
+                }).join('');
                 planDisplay.innerHTML = planHTML;
             }
-            
-            // Display agent results
+
+            // Render formatted results
+            resultsDisplay.classList.add('active');
+            renderSwarmFormatted(data);
+
+            // Show view toggle
+            viewToggle.style.display = 'inline-block';
+        }
+
+        // Generate and download a Markdown report from the last swarm execution
+        function generateSwarmReport() {
+            const data = swarmState.lastResult;
+            if (!data) {
+                alert('No execution results to export. Run a task first.');
+                return;
+            }
+
+            const now = new Date().toISOString();
+            const lines = [
+                `# Antigravity Multi-Agent Swarm — Execution Report`,
+                ``,
+                `**Generated:** ${now}  `,
+                `**Priority:** ${data.priority || 'NORMAL'}  `,
+                `**Wall Time:** ${data.wall_time_ms != null ? data.wall_time_ms + ' ms' : '—'}  `,
+                `**Cache:** ${data.from_cache ? '⚡ Hit (cached result)' : 'Miss (fresh execution)'}  `,
+                `**Messages exchanged:** ${data.message_count || 0}  `,
+                ``,
+                `---`,
+                ``,
+                `## Task`,
+                ``,
+                `> ${(data.task || '').replace(/\n/g, '\n> ')}`,
+                ``,
+                `---`,
+                ``,
+                `## Delegation Plan`,
+                ``,
+            ];
+
+            if (data.delegation_plan) {
+                Object.entries(data.delegation_plan).forEach(([agent, task]) => {
+                    const conf = data.confidence_scores ? data.confidence_scores[agent] : null;
+                    const confStr = conf != null ? ` *(${Math.round(conf * 100)}% confidence)*` : '';
+                    lines.push(`### ${agent}${confStr}`);
+                    lines.push(``);
+                    lines.push(task);
+                    lines.push(``);
+                });
+            }
+
+            lines.push(`---`);
+            lines.push(``);
+            lines.push(`## Agent Results`);
+            lines.push(``);
+
             if (data.agent_results) {
-                resultsDisplay.classList.add('active');
-                const resultsHTML = Object.entries(data.agent_results).map(([agent, result]) => `
-                    <div class="swarm-result-item">
-                        <div class="swarm-result-header">
-                            <div class="swarm-result-agent">${agent}</div>
-                            <div class="swarm-result-status ${result.success !== false ? '' : 'error'}">
-                                ${result.success !== false ? '✓ Success' : '✗ Error'}
-                            </div>
-                        </div>
-                        <div class="swarm-result-content">${escapeHtml(JSON.stringify(result, null, 2))}</div>
-                    </div>
-                `).join('');
-                resultsDisplay.innerHTML = resultsHTML;
+                Object.entries(data.agent_results).forEach(([agent, result]) => {
+                    const status = result.success !== false ? '✓ Success' : '✗ Error';
+                    const ms = result.execution_time_ms != null ? ` — ${result.execution_time_ms} ms` : '';
+                    lines.push(`### ${agent} — ${status}${ms}`);
+                    lines.push(``);
+                    lines.push('```');
+                    lines.push(result.output || '');
+                    lines.push('```');
+                    lines.push(``);
+                });
             }
-            
-            // Display final result if available
-            if (data.final_result) {
-                resultsDisplay.classList.add('active');
-                const finalHTML = `
-                    <div class="swarm-result-item">
-                        <div class="swarm-result-header">
-                            <div class="swarm-result-agent">Final Synthesized Result</div>
-                            <div class="swarm-result-status">✓ Complete</div>
-                        </div>
-                        <div class="swarm-result-content">${escapeHtml(data.final_result)}</div>
-                    </div>
-                `;
-                resultsDisplay.innerHTML += finalHTML;
+
+            if (data.synthesis) {
+                lines.push(`---`);
+                lines.push(``);
+                lines.push(`## Final Synthesis`);
+                lines.push(``);
+                lines.push(data.synthesis);
+                lines.push(``);
             }
+
+            lines.push(`---`);
+            lines.push(`*Report generated by Antigravity Multi-Agent Swarm*`);
+
+            const markdown = lines.join('\n');
+            const blob = new Blob([markdown], { type: 'text/markdown' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `swarm-report-${Date.now()}.md`;
+            a.click();
+            URL.revokeObjectURL(url);
+            showNotification('Report downloaded', 'success');
         }
 
         // Load agent capabilities

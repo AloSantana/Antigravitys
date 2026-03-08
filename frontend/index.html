@@ -785,17 +785,45 @@
 
 Example: Create a REST API for user management with authentication, tests, and deployment configuration"></textarea>
                         
-                        <div class="swarm-options">
+                        <div class="swarm-options" style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;">
                             <label class="swarm-checkbox">
                                 <input type="checkbox" id="swarmVerbose" checked>
                                 Verbose output
                             </label>
+                            <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;color:var(--text-muted);">
+                                Priority
+                                <select id="swarmPriority" style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text-primary);font-size:0.85rem;cursor:pointer;">
+                                    <option value="LOW">🔵 Low</option>
+                                    <option value="NORMAL" selected>🟢 Normal</option>
+                                    <option value="HIGH">🟡 High</option>
+                                    <option value="CRITICAL">🔴 Critical</option>
+                                </select>
+                            </label>
                         </div>
                         
-                        <button class="swarm-execute-btn" id="swarmExecuteBtn" onclick="executeSwarm()">
-                            <span>🚀</span>
-                            <span>Execute with Swarm</span>
-                        </button>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                            <button class="swarm-execute-btn" id="swarmExecuteBtn" onclick="executeSwarm()" style="flex:1;min-width:180px;">
+                                <span>🚀</span>
+                                <span>Execute with Swarm</span>
+                            </button>
+                            <button class="swarm-execute-btn" id="swarmReportBtn" onclick="generateSwarmReport()" disabled
+                                style="flex:1;min-width:180px;background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-secondary);">
+                                <span>📄</span>
+                                <span>Generate Report</span>
+                            </button>
+                            <button class="swarm-execute-btn" onclick="clearSwarmResults()"
+                                style="flex:0 0 auto;background:transparent;border:1px solid var(--border);color:var(--text-muted);">
+                                🗑️ Clear
+                            </button>
+                        </div>
+
+                        <!-- Execution Stats Bar -->
+                        <div id="swarmStatsBar" style="display:none;margin-top:12px;padding:10px 14px;background:var(--bg-secondary);border-radius:8px;border:1px solid var(--border);display:none;flex-wrap:wrap;gap:16px;font-size:0.8rem;color:var(--text-muted);">
+                            <span>⏱️ Wall time: <strong id="swarmWallTime">—</strong></span>
+                            <span>🔢 Messages: <strong id="swarmMsgCount">—</strong></span>
+                            <span>⚡ Cache: <strong id="swarmCacheStatus">—</strong></span>
+                            <span>🎯 Priority: <strong id="swarmPriorityDisplay">—</strong></span>
+                        </div>
                     </div>
 
                     <!-- Agent Status -->
@@ -836,7 +864,7 @@ Example: Create a REST API for user management with authentication, tests, and d
                         </div>
                     </div>
 
-                    <!-- Delegation Plan -->
+                    <!-- Delegation Plan (with confidence scores) -->
                     <div class="swarm-controls">
                         <div class="swarm-section-title">
                             📋 Delegation Plan
@@ -851,8 +879,12 @@ Example: Create a REST API for user management with authentication, tests, and d
 
                     <!-- Results -->
                     <div class="swarm-controls">
-                        <div class="swarm-section-title">
-                            ✨ Execution Results
+                        <div class="swarm-section-title" style="display:flex;align-items:center;justify-content:space-between;">
+                            <span>✨ Execution Results</span>
+                            <button id="swarmResultsViewToggle" onclick="toggleSwarmView()" 
+                                style="display:none;background:var(--bg-secondary);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:0.8rem;color:var(--text-muted);cursor:pointer;">
+                                📊 Raw JSON
+                            </button>
                         </div>
                         
                         <div class="swarm-results-display" id="swarmResultsDisplay">

@@ -2309,6 +2309,7 @@ class SwarmExecutionRequest(BaseModel):
     """Model for swarm execution request."""
     task: str = Field(..., min_length=3, max_length=10000)
     verbose: bool = True
+    priority: str = Field(default="NORMAL", pattern="^(LOW|NORMAL|HIGH|CRITICAL)$")
 
 @app.post("/api/swarm/execute")
 @limiter.limit("10/minute")
@@ -2317,16 +2318,26 @@ async def execute_swarm_task(request: Request, swarm_request: SwarmExecutionRequ
     Execute a task using the multi-agent swarm system.
     
     Args:
-        swarm_request: Task and execution options
+        swarm_request: Task, execution options, and priority level
         
     Returns:
-        Swarm execution results
+        Swarm execution results including delegation plan, worker results,
+        confidence scores, wall time, and cache status
     """
     try:
         # Import swarm system
         import sys
         sys.path.insert(0, os.path.join(project_root, "src"))
-        from swarm import SwarmOrchestrator
+        from swarm import SwarmOrchestrator, TaskPriority
+        
+        # Map string priority to enum
+        priority_map = {
+            "LOW": TaskPriority.LOW,
+            "NORMAL": TaskPriority.NORMAL,
+            "HIGH": TaskPriority.HIGH,
+            "CRITICAL": TaskPriority.CRITICAL,
+        }
+        priority = priority_map.get(swarm_request.priority.upper(), TaskPriority.NORMAL)
         
         # Create orchestrator
         swarm = SwarmOrchestrator()
@@ -2334,16 +2345,32 @@ async def execute_swarm_task(request: Request, swarm_request: SwarmExecutionRequ
         # Execute task
         result = await swarm.execute(
             swarm_request.task,
-            verbose=swarm_request.verbose
+            verbose=swarm_request.verbose,
+            priority=priority,
         )
-        
+
+        # Extract per-agent result summaries (output text + timing)
+        agent_results = {}
+        for agent_name, agent_result in result.get("worker_results", {}).items():
+            agent_results[agent_name] = {
+                "success": agent_result.get("success", True),
+                "output": agent_result.get("output", ""),
+                "execution_time_ms": agent_result.get("execution_time_ms", 0),
+            }
+
         return {
             "success": result["success"],
             "task": result["task"],
             "delegation_plan": result["delegation_plan"],
             "workers_used": result["workers_used"],
             "synthesis": result["synthesis"],
-            "message_count": result["message_count"]
+            "message_count": result["message_count"],
+            # New enriched fields
+            "agent_results": agent_results,
+            "confidence_scores": result.get("confidence_scores", {}),
+            "wall_time_ms": result.get("wall_time_ms", 0),
+            "from_cache": result.get("from_cache", False),
+            "priority": result.get("priority", swarm_request.priority),
         }
     except ImportError as e:
         logger.error(f"Failed to import swarm system: {e}")
@@ -2391,6 +2418,29 @@ async def get_swarm_capabilities(request: Request):
             status_code=500,
             detail=f"Failed to retrieve capabilities: {str(e)}"
         )
+
+@app.get("/api/swarm/metrics")
+@limiter.limit("30/minute")
+async def get_swarm_metrics(request: Request):
+    """
+    Get swarm performance metrics.
+
+    Returns:
+        Swarm-level counters, cache statistics, and per-agent metrics.
+    """
+    try:
+        import sys
+        sys.path.insert(0, os.path.join(project_root, "src"))
+        from swarm import SwarmOrchestrator
+
+        swarm = SwarmOrchestrator()
+        return swarm.get_swarm_metrics()
+    except ImportError as e:
+        logger.error(f"Failed to import swarm system: {e}")
+        raise HTTPException(status_code=500, detail="Swarm system not available")
+    except Exception as e:
+        logger.error(f"Failed to get swarm metrics: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve metrics: {str(e)}")
 
 # ═══════════════════════════════════════════════════════════════
 # End Swarm System API
