@@ -2,6 +2,7 @@
 Reviewer agent specialized in code review and quality assurance.
 """
 
+import time
 from typing import Dict, Any, Optional
 
 from .base_agent import BaseAgent
@@ -37,13 +38,16 @@ class ReviewerAgent(BaseAgent):
         review_type = context.get("review_type", "general") if context else "general"
         
         # Perform review
+        start = time.monotonic()
         output = self._perform_review(task, code_to_review, review_type)
+        elapsed_ms = (time.monotonic() - start) * 1000
         
         result = {
             "success": True,
             "output": output,
             "review_type": review_type,
-            "issues_found": self._count_issues(output)
+            "issues_found": self._count_issues(output),
+            "execution_time_ms": round(elapsed_ms, 2),
         }
         
         self.add_to_history(task, result)

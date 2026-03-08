@@ -5,6 +5,7 @@ Coder agent specialized in writing and refactoring code.
 from typing import Dict, Any, Optional
 
 from .base_agent import BaseAgent
+import time
 
 
 class CoderAgent(BaseAgent):
@@ -37,13 +38,16 @@ class CoderAgent(BaseAgent):
         language = context.get("language", "python") if context else "python"
         
         # Simulate code generation (in real implementation, would use LLM)
+        start = time.monotonic()
         output = self._generate_code_response(task, existing_code, language)
+        elapsed_ms = (time.monotonic() - start) * 1000
         
         result = {
             "success": True,
             "output": output,
             "language": language,
-            "task_type": self._classify_task(task)
+            "task_type": self._classify_task(task),
+            "execution_time_ms": round(elapsed_ms, 2),
         }
         
         self.add_to_history(task, result)
