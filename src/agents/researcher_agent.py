@@ -2,6 +2,7 @@
 Researcher agent specialized in information gathering and analysis.
 """
 
+import time
 from typing import Dict, Any, Optional
 
 from .base_agent import BaseAgent
@@ -37,13 +38,16 @@ class ResearcherAgent(BaseAgent):
         depth = context.get("depth", "standard") if context else "standard"
         
         # Perform research
+        start = time.monotonic()
         output = self._perform_research(task, focus_areas, depth)
+        elapsed_ms = (time.monotonic() - start) * 1000
         
         result = {
             "success": True,
             "output": output,
             "focus_areas": focus_areas,
-            "depth": depth
+            "depth": depth,
+            "execution_time_ms": round(elapsed_ms, 2),
         }
         
         self.add_to_history(task, result)

@@ -34,7 +34,15 @@
         <!-- Left Sidebar - File Explorer -->
         <div class="sidebar">
             <div class="sidebar-section">
-                <div class="section-title">📂 Project Files</div>
+                <div class="section-title" style="display:flex;align-items:center;justify-content:space-between;">
+                    <span>📂 Project Files</span>
+                    <div style="display:flex;gap:6px;">
+                        <button onclick="fetchFiles()" title="Refresh file list"
+                            style="background:transparent;border:none;cursor:pointer;font-size:0.8rem;padding:2px 5px;border-radius:4px;color:var(--text-muted);" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-muted)'">🔄</button>
+                        <button onclick="indexRepoFiles()" id="indexRepoBtn" title="Copy project source files into drop_zone for RAG analysis"
+                            style="background:transparent;border:none;cursor:pointer;font-size:0.8rem;padding:2px 5px;border-radius:4px;color:var(--text-muted);" onmouseover="this.style.color='var(--text-primary)'" onmouseout="this.style.color='var(--text-muted)'">📥 Index</button>
+                    </div>
+                </div>
                 <div class="file-tree" id="fileTree">
                     <div style="padding: 20px; text-align: center; color: var(--text-muted); font-size: 0.875rem;">
                         Loading files...
@@ -92,6 +100,7 @@
                 <div class="editor-container">
                     <div class="editor-toolbar">
                         <div class="editor-info" id="editorInfo">No file selected</div>
+                        <button class="icon-btn" id="analyzeFileBtn" onclick="analyzeCurrentFileWithSwarm()" title="Analyze this file with the multi-agent swarm" style="display:none;">🐝 Analyze</button>
                         <button class="icon-btn" onclick="saveFile()">💾 Save</button>
                     </div>
                     <textarea id="codeEditor"></textarea>
@@ -785,17 +794,56 @@
 
 Example: Create a REST API for user management with authentication, tests, and deployment configuration"></textarea>
                         
-                        <div class="swarm-options">
+                        <div class="swarm-options" style="display:flex;flex-wrap:wrap;gap:16px;align-items:center;">
                             <label class="swarm-checkbox">
                                 <input type="checkbox" id="swarmVerbose" checked>
                                 Verbose output
                             </label>
+                            <label style="display:flex;align-items:center;gap:8px;font-size:0.85rem;color:var(--text-muted);">
+                                Priority
+                                <select id="swarmPriority" style="background:var(--bg-secondary);border:1px solid var(--border);border-radius:6px;padding:4px 8px;color:var(--text-primary);font-size:0.85rem;cursor:pointer;">
+                                    <option value="LOW">🔵 Low</option>
+                                    <option value="NORMAL" selected>🟢 Normal</option>
+                                    <option value="HIGH">🟡 High</option>
+                                    <option value="CRITICAL">🔴 Critical</option>
+                                </select>
+                            </label>
                         </div>
                         
-                        <button class="swarm-execute-btn" id="swarmExecuteBtn" onclick="executeSwarm()">
-                            <span>🚀</span>
-                            <span>Execute with Swarm</span>
-                        </button>
+                        <div style="display:flex;gap:10px;flex-wrap:wrap;">
+                            <button class="swarm-execute-btn" id="swarmExecuteBtn" onclick="executeSwarm()" style="flex:1;min-width:180px;">
+                                <span>🚀</span>
+                                <span>Execute with Swarm</span>
+                            </button>
+                            <!-- Export Report split button -->
+                            <div id="swarmReportWrapper" style="position:relative;flex:1;min-width:180px;display:flex;">
+                                <button class="swarm-execute-btn" id="swarmReportBtn" onclick="generateSwarmReport('md')" disabled
+                                    style="flex:1;background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-secondary);border-right:none;border-radius:8px 0 0 8px;">
+                                    <span>📄</span>
+                                    <span>Export Report</span>
+                                </button>
+                                <button id="swarmReportDropdownBtn" onclick="toggleReportDropdown()" disabled
+                                    style="background:var(--bg-secondary);border:1px solid var(--border);border-left:1px solid var(--border-muted,#555);color:var(--text-secondary);padding:0 10px;border-radius:0 8px 8px 0;cursor:pointer;font-size:0.9rem;"
+                                    title="Choose export format">▾</button>
+                                <div id="reportFormatDropdown" style="display:none;position:absolute;top:calc(100% + 4px);right:0;min-width:160px;background:var(--bg-elevated,#1e1e2e);border:1px solid var(--border);border-radius:8px;box-shadow:0 4px 20px rgba(0,0,0,.3);z-index:999;overflow:hidden;">
+                                    <button onclick="generateSwarmReport('md'); toggleReportDropdown();" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;background:transparent;border:none;color:var(--text-primary,#cdd6f4);cursor:pointer;font-size:0.88rem;text-align:left;" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='transparent'">📝 Markdown (.md)</button>
+                                    <button onclick="generateSwarmReport('html'); toggleReportDropdown();" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;background:transparent;border:none;color:var(--text-primary,#cdd6f4);cursor:pointer;font-size:0.88rem;text-align:left;" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='transparent'">🌐 HTML Document (.html)</button>
+                                    <button onclick="generateSwarmReport('pdf'); toggleReportDropdown();" style="display:flex;align-items:center;gap:8px;width:100%;padding:10px 14px;background:transparent;border:none;color:var(--text-primary,#cdd6f4);cursor:pointer;font-size:0.88rem;text-align:left;" onmouseover="this.style.background='var(--bg-secondary)'" onmouseout="this.style.background='transparent'">🖨️ PDF (Print Dialog)</button>
+                                </div>
+                            </div>
+                            <button class="swarm-execute-btn" onclick="clearSwarmResults()"
+                                style="flex:0 0 auto;background:transparent;border:1px solid var(--border);color:var(--text-muted);">
+                                🗑️ Clear
+                            </button>
+                        </div>
+
+                        <!-- Execution Stats Bar -->
+                        <div id="swarmStatsBar" style="display:none;margin-top:12px;padding:10px 14px;background:var(--bg-secondary);border-radius:8px;border:1px solid var(--border);display:none;flex-wrap:wrap;gap:16px;font-size:0.8rem;color:var(--text-muted);">
+                            <span>⏱️ Wall time: <strong id="swarmWallTime">—</strong></span>
+                            <span>🔢 Messages: <strong id="swarmMsgCount">—</strong></span>
+                            <span>⚡ Cache: <strong id="swarmCacheStatus">—</strong></span>
+                            <span>🎯 Priority: <strong id="swarmPriorityDisplay">—</strong></span>
+                        </div>
                     </div>
 
                     <!-- Agent Status -->
@@ -836,7 +884,7 @@ Example: Create a REST API for user management with authentication, tests, and d
                         </div>
                     </div>
 
-                    <!-- Delegation Plan -->
+                    <!-- Delegation Plan (with confidence scores) -->
                     <div class="swarm-controls">
                         <div class="swarm-section-title">
                             📋 Delegation Plan
@@ -851,8 +899,12 @@ Example: Create a REST API for user management with authentication, tests, and d
 
                     <!-- Results -->
                     <div class="swarm-controls">
-                        <div class="swarm-section-title">
-                            ✨ Execution Results
+                        <div class="swarm-section-title" style="display:flex;align-items:center;justify-content:space-between;">
+                            <span>✨ Execution Results</span>
+                            <button id="swarmResultsViewToggle" onclick="toggleSwarmView()" 
+                                style="display:none;background:var(--bg-secondary);border:1px solid var(--border);border-radius:6px;padding:4px 10px;font-size:0.8rem;color:var(--text-muted);cursor:pointer;">
+                                📊 Raw JSON
+                            </button>
                         </div>
                         
                         <div class="swarm-results-display" id="swarmResultsDisplay">

@@ -391,6 +391,149 @@ async def upload_files(request: Request, files: list[UploadFile] = File(...)):
         "files": uploaded_files
     }
 
+
+@app.get("/api/files/read")
+@limiter.limit("60/minute")
+async def read_file_content(request: Request, path: str = Query(..., min_length=1)):
+    """
+    Read the content of a file inside the drop_zone.
+
+    Args:
+        path: Relative path to the file within the drop_zone directory
+
+    Returns:
+        File name and UTF-8 decoded content
+    """
+    try:
+        watch_dir_abs = os.path.abspath(watcher.watch_dir if watcher else os.path.join(project_root, "drop_zone"))
+        # Resolve to absolute, preventing path traversal
+        requested = os.path.abspath(os.path.join(watch_dir_abs, path))
+        if not requested.startswith(watch_dir_abs + os.sep) and requested != watch_dir_abs:
+            raise HTTPException(status_code=400, detail="Invalid path: directory traversal detected")
+        if not os.path.isfile(requested):
+            raise HTTPException(status_code=404, detail="File not found")
+
+        file_size = os.path.getsize(requested)
+        max_read = 1 * 1024 * 1024  # 1 MB cap for preview
+        with open(requested, "r", encoding="utf-8", errors="replace") as f:
+            content = f.read(max_read)
+        truncated = file_size > max_read
+
+        return {
+            "name": os.path.basename(requested),
+            "path": path,
+            "size": file_size,
+            "content": content,
+            "truncated": truncated,
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to read file '{path}': {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to read file: {str(e)}")
+
+
+class RepoIndexRequest(BaseModel):
+    """Request body for repo indexing."""
+    directories: List[str] = Field(
+        default=[".", "src", "backend", "docs", ".github/agents", "tests", "scripts", "tools", "examples", ".antigravity", ".specs"],
+        description="Project-relative directories to index (relative to project root). Use '.' to include root-level files."
+    )
+    extensions: List[str] = Field(
+        default=[".py", ".js", ".ts", ".md", ".txt", ".json", ".yaml", ".yml", ".html", ".css"],
+        description="File extensions to include"
+    )
+    overwrite: bool = Field(default=False, description="Overwrite existing files in drop_zone")
+
+
+@app.post("/api/repo/index")
+@limiter.limit("5/minute")
+async def index_repo_files(request: Request, body: RepoIndexRequest = RepoIndexRequest()):
+    """
+    Copy project source files into the drop_zone so they are automatically
+    ingested into the RAG knowledge base.
+
+    Only files within the project root are accessible. Files are copied with
+    a flattened name (path separators replaced with '__') to avoid collisions.
+
+    Returns:
+        Summary of files copied / skipped / failed
+    """
+    try:
+        watch_dir_abs = os.path.abspath(watcher.watch_dir if watcher else os.path.join(project_root, "drop_zone"))
+        allowed_ext = {ext.lower() if ext.startswith(".") else f".{ext.lower()}" for ext in body.extensions}
+
+        # Validate requested directories — must stay inside project root
+        safe_dirs: List[str] = []
+        root_files_only: bool = False  # flag to handle "." (root-level files without recursion)
+        for rel_dir in body.directories:
+            if rel_dir == ".":
+                root_files_only = True
+                safe_dirs.append(project_root)
+                continue
+            candidate = os.path.abspath(os.path.join(project_root, rel_dir))
+            if not candidate.startswith(project_root):
+                logger.warning(f"Skipping directory outside project root: {rel_dir}")
+                continue
+            if os.path.isdir(candidate):
+                safe_dirs.append(candidate)
+
+        copied: List[str] = []
+        skipped: List[str] = []
+        failed: List[str] = []
+
+        for source_dir in safe_dirs:
+            for root, _dirs, files in os.walk(source_dir):
+                # When source_dir is the project root, only process root-level files (no recursion)
+                if root_files_only and os.path.abspath(root) == os.path.abspath(project_root):
+                    _dirs.clear()  # prevent recursion into subdirectories for root-level scan
+                # Skip hidden dirs and common noise
+                _dirs[:] = [d for d in _dirs if not d.startswith(".") and d not in ("__pycache__", "node_modules", ".venv", "venv")]
+                for filename in files:
+                    ext = os.path.splitext(filename)[1].lower()
+                    if ext not in allowed_ext:
+                        continue
+
+                    src_path = os.path.join(root, filename)
+
+                    # Build a unique flat name: relative path with / → __
+                    rel = os.path.relpath(src_path, project_root)
+                    flat_name = rel.replace(os.sep, "__")
+
+                    dest_path = os.path.join(watch_dir_abs, flat_name)
+
+                    try:
+                        if os.path.exists(dest_path) and not body.overwrite:
+                            skipped.append(rel)
+                            continue
+                        # Only copy text-readable files up to 2 MB
+                        if os.path.getsize(src_path) > 2 * 1024 * 1024:
+                            skipped.append(f"{rel} (too large)")
+                            continue
+                        import shutil as _shutil
+                        _shutil.copy2(src_path, dest_path)
+                        copied.append(rel)
+                    except Exception as copy_err:
+                        logger.warning(f"Failed to copy {rel}: {copy_err}")
+                        failed.append(rel)
+
+        logger.info(f"Repo index: {len(copied)} copied, {len(skipped)} skipped, {len(failed)} failed")
+        return {
+            "message": f"Indexed {len(copied)} file(s) into drop_zone for RAG analysis",
+            "copied": copied,
+            "skipped": skipped,
+            "failed": failed,
+            "total_copied": len(copied),
+            "total_skipped": len(skipped),
+            "total_failed": len(failed),
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to index repo files: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to index repo files: {str(e)}")
+
+
 @app.post("/agent/ask")
 @limiter.limit("30/minute")
 async def ask_agent(request: Request, query: str):
@@ -2309,6 +2452,7 @@ class SwarmExecutionRequest(BaseModel):
     """Model for swarm execution request."""
     task: str = Field(..., min_length=3, max_length=10000)
     verbose: bool = True
+    priority: str = Field(default="NORMAL", pattern="^(LOW|NORMAL|HIGH|CRITICAL)$")
 
 @app.post("/api/swarm/execute")
 @limiter.limit("10/minute")
@@ -2317,16 +2461,26 @@ async def execute_swarm_task(request: Request, swarm_request: SwarmExecutionRequ
     Execute a task using the multi-agent swarm system.
     
     Args:
-        swarm_request: Task and execution options
+        swarm_request: Task, execution options, and priority level
         
     Returns:
-        Swarm execution results
+        Swarm execution results including delegation plan, worker results,
+        confidence scores, wall time, and cache status
     """
     try:
         # Import swarm system
         import sys
         sys.path.insert(0, os.path.join(project_root, "src"))
-        from swarm import SwarmOrchestrator
+        from swarm import SwarmOrchestrator, TaskPriority
+        
+        # Map string priority to enum
+        priority_map = {
+            "LOW": TaskPriority.LOW,
+            "NORMAL": TaskPriority.NORMAL,
+            "HIGH": TaskPriority.HIGH,
+            "CRITICAL": TaskPriority.CRITICAL,
+        }
+        priority = priority_map.get(swarm_request.priority.upper(), TaskPriority.NORMAL)
         
         # Create orchestrator
         swarm = SwarmOrchestrator()
@@ -2334,16 +2488,32 @@ async def execute_swarm_task(request: Request, swarm_request: SwarmExecutionRequ
         # Execute task
         result = await swarm.execute(
             swarm_request.task,
-            verbose=swarm_request.verbose
+            verbose=swarm_request.verbose,
+            priority=priority,
         )
-        
+
+        # Extract per-agent result summaries (output text + timing)
+        agent_results = {}
+        for agent_name, agent_result in result.get("worker_results", {}).items():
+            agent_results[agent_name] = {
+                "success": agent_result.get("success", True),
+                "output": agent_result.get("output", ""),
+                "execution_time_ms": agent_result.get("execution_time_ms", 0),
+            }
+
         return {
             "success": result["success"],
             "task": result["task"],
             "delegation_plan": result["delegation_plan"],
             "workers_used": result["workers_used"],
             "synthesis": result["synthesis"],
-            "message_count": result["message_count"]
+            "message_count": result["message_count"],
+            # New enriched fields
+            "agent_results": agent_results,
+            "confidence_scores": result.get("confidence_scores", {}),
+            "wall_time_ms": result.get("wall_time_ms", 0),
+            "from_cache": result.get("from_cache", False),
+            "priority": result.get("priority", swarm_request.priority),
         }
     except ImportError as e:
         logger.error(f"Failed to import swarm system: {e}")
@@ -2391,6 +2561,198 @@ async def get_swarm_capabilities(request: Request):
             status_code=500,
             detail=f"Failed to retrieve capabilities: {str(e)}"
         )
+
+@app.get("/api/swarm/metrics")
+@limiter.limit("30/minute")
+async def get_swarm_metrics(request: Request):
+    """
+    Get swarm performance metrics.
+
+    Returns:
+        Swarm-level counters, cache statistics, and per-agent metrics.
+    """
+    try:
+        import sys
+        sys.path.insert(0, os.path.join(project_root, "src"))
+        from swarm import SwarmOrchestrator
+
+        swarm = SwarmOrchestrator()
+        return swarm.get_swarm_metrics()
+    except ImportError as e:
+        logger.error(f"Failed to import swarm system: {e}")
+        raise HTTPException(status_code=500, detail="Swarm system not available")
+    except Exception as e:
+        logger.error(f"Failed to get swarm metrics: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve metrics: {str(e)}")
+
+class SwarmReportRequest(BaseModel):
+    """Request body for generating a formatted swarm execution report."""
+    task: str = Field(default="", description="The original task prompt")
+    priority: str = Field(default="NORMAL", description="Execution priority")
+    wall_time_ms: Optional[float] = Field(default=None, description="Wall-clock execution time in ms")
+    from_cache: bool = Field(default=False, description="Whether result was served from cache")
+    message_count: int = Field(default=0, description="Number of messages exchanged")
+    delegation_plan: Optional[dict] = Field(default=None, description="Agent delegation plan")
+    confidence_scores: Optional[dict] = Field(default=None, description="Routing confidence scores per agent")
+    agent_results: Optional[dict] = Field(default=None, description="Per-agent execution results")
+    synthesis: Optional[str] = Field(default=None, description="Synthesised final output")
+    format: str = Field(default="html", description="Output format: 'html' or 'pdf'")
+
+
+@app.post("/api/swarm/report")
+@limiter.limit("20/minute")
+async def generate_swarm_report(request: Request, body: SwarmReportRequest):
+    """
+    Generate a formatted HTML or print-ready PDF report from swarm execution results.
+
+    Accepts the full swarm result payload and returns a self-contained HTML document
+    with professional styling. When format='pdf', the HTML includes a print trigger
+    so the browser renders it as a PDF via the system print dialog.
+
+    Returns:
+        HTML document (text/html) suitable for download or printing.
+    """
+    try:
+        from fastapi.responses import HTMLResponse
+        import html as html_lib
+        from datetime import datetime as _dt
+
+        now = _dt.now().strftime("%Y-%m-%d %H:%M:%S UTC")
+        task_escaped = html_lib.escape(body.task or "")
+        priority = html_lib.escape(body.priority or "NORMAL")
+        wall_time = f"{body.wall_time_ms:.0f} ms" if body.wall_time_ms is not None else "—"
+        cache_badge = (
+            '<span style="background:#f59e0b;color:#fff;padding:2px 8px;border-radius:12px;font-size:0.75rem;">⚡ Cache Hit</span>'
+            if body.from_cache else
+            '<span style="background:#6b7280;color:#fff;padding:2px 8px;border-radius:12px;font-size:0.75rem;">Fresh</span>'
+        )
+        priority_colors = {"LOW": "#6b7280", "NORMAL": "#3b82f6", "HIGH": "#f59e0b", "CRITICAL": "#ef4444"}
+        priority_color = priority_colors.get(priority.upper(), "#3b82f6")
+
+        # --- Build delegation plan section ---
+        delegation_html = ""
+        if body.delegation_plan:
+            rows = ""
+            for agent_name, sub_task in body.delegation_plan.items():
+                conf = (body.confidence_scores or {}).get(agent_name)
+                conf_html = (
+                    f'<span style="background:{priority_color}22;color:{priority_color};padding:1px 6px;border-radius:10px;font-size:0.75rem;margin-left:6px;">'
+                    f'{round(conf * 100)}%</span>'
+                ) if conf is not None else ""
+                rows += (
+                    f'<tr><td style="padding:8px 12px;font-weight:600;white-space:nowrap;width:140px;">'
+                    f'{html_lib.escape(str(agent_name))}{conf_html}</td>'
+                    f'<td style="padding:8px 12px;color:#374151;">{html_lib.escape(str(sub_task))}</td></tr>'
+                )
+            delegation_html = f"""
+            <section class="section">
+                <h2>Delegation Plan</h2>
+                <table style="width:100%;border-collapse:collapse;border:1px solid #e5e7eb;border-radius:8px;overflow:hidden;">
+                    <thead><tr style="background:#f3f4f6;">
+                        <th style="padding:8px 12px;text-align:left;font-size:0.8rem;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;">Agent</th>
+                        <th style="padding:8px 12px;text-align:left;font-size:0.8rem;color:#6b7280;text-transform:uppercase;letter-spacing:0.05em;">Assigned Task</th>
+                    </tr></thead>
+                    <tbody>{rows}</tbody>
+                </table>
+            </section>"""
+
+        # --- Build agent results section ---
+        results_html = ""
+        if body.agent_results:
+            cards = ""
+            for agent_name, result in body.agent_results.items():
+                success = result.get("success", True) is not False
+                status_color = "#10b981" if success else "#ef4444"
+                status_label = "✓ Success" if success else "✗ Error"
+                timing = f' — {result["execution_time_ms"]:.0f} ms' if result.get("execution_time_ms") is not None else ""
+                output = html_lib.escape(str(result.get("output", "")))
+                cards += f"""
+                <div style="border:1px solid #e5e7eb;border-radius:8px;margin-bottom:16px;overflow:hidden;">
+                    <div style="background:#f9fafb;padding:10px 16px;display:flex;align-items:center;gap:12px;border-bottom:1px solid #e5e7eb;">
+                        <span style="font-weight:700;">{html_lib.escape(str(agent_name))}</span>
+                        <span style="color:{status_color};font-size:0.85rem;">{status_label}{html_lib.escape(timing)}</span>
+                    </div>
+                    <pre style="margin:0;padding:16px;background:#1e1e2e;color:#cdd6f4;font-size:0.8rem;overflow-x:auto;white-space:pre-wrap;word-break:break-word;">{output}</pre>
+                </div>"""
+            results_html = f"""
+            <section class="section">
+                <h2>Agent Results</h2>
+                {cards}
+            </section>"""
+
+        # --- Synthesis section ---
+        synthesis_html = ""
+        if body.synthesis:
+            synthesis_html = f"""
+            <section class="section" style="border-left:4px solid {priority_color};padding-left:20px;">
+                <h2>Final Synthesis</h2>
+                <div style="color:#374151;line-height:1.7;white-space:pre-wrap;">{html_lib.escape(body.synthesis)}</div>
+            </section>"""
+
+        print_script = '<script>window.onload=function(){{window.print();}}</script>' if body.format == "pdf" else ""
+
+        html_doc = f"""<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Antigravity Swarm Report — {now}</title>
+{print_script}
+<style>
+  *{{box-sizing:border-box;margin:0;padding:0}}
+  body{{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8fafc;color:#111827;padding:32px}}
+  .page{{max-width:900px;margin:0 auto;background:#fff;border-radius:12px;box-shadow:0 4px 24px rgba(0,0,0,.08);overflow:hidden}}
+  .header{{background:linear-gradient(135deg,#1e1b4b 0%,#312e81 100%);color:#fff;padding:32px 40px}}
+  .header h1{{font-size:1.6rem;font-weight:700;margin-bottom:4px}}
+  .header .meta{{font-size:0.85rem;opacity:.75;margin-top:8px;display:flex;flex-wrap:wrap;gap:16px}}
+  .body{{padding:32px 40px}}
+  .section{{margin-bottom:32px}}
+  .section h2{{font-size:1.1rem;font-weight:700;margin-bottom:16px;color:#1e1b4b;border-bottom:2px solid #e5e7eb;padding-bottom:8px}}
+  .task-box{{background:#f3f4f6;border-radius:8px;padding:16px 20px;font-size:0.95rem;line-height:1.6;color:#374151;white-space:pre-wrap;word-break:break-word}}
+  .stats{{display:flex;flex-wrap:wrap;gap:12px;margin-bottom:0}}
+  .stat-chip{{background:#f3f4f6;border-radius:8px;padding:8px 16px;font-size:0.85rem}}
+  .stat-chip b{{color:#111827}}
+  footer{{text-align:center;font-size:0.75rem;color:#9ca3af;padding:16px 40px;border-top:1px solid #f3f4f6}}
+  @media print{{body{{background:#fff;padding:0}}  .page{{box-shadow:none;border-radius:0}}}}
+</style>
+</head>
+<body>
+<div class="page">
+  <div class="header">
+    <h1>🐝 Antigravity Multi-Agent Swarm Report</h1>
+    <div class="meta">
+      <span>Generated: {now}</span>
+      <span>Priority: <b style="color:#fbbf24;">{priority}</b></span>
+      <span>Wall Time: <b>{wall_time}</b></span>
+      <span>Messages: <b>{body.message_count}</b></span>
+      <span>{cache_badge}</span>
+    </div>
+  </div>
+  <div class="body">
+    <section class="section">
+      <h2>Task</h2>
+      <div class="task-box">{task_escaped}</div>
+    </section>
+    {delegation_html}
+    {results_html}
+    {synthesis_html}
+  </div>
+  <footer>Antigravity Multi-Agent Swarm &bull; {now}</footer>
+</div>
+</body>
+</html>"""
+
+        media_type = "text/html"
+        filename = f"swarm-report-{_dt.now().strftime('%Y%m%d-%H%M%S')}.{'pdf' if body.format == 'pdf' else 'html'}"
+        headers = {"Content-Disposition": f'attachment; filename="{filename}"'}
+        return HTMLResponse(content=html_doc, headers=headers, media_type=media_type)
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to generate swarm report: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to generate report: {str(e)}")
+
 
 # ═══════════════════════════════════════════════════════════════
 # End Swarm System API
