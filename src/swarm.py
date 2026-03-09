@@ -10,6 +10,8 @@ from dataclasses import dataclass, field
 from datetime import datetime
 
 from src.agents import RouterAgent, CoderAgent, ReviewerAgent, ResearcherAgent
+from src.hooks import hook_registry, HookEvent
+from src.memory_workspace import workspace_manager
 
 
 @dataclass
@@ -136,6 +138,13 @@ class SwarmOrchestrator:
         # Step 2: Router analyzes task
         if verbose:
             print("→ Router: Analyzing task and creating delegation plan...")
+
+        # --- lifecycle: BEFORE_DELEGATION ---
+        await hook_registry.fire(
+            HookEvent.BEFORE_DELEGATION,
+            agent_name="SwarmOrchestrator",
+            data={"task": user_task},
+        )
         
         delegation_result = await self.router.execute(user_task)
         delegation_plan = delegation_result.get("delegation_plan", {})
@@ -192,6 +201,17 @@ class SwarmOrchestrator:
             print("→ Router: Synthesizing results from all workers...")
         
         synthesis = await self.router.synthesize_results(worker_results)
+
+        # --- lifecycle: AFTER_DELEGATION ---
+        await hook_registry.fire(
+            HookEvent.AFTER_DELEGATION,
+            agent_name="SwarmOrchestrator",
+            data={
+                "task": user_task,
+                "workers_used": list(worker_results.keys()),
+                "success": synthesis.get("success", True),
+            },
+        )
         
         self.message_bus.send(
             "Router",
