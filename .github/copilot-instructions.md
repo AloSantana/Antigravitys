@@ -676,6 +676,11 @@ curl http://localhost:8000/performance/metrics
 # Performance analysis
 curl http://localhost:8000/performance/analysis
 
+# Parsewise document processing
+curl http://localhost:8000/api/parsewise/status
+curl -X POST http://localhost:8000/api/parsewise/extract -F "file=@document.pdf"
+curl -X POST http://localhost:8000/api/parsewise/validate -H "Content-Type: application/json" -d '{"data": {...}}'
+
 # API documentation
 http://localhost:8000/docs
 ```
