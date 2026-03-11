@@ -58,7 +58,6 @@ See `docs/OPENCODE_INTEGRATION.md` for full setup guide.
 
 Key plugins:
 - **oh-my-opencode**: Primary plugin with Sisyphus agent (`.opencode/oh-my-opencode.jsonc`)
-- **gsd-opencode**: Spec-driven development (`npx gsd-opencode`)
 - **swarm-tools**: Multi-agent swarm coordination
 
 Slash commands available:

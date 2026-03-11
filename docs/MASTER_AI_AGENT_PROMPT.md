@@ -18,12 +18,11 @@
 | [5. oh-my-opencode Config](#5-oh-my-opencode-config) | Sisyphus, model routing, background agents |
 | [6. swarm-tools Config](#6-swarm-tools-config) | Hive, Hivemind, Swarm Mail, /swarm command |
 | [7. opencode-sessions Config](#7-opencode-sessions-config) | Turn-based collab, fork, handoff, compact |
-| [8. gsd-opencode Config](#8-gsd-opencode-config) | Spec-driven dev, model profiles, workflow agents |
-| [9. Gemini CLI Optimal Config](#9-gemini-cli-optimal-config) | `settings.json`, MCP servers, cross-model use |
-| [10. Antigravity Backend Config](#10-antigravity-backend-config) | `.env`, ModelRotator, Swarm, cache tuning |
-| [11. Cross-Platform Model Router](#11-cross-platform-model-router) | How all three share models seamlessly |
-| [12. Automated Workflow Patterns](#12-automated-workflow-patterns) | End-to-end workflows using all tools together |
-| [13. Repo Optimization Report](#13-repo-optimization-report) | Findings + recommendations (no changes applied) |
+| [8. Gemini CLI Optimal Config](#8-gemini-cli-optimal-config) | `settings.json`, MCP servers, cross-model use |
+| [9. Antigravity Backend Config](#9-antigravity-backend-config) | `.env`, ModelRotator, Swarm, cache tuning |
+| [10. Cross-Platform Model Router](#10-cross-platform-model-router) | How all three share models seamlessly |
+| [11. Automated Workflow Patterns](#11-automated-workflow-patterns) | End-to-end workflows using all tools together |
+| [12. Repo Optimization Report](#12-repo-optimization-report) | Findings + recommendations (no changes applied) |
 
 ---
 
@@ -40,7 +39,7 @@
 │  │   FastAPI :8000  │   │   + oh-my-opencode │   │  ~/.gemini/      │  │
 │  │                  │   │   + swarm-tools    │   │  settings.json   │  │
 │  │ • 45+ endpoints  │   │   + opencode-sess. │   │                  │  │
-│  │ • 13 agents      │   │   + gsd-opencode   │   │ • Gemini 2.5 Pro │  │
+│  │ • 13 agents      │   │   + opencode-sess. │   │ • Gemini 2.5 Pro │  │
 │  │ • RAG (ChromaDB) │   │                    │   │ • 1M ctx window  │  │
 │  │ • ModelRotator   │   │ • Sisyphus agent   │   │ • 16 MCP servers │  │
 │  │   (4 providers)  │   │ • Background tasks │   │                  │  │
@@ -66,7 +65,6 @@
 | `oh-my-opencode` | `oh-my-opencode` | Sisyphus agent harness, background parallel agents, LSP tools, hash-anchored edits, built-in websearch/context7/grep MCPs |
 | `swarm-tools` | `opencode-swarm-plugin` | Git-backed task tracking (Hive), semantic memory (Hivemind + Ollama), actor-model agent coordination (Swarm Mail), `/swarm` decomposition command |
 | `opencode-sessions` | `opencode-sessions` | Turn-based agent collaboration, phase handoffs, parallel session forking, session compression, `session()` tool |
-| `gsd-opencode` | `gsd-opencode` | Spec-driven development, 3 model profiles (quality/balanced/budget), research+plan+verify workflow agents, parallelized execution |
 | `opencode.cafe` | (npm, browse at opencode.cafe) | Plugin and extension registry for OpenCode — discover community plugins |
 | `opencode` | `opencode-ai` | The OpenCode terminal agent itself (anomalyco fork, dev branch) |
 | `openclaw` | `openclaw` | Alternative OpenClaw AI assistant, cross-platform, multi-agent, own skill system |
@@ -81,7 +79,6 @@ OpenCode core (opencode-ai)
    └── oh-my-opencode plugin   → adds Sisyphus + background agents
        └── swarm-tools plugin  → adds Hive + Hivemind + parallel decomposition
        └── opencode-sessions   → adds session() tool for phase transitions
-       └── gsd-opencode        → adds /gsd-* spec-driven workflow commands
 ```
 
 All plugins are loaded from `"plugin": [...]` in `opencode.json` and auto-installed
@@ -100,10 +97,10 @@ python >= 3.11    # for Antigravity backend
 git               # for swarm-tools Hive
 ollama            # optional: for swarm-tools Hivemind embeddings + Antigravity local fallback
 
-# API keys needed (see Section 9 for full list)
+# API keys needed (see Appendix A for full list)
 GEMINI_API_KEY      # Google Gemini — Antigravity + Gemini CLI
 ANTHROPIC_API_KEY   # Claude — Sisyphus (primary oh-my-opencode agent)
-GITHUB_TOKEN        # GitHub MCP + gsd-opencode
+GITHUB_TOKEN        # GitHub MCP + issue triage
 OPENROUTER_API_KEY  # Bridge: lets any tool use any model
 ```
 
@@ -180,21 +177,7 @@ npm install -g opencode-sessions
 # The session() tool appears in the TUI automatically
 ```
 
-### Step 6 — Install gsd-opencode
-
-```bash
-# Run the installer (interactive, installs slash commands)
-npx gsd-opencode
-# or
-npx gsd-opencode@latest
-
-# First use: run setup wizard
-# In OpenCode TUI:
-/gsd-settings        # opens interactive menu
-# → Select "Setup presets wizard" to configure model profiles
-```
-
-### Step 7 — Set up Gemini CLI
+### Step 6 — Set up Gemini CLI
 
 ```bash
 # Install
@@ -207,10 +190,10 @@ gemini auth login
 
 # Copy the Antigravity Gemini config
 cp .agent/gemini_mcp_settings.json ~/.gemini/settings.json
-# (Edit ~/.gemini/settings.json to set systemPrompt — see Section 9)
+# (Edit ~/.gemini/settings.json to set systemPrompt — see Section 8)
 ```
 
-### Step 8 — Start the Antigravity Backend
+### Step 7 — Start the Antigravity Backend
 
 ```bash
 # Install Python dependencies
@@ -229,7 +212,7 @@ cd backend && uvicorn main:app --reload --port 8000
 curl http://localhost:8000/health
 ```
 
-### Step 9 — Docker (optional, production)
+### Step 8 — Docker (optional, production)
 
 ```bash
 # All services: backend + frontend nginx + ChromaDB + Redis
@@ -242,7 +225,7 @@ docker-compose --profile with-ollama up -d
 docker-compose ps
 ```
 
-### Step 10 — Configure API Keys in .env
+### Step 9 — Configure API Keys in .env
 
 ```bash
 # Minimum set for full functionality
@@ -292,7 +275,6 @@ You have simultaneous access to:
       oh-my-opencode: Sisyphus orchestrator + 6 sub-agents + background tasks
       swarm-tools: Hive task store + Hivemind memory + Swarm Mail coordination
       opencode-sessions: session() tool for fork/handoff/compact/message
-      gsd-opencode: /gsd-* spec-driven development with model profiles
 
   [C] Gemini CLI
       Primary: gemini-2.5-pro (1M token context)
@@ -421,7 +403,7 @@ You have simultaneous access to:
  "triage"                 → load github-triage skill, spawn 1 agent per issue
  "/swarm <task>"          → decompose via swarm-tools, spawn parallel workers
  "/gsd-init"              → start gsd spec-driven workflow
- "optimize" / "repo opt"  → see Section 13 of this document
+ "optimize" / "repo opt"  → see Section 12 of this document
 
 ══════════════════════════════════════════════════════════════════════
  FORBIDDEN (never do these)
@@ -463,8 +445,7 @@ You have simultaneous access to:
   "plugin": [
     "oh-my-opencode",
     "opencode-swarm-plugin",
-    "opencode-sessions",
-    "gsd-opencode"
+    "opencode-sessions"
   ],
 
   "systemPrompt": "<<PASTE SECTION 3 PROMPT HERE>>",
@@ -905,93 +886,7 @@ Explore multiple approaches before committing:
 
 ---
 
-## 8. gsd-opencode Config
-
-### Three Model Profiles
-
-| Profile | Planning model | Execution model | Verify model | Best for |
-|---------|---------------|-----------------|--------------|---------|
-| `quality` | claude-opus-4-5 | claude-sonnet-4-5 | gemini-2.5-flash | Critical architecture, production features |
-| `balanced` | claude-sonnet-4-5 | gemini-2.5-flash | claude-haiku-4-5 | Daily development |
-| `budget` | gemini-2.5-flash | gemini-2.5-flash | gemini-2.5-flash | High-volume, exploratory work |
-
-### First-Time Setup
-
-```bash
-# Run in OpenCode TUI:
-/gsd-settings
-# → "Setup presets wizard"
-# Discovers your available models via `opencode models`
-# Prompts you to select 3 models × 3 profiles = 9 selections
-# Saves to .planning/config.json
-# Generates opencode.json with agent-to-model mappings
-```
-
-> **Important**: After changing profiles, fully restart OpenCode.
-> OpenCode loads `opencode.json` at startup and does NOT hot-reload model assignments.
-
-### GSD Workflow Commands
-
-```bash
-/gsd-init                   # Start: creates spec + planning structure
-/gsd-plan-phase             # Research + plan current phase
-/gsd-execute-phase          # Execute with verification
-/gsd-set-profile quality    # Switch to quality profile
-/gsd-set-profile balanced   # Switch to balanced
-/gsd-set-profile budget     # Switch to budget
-/gsd-settings               # Full interactive settings menu
-```
-
-### GSD Workflow Agents (automatic)
-
-| Agent | Default | What it does |
-|-------|---------|-------------|
-| `research` | `true` | Researches domain before planning each phase |
-| `plan_check` | `true` | Verifies plans achieve goals before execution |
-| `verifier` | `true` | Confirms deliverables after execution |
-
-Toggle in `/gsd-settings` or skip per-invocation:
-- `/gsd-plan-phase --skip-research`
-- `/gsd-plan-phase --skip-verify`
-
-### `.planning/config.json` — What GSD Creates
-
-```json
-{
-  "active_profile": "balanced",
-  "profiles": {
-    "presets": {
-      "quality": {
-        "planning": "anthropic/claude-opus-4-5",
-        "execution": "anthropic/claude-sonnet-4-5",
-        "verification": "google/gemini-2.5-flash"
-      },
-      "balanced": {
-        "planning": "anthropic/claude-sonnet-4-5",
-        "execution": "google/gemini-2.5-flash",
-        "verification": "anthropic/claude-haiku-4-5"
-      },
-      "budget": {
-        "planning": "google/gemini-2.5-flash",
-        "execution": "google/gemini-2.5-flash",
-        "verification": "google/gemini-2.5-flash"
-      }
-    }
-  },
-  "workflow": {
-    "research": true,
-    "plan_check": true,
-    "verifier": true
-  },
-  "parallelization": {
-    "enabled": true
-  }
-}
-```
-
----
-
-## 9. Gemini CLI Optimal Config
+## 8. Gemini CLI Optimal Config
 
 ### `~/.gemini/settings.json` — Full Optimal Config
 
@@ -1134,7 +1029,7 @@ With `fetch` MCP enabled:
 
 ---
 
-## 10. Antigravity Backend Config
+## 9. Antigravity Backend Config
 
 ### `.env` Optimal Settings
 
@@ -1209,7 +1104,7 @@ The `src/model_rotator.py` distributes requests via health-score algorithm:
 
 ---
 
-## 11. Cross-Platform Model Router
+## 10. Cross-Platform Model Router
 
 ### The Universal Bridge Architecture
 
@@ -1305,43 +1200,34 @@ Session 3 — Antigravity backend /api/chat:
 
 ---
 
-## 12. Automated Workflow Patterns
+## 11. Automated Workflow Patterns
 
 ### Pattern A: Full Feature Development (Maximum Quality)
 
 ```
 Trigger: Large new feature
 
-1. [gsd-opencode] /gsd-init "User authentication with OAuth2 + PKCE"
-   → Creates spec in .planning/
-   → Sets profile: quality (Claude Opus for planning)
+1. [oh-my-opencode] /init "User authentication with OAuth2 + PKCE"
+   → Sisyphus analyzes codebase, plans implementation phases
 
-2. [gsd-opencode] /gsd-plan-phase
-   → research agent: searches OAuth2 + FastAPI best practices
-   → plan agent: creates detailed implementation plan
-   → plan_check agent: verifies plan is complete
-
-3. [opencode-sessions] session({ mode: "fork", agent: "plan", text: "JWT approach" })
+2. [opencode-sessions] session({ mode: "fork", agent: "plan", text: "JWT approach" })
    session({ mode: "fork", agent: "plan", text: "Session cookies approach" })
    → Compare architectures, pick the winner
 
-4. [swarm-tools] /swarm "Implement OAuth2 with PKCE per the plan"
+3. [swarm-tools] /swarm "Implement OAuth2 with PKCE per the plan"
    → Coordinator creates Hive cells (routes, models, tests, docs)
    → Workers execute in parallel with file reservations
    → Hivemind stores successful patterns
 
-5. [oh-my-opencode] Sisyphus spawns background agents:
+4. [oh-my-opencode] Sisyphus spawns background agents:
    → hephaestus: implements backend/main.py routes
    → oracle: validates design decisions
    → librarian: fetches FastAPI OAuth2 docs via Context7
 
-6. [gsd-opencode] /gsd-execute-phase
-   → verifier agent: confirms all must-haves delivered
-
-7. [@agent:code-reviewer] Security audit via GitHub Copilot
+5. [@agent:code-reviewer] Security audit via GitHub Copilot
    → Checks for PKCE implementation correctness, token exposure
 
-8. [@agent:testing-stability-expert] Test suite
+6. [@agent:testing-stability-expert] Test suite
    → pytest coverage for all auth endpoints
 
 Estimated time: ~20 min vs ~3 hours manual
@@ -1425,7 +1311,7 @@ Trigger: "optimize" or monthly maintenance
 
 ---
 
-## 13. Repo Optimization Report
+## 12. Repo Optimization Report
 
 > **Status**: Research findings only. No changes applied.
 > **How to apply**: Use `@agent:rapid-implementer` to implement specific items.
@@ -1497,7 +1383,7 @@ worker_results = dict(await asyncio.gather(*[
 ```bash
 GEMINI_API_KEY=          # Google Gemini — Antigravity + Gemini CLI
 ANTHROPIC_API_KEY=       # Claude — Sisyphus (oh-my-opencode)
-GITHUB_TOKEN=            # GitHub MCP, triage, gsd-opencode
+GITHUB_TOKEN=            # GitHub MCP, triage
 ```
 
 ### Strongly Recommended
@@ -1558,7 +1444,6 @@ Installation:
 [ ] bunx oh-my-opencode install
 [ ] npm install -g opencode-swarm-plugin && swarm setup && swarm init
 [ ] npm install -g opencode-sessions
-[ ] npx gsd-opencode
 [ ] cp .agent/gemini_mcp_settings.json ~/.gemini/settings.json
 [ ] pip install -r requirements.txt
 
@@ -1568,7 +1453,6 @@ Configuration:
 [ ] Edit .opencode/oh-my-opencode.jsonc: paste agent configs (Section 5)
 [ ] Paste Section 3 system prompt into opencode.json systemPrompt field
 [ ] Paste Section 3 system prompt into ~/.gemini/settings.json systemPrompt field
-[ ] In OpenCode TUI: /gsd-settings → Setup presets wizard (Section 8)
 [ ] Run: opencode → /init (initializes AGENTS.md for project)
 
 Validation:
@@ -1582,7 +1466,7 @@ Validation:
 ---
 
 *Document compiled from research of: AloSantana/oh-my-opencode, AloSantana/swarm-tools,
-AloSantana/opencode-sessions, AloSantana/gsd-opencode, AloSantana/opencode.cafe,
+AloSantana/opencode-sessions, AloSantana/opencode.cafe,
 AloSantana/opencode, AloSantana/openclaw, AloSantana/CopilotKit + opencode.ai official docs
 + Antigravity repo source analysis.*
 

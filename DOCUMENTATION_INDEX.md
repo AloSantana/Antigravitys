@@ -9,9 +9,8 @@
 | Document | Description | For |
 |----------|-------------|-----|
 | **[README.md](README.md)** | Main project overview, features, installation | Everyone |
-
-| **[docs/COMPLETE_SETUP_GUIDE.md](docs/COMPLETE_SETUP_GUIDE.md)** | ⭐ All-in-one: install, configure OpenCode + Gemini CLI + Copilot, MCP, agents | Everyone |
-
+| **[docs/REINSTALL_GUIDE.md](docs/REINSTALL_GUIDE.md)** | ⭐ **Complete reinstall guide for GCP production VM** — step-by-step from VM creation to running stack | GCP production |
+| **[docs/COMPLETE_SETUP_GUIDE.md](docs/COMPLETE_SETUP_GUIDE.md)** | All-in-one: install, configure OpenCode + Gemini CLI + Copilot, MCP, agents | Everyone |
 | **[QUICKSTART.md](QUICKSTART.md)** | 5-minute setup guide (GUI-first) | New users |
 | **[TROUBLESHOOTING.md](TROUBLESHOOTING.md)** | Comprehensive troubleshooting guide | When problems occur |
 | **[SETUP.md](SETUP.md)** | Detailed installation guide | Developers |
@@ -48,7 +47,7 @@
 | **[AGENTS.md](AGENTS.md)** | Workspace structure map for AI agents | Codebase overview |
 | **[ANTIGRAVITY_MASTER_GUIDE.md](ANTIGRAVITY_MASTER_GUIDE.md)** | Canonical MCP server setup guide | MCP + agents |
 | **[docs/MASTER_AI_AGENT_PROMPT.md](docs/MASTER_AI_AGENT_PROMPT.md)** | Master system prompt + full cross-platform integration guide (Antigravity + OpenCode + Gemini CLI) | All platforms |
-| **[docs/OPENCODE_INTEGRATION.md](docs/OPENCODE_INTEGRATION.md)** | OpenCode plugin ecosystem (oh-my-opencode, gsd-opencode, swarm-tools, opencode-sessions) | OpenCode |
+| **[docs/OPENCODE_INTEGRATION.md](docs/OPENCODE_INTEGRATION.md)** | OpenCode plugin ecosystem (oh-my-opencode, swarm-tools, opencode-sessions) | OpenCode |
 
 | **[docs/MASTER_AGENT_MISSION.md](docs/MASTER_AGENT_MISSION.md)** | **Optimized multi-phase agent mission prompt** | Full platform config |
 | **[COPILOT_SETUP.md](COPILOT_SETUP.md)** | GitHub Copilot agent setup | Copilot configuration |
