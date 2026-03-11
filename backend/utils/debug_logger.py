@@ -21,6 +21,10 @@ from enum import Enum
 
 logger = logging.getLogger(__name__)
 
+# Compute absolute path to the project root (debug_logger.py → utils/ → backend/ → project root)
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+DEFAULT_LOG_DIR = os.path.join(_PROJECT_ROOT, "logs")
+
 
 class LogLevel(str, Enum):
     """Log severity levels."""
@@ -44,7 +48,7 @@ class DebugLogger:
     - Filtering by severity, model, time range
     """
     
-    def __init__(self, log_dir: str = "logs", log_file: str = "debug.jsonl"):
+    def __init__(self, log_dir: str = DEFAULT_LOG_DIR, log_file: str = "debug.jsonl"):
         """
         Initialize the debug logger.
         

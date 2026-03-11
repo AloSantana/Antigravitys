@@ -221,16 +221,37 @@ EXTERNAL_HOST=YOUR_EXTERNAL_IP      # replace with the numeric IP from step 2
 
 ```bash
 cd ~/projects/Antigravitys
+```
 
-# Start core services (backend + frontend + ChromaDB + Redis)
+### Pre-create bind-mount directories
+
+Docker creates missing bind-mount directories as **root**, which prevents the
+container's non-root `appuser` from writing to them.  Create them yourself first
+so they are owned by your login account (the container's entrypoint script will
+then take over ownership):
+
+```bash
+mkdir -p logs artifacts drop_zone
+```
+
+### Start core services
+
+```bash
+# Start backend + frontend (ChromaDB and Redis are optional profiles)
 docker compose up -d
 
 # Check all containers are running
 docker compose ps
 
-# Follow logs (Ctrl+C to stop watching)
-docker compose logs -f
+# Follow logs — watch for any startup errors (Ctrl+C to stop)
+docker compose logs -f backend
 ```
+
+> ✅ **What to expect:** The backend entrypoint script (`scripts/docker-entrypoint.sh`)
+> runs briefly as root to fix ownership on the bind-mounted volumes (`logs/`,
+> `artifacts/`, `drop_zone/`) and then drops to `appuser` before starting Python.
+> You should **not** see any `PermissionError` lines in the logs.
+> If you do, see the [Troubleshooting](#13-troubleshooting) section.
 
 ### Verify the backend is up
 
@@ -437,6 +458,10 @@ ssh antigravity
 | OpenCode plugins not loading | Plugin not installed or path issue | Re-run `bunx oh-my-opencode install` from the repo root |
 | Moltis web UI not reachable | Port 13131 not open | `sudo ufw allow 13131/tcp` and check GCP firewall rules |
 | VM slow / OOM | Not enough RAM for all services | Check `htop`, reduce services: `docker compose stop chromadb redis` |
+| `PermissionError: [Errno 13] Permission denied: '/app/artifacts/code'` | `logs/` or `artifacts/` was created by root before `docker compose up` | Run `mkdir -p logs artifacts drop_zone` **before** `docker compose up` (see Phase 4). The entrypoint script auto-fixes ownership on startup. |
+| `PermissionError: [Errno 13] Permission denied: 'backend'` | VectorStore path bug (fixed) — old image still running | Rebuild: `docker compose build --no-cache backend && docker compose up -d` |
+| `PermissionError: [Errno 13] Permission denied: 'logs/debug.jsonl'` | DebugLogger path bug (fixed) — old image still running | Rebuild: `docker compose build --no-cache backend && docker compose up -d` |
+| `artifact_manager - ERROR - Failed to initialize artifact storage` in logs | Permission denied on `/app/artifacts` subdirectories | Backend continues in degraded mode — artifact endpoints return 500. Fix: `mkdir -p logs artifacts drop_zone`, then restart: `docker compose restart backend` |
 
 ### Resize a disk that was created too small
 

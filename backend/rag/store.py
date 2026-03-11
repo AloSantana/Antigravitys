@@ -9,7 +9,9 @@ from collections import OrderedDict
 logger = logging.getLogger(__name__)
 
 # Constants
-DEFAULT_PERSIST_DIR = "backend/data/chroma"
+# Compute absolute path to the project root (store.py → rag/ → backend/ → project root)
+_PROJECT_ROOT = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+DEFAULT_PERSIST_DIR = os.path.join(_PROJECT_ROOT, "data", "chroma")
 DEFAULT_CACHE_TTL = 60
 DEFAULT_CACHE_SIZE = 50
 
