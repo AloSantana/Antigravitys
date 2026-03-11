@@ -1184,6 +1184,362 @@ tail -f logs/backend.log
 
 ---
 
+## ☁️ Google Cloud (GCP) VPS Issues
+
+> See the full deployment guide: [`docs/GCP_VPS_DEPLOYMENT.md`](docs/GCP_VPS_DEPLOYMENT.md)
+
+---
+
+### Problem: VM Won't Start / Quota Exceeded
+
+**Symptoms:**
+- `gcloud compute instances create` fails
+- Error: "Quota 'CPUS' exceeded" or "RESOURCE_EXHAUSTED"
+
+**Solutions:**
+
+```bash
+# Check your project's current quotas
+gcloud compute project-info describe --format="table(quotas.metric,quotas.limit,quotas.usage)"
+
+# Check region-specific quotas
+gcloud compute regions describe us-central1 \
+  --format="table(quotas.metric,quotas.limit,quotas.usage)"
+
+# Request quota increase (web UI)
+# https://console.cloud.google.com/iam-admin/quotas
+
+# Try a different zone in the same region
+gcloud compute instances create antigravity-production \
+  --zone=us-central1-b \   # try -b, -c, -f
+  --machine-type=n2-standard-8 \
+  ...
+
+# Check instance status
+gcloud compute instances list
+gcloud compute instances describe antigravity-production --zone=us-central1-a
+```
+
+---
+
+### Problem: Can't SSH Into VM
+
+**Symptoms:**
+- `gcloud compute ssh` times out or refuses connection
+- "Permission denied (publickey)" error
+
+**Solutions:**
+
+```bash
+# 1. Verify the VM is running
+gcloud compute instances list | grep antigravity
+
+# 2. Check firewall allows SSH (port 22)
+gcloud compute firewall-rules list | grep ssh
+
+# 3. Use gcloud SSH (auto-handles OS Login and key injection)
+gcloud compute ssh antigravity-production \
+  --zone=us-central1-a \
+  --troubleshoot
+
+# 4. If using OS Login, ensure it's enabled
+gcloud compute instances describe antigravity-production \
+  --zone=us-central1-a \
+  --format="get(metadata.items)"
+
+# 5. Re-add your SSH key via gcloud
+gcloud compute os-login ssh-keys add \
+  --key-file=~/.ssh/id_ed25519.pub
+
+# 6. If locked out completely, use the serial console
+gcloud compute instances add-metadata antigravity-production \
+  --zone=us-central1-a \
+  --metadata=serial-port-enable=true
+gcloud compute connect-to-serial-port antigravity-production \
+  --zone=us-central1-a
+```
+
+---
+
+### Problem: Docker Permission Denied
+
+**Symptoms:**
+- `docker: permission denied while trying to connect to the Docker daemon socket`
+- `Got permission denied while trying to connect to the Docker daemon`
+
+**Solutions:**
+
+```bash
+# 1. Add your user to the docker group
+sudo usermod -aG docker $USER
+
+# 2. Apply group change WITHOUT logging out (current session)
+newgrp docker
+
+# 3. Verify group membership
+groups $USER
+
+# 4. If still failing, check Docker socket permissions
+ls -la /var/run/docker.sock
+# Should show: srw-rw---- ... root docker
+
+# 5. Grant direct socket access for current session (temporary workaround)
+sudo chmod 666 /var/run/docker.sock
+
+# 6. Check Docker service is running
+sudo systemctl status docker
+sudo systemctl start docker
+```
+
+---
+
+### Problem: Nginx 502 Bad Gateway
+
+**Symptoms:**
+- Browser shows "502 Bad Gateway" or "504 Gateway Timeout"
+- Frontend loads but API calls fail
+
+**Solutions:**
+
+```bash
+# 1. Check if backend container is running
+docker compose ps
+docker compose logs -f backend --tail=50
+
+# 2. Check if backend is listening on port 8000
+ss -tlnp | grep 8000
+curl -v http://localhost:8000/health
+
+# 3. Check Nginx config is pointing to the right port
+sudo nginx -T | grep proxy_pass
+
+# 4. Check Nginx error log
+sudo tail -50 /var/log/nginx/antigravity-error.log
+
+# 5. Restart containers
+docker compose restart backend
+docker compose up -d
+
+# 6. Test Nginx config and reload
+sudo nginx -t && sudo systemctl reload nginx
+
+# 7. Check if UFW is blocking internal traffic (should not be)
+sudo ufw status verbose
+```
+
+---
+
+### Problem: SSL Certificate Issues
+
+**Symptoms:**
+- "NET::ERR_CERT_AUTHORITY_INVALID" in browser
+- Certbot says "Domain not pointing to this server" or "Connection refused"
+- Certificate expired
+
+**Solutions:**
+
+```bash
+# 1. Verify your domain's A record points to the VM's IP
+dig +short your-domain.com
+gcloud compute instances describe antigravity-production \
+  --zone=us-central1-a \
+  --format='get(networkInterfaces[0].accessConfigs[0].natIP)'
+# These should match!
+
+# 2. Ensure ports 80 and 443 are open (Let's Encrypt needs port 80 for verification)
+sudo ufw status | grep -E "80|443"
+gcloud compute firewall-rules list | grep allow-antigravity
+
+# 3. Re-run certbot
+sudo certbot --nginx -d your-domain.com -m you@email.com --agree-tos
+
+# 4. Renew an expired certificate
+sudo certbot renew
+
+# 5. Check certificate expiry
+sudo certbot certificates
+openssl s_client -connect your-domain.com:443 -servername your-domain.com 2>/dev/null \
+  | openssl x509 -noout -dates
+
+# 6. Force renewal (before expiry)
+sudo certbot renew --force-renewal --cert-name your-domain.com
+
+# 7. Check certbot timer is active
+sudo systemctl status certbot.timer
+sudo systemctl enable certbot.timer
+```
+
+---
+
+### Problem: Firewall Blocking Connections
+
+**Symptoms:**
+- Can't reach the VM on specific ports from the internet
+- `curl http://VM_IP:8000` hangs or times out
+
+**Solutions:**
+
+```bash
+# 1. Check GCP firewall rules (cloud-level)
+gcloud compute firewall-rules list
+
+# Add missing ports (GCP level)
+gcloud compute firewall-rules create allow-antigravity-ports \
+  --allow=tcp:80,tcp:443,tcp:8000,tcp:3000,tcp:13131 \
+  --target-tags=http-server,https-server \
+  --direction=INGRESS
+
+# Verify the VM has the right network tags
+gcloud compute instances describe antigravity-production \
+  --zone=us-central1-a \
+  --format="get(tags.items)"
+
+# Add tags if missing
+gcloud compute instances add-tags antigravity-production \
+  --zone=us-central1-a \
+  --tags=http-server,https-server
+
+# 2. Check UFW (VM-level firewall)
+sudo ufw status verbose
+
+# Add a port to UFW
+sudo ufw allow 8000/tcp comment 'Backend API'
+sudo ufw allow 13131/tcp comment 'Moltis Web UI'
+
+# 3. Test from the VM itself (rules out cloud firewall vs app issue)
+curl -v http://localhost:8000/health   # Should work
+curl -v http://localhost:3000          # Should work
+```
+
+---
+
+### Problem: Disk Space Running Out
+
+**Symptoms:**
+- Docker pulls fail: "no space left on device"
+- Backend crashes with disk write errors
+- `df -h` shows /dev/sda1 at 100%
+
+**Solutions:**
+
+```bash
+# 1. Check disk usage
+df -h
+du -sh /var/lib/docker   # Docker storage
+du -sh ~/projects/*      # Projects
+
+# 2. Clean up Docker (removes stopped containers, unused images, networks)
+docker system prune -a --volumes
+# ⚠️ Use -v only if you want to remove named volumes too
+
+# 3. Remove old Docker images
+docker images | grep "<none>" | awk '{print $3}' | xargs docker rmi 2>/dev/null || true
+
+# 4. Clear log files
+sudo journalctl --vacuum-time=7d
+sudo truncate -s 0 /var/log/nginx/antigravity-access.log
+
+# 5. Resize the GCP disk (online, no downtime required)
+gcloud compute disks resize YOUR-DISK-NAME \
+  --size=512GB \
+  --zone=us-central1-a
+
+# Then extend the filesystem
+sudo resize2fs /dev/sda1
+
+# 6. Check if artifacts directory is large
+du -sh ~/projects/Antigravitys/artifacts/
+```
+
+---
+
+### Problem: VM Performance Degradation
+
+**Symptoms:**
+- Agents responding slowly
+- High CPU usage, OOM errors
+- `htop` shows near-100% CPU or memory pressure
+
+**Solutions:**
+
+```bash
+# 1. Check system resources
+htop
+free -h
+vmstat 1 5
+iostat -x 1 5
+
+# 2. Check Docker container resource usage
+docker stats --no-stream
+
+# 3. Check if swap is being used heavily (indicates RAM pressure)
+free -h
+# If swap used > 1GB with 16GB RAM → upgrade to Production tier
+
+# 4. Limit runaway processes
+# Find CPU-hungry processes
+ps aux --sort=-%cpu | head -20
+
+# 5. Restart Docker services to reclaim memory
+docker compose restart
+
+# 6. Upgrade machine type (VM restart required)
+gcloud compute instances stop antigravity-production --zone=us-central1-a
+gcloud compute instances set-machine-type antigravity-production \
+  --zone=us-central1-a \
+  --machine-type=n2-standard-8
+gcloud compute instances start antigravity-production --zone=us-central1-a
+
+# 7. Check Moltis health (if using Moltis)
+curl -s http://localhost:13131/health
+```
+
+---
+
+### Problem: Billing Alerts
+
+**Symptoms:**
+- Unexpected GCP bill
+- Budget alert email received
+
+**Solutions:**
+
+```bash
+# Check current month's cost
+gcloud billing accounts list
+gcloud billing budgets list --billing-account=YOUR-BILLING-ACCOUNT-ID
+
+# Stop the VM to stop charges (disk storage still billed)
+gcloud compute instances stop antigravity-production --zone=us-central1-a
+
+# Delete VM to stop all charges (⚠️ permanent if no snapshot)
+# First, create a snapshot
+gcloud compute disks snapshot antigravity-production \
+  --zone=us-central1-a \
+  --snapshot-names=antigravity-backup
+
+# Then delete
+gcloud compute instances delete antigravity-production --zone=us-central1-a
+
+# Set up billing budget alert (web UI):
+# https://console.cloud.google.com/billing → Budgets & alerts
+
+# Apply committed use discount (1-year, saves ~28-35%)
+gcloud compute commitments create antigravity-1yr \
+  --plan=12-month \
+  --region=us-central1 \
+  --resources=vcpu=8,memory=32GB
+
+# Schedule auto-start/stop to save ~50% (if not running 24/7)
+gcloud compute resource-policies create instance-schedule antigravity-schedule \
+  --region=us-central1 \
+  --vm-start-schedule="0 8 * * *" \
+  --vm-stop-schedule="0 23 * * *" \
+  --timezone=UTC
+```
+
+---
+
 ## 🔍 Diagnostic Commands Reference
 
 ### System Health
