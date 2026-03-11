@@ -154,7 +154,7 @@ install_moltis() {
     fi
 
     # Moltis upstream: https://github.com/moltis-org/moltis
-    # AloSantana's fork (13+ commits ahead, with gsd-opencode & OpenCode skill adapter):
+    # AloSantana's fork (13+ commits ahead, with custom OpenCode skill adapter):
     #   https://github.com/AloSantana/moltis
     #
     # Install method priority:
@@ -221,11 +221,8 @@ _moltis_post_install() {
     echo -e "  2. Open:  ${BLUE}http://localhost:13131${NC}  (enter the setup code from the terminal)"
     echo -e "     Full install guide: ${CYAN}https://github.com/AloSantana/moltis/blob/main/LOCAL_LINUX_INSTALL.md${NC}"
     echo -e "  3. Add your API keys in Settings → Providers (Gemini, OpenAI, Anthropic, etc.)"
-    echo -e "  4. Install gsd-opencode skills:"
-    echo -e "     ${CYAN}moltis skills install https://github.com/AloSantana/gsd-opencode${NC}"
     echo ""
-    echo -e "  ${YELLOW}Note:${NC} AloSantana's fork has custom gsd-opencode / OpenCode skill adapter."
-    echo -e "  To build the fork from source (picks up those extras):"
+    echo -e "  To build from AloSantana's fork (OpenCode skill adapter + extra patches):"
     echo -e "    ${CYAN}cd ~/projects && git clone git@github.com:AloSantana/moltis.git${NC}"
     echo -e "    ${CYAN}cd moltis && cargo install just && just build-release${NC}"
     echo -e "    ${CYAN}cp target/release/moltis ~/.local/bin/moltis${NC}"

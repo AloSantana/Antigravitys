@@ -4,7 +4,7 @@
 > Antigravity / OpenCode multi-agent stack with every integrated service.**
 >
 > 📖 **Comprehensive platform integration guide**: [`docs/MASTER_AI_AGENT_PROMPT.md`](docs/MASTER_AI_AGENT_PROMPT.md) —
-> all forked repos (oh-my-opencode, swarm-tools, opencode-sessions, gsd-opencode),
+> all forked repos (oh-my-opencode, swarm-tools, opencode-sessions),
 > cross-platform model routing, automated workflow patterns, and master system prompt.
 
 ---
@@ -20,7 +20,7 @@
 7. [Service Setup Checklists](#7-service-setup-checklists)
 8. [Agent Workflow Patterns](#8-agent-workflow-patterns)
 
-> **OpenCode Plugin Integration**: See [`docs/OPENCODE_INTEGRATION.md`](docs/OPENCODE_INTEGRATION.md) for the complete guide to setting up **oh-my-opencode** (Sisyphus agent), **gsd-opencode** (spec-driven dev), **swarm-tools**, and all related OpenCode plugins with Antigravity.
+> **OpenCode Plugin Integration**: See [`docs/OPENCODE_INTEGRATION.md`](docs/OPENCODE_INTEGRATION.md) for the complete guide to setting up **oh-my-opencode** (Sisyphus agent), **swarm-tools**, and all related OpenCode plugins with Antigravity.
 
 ---
 

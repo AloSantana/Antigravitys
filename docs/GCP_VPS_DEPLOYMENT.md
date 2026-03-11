@@ -2,6 +2,9 @@
 
 Complete guide for deploying Antigravity Workspace on Google Cloud Compute Engine — covering two VM tiers, headless Docker deployment, Nginx reverse proxy for public web access, multi-project Git workflows, and AI tool installation.
 
+> 🔄 **Reinstalling from scratch?** Use the focused step-by-step guide:
+> **[docs/REINSTALL_GUIDE.md](REINSTALL_GUIDE.md)**
+
 ---
 
 ## 📋 Table of Contents
@@ -49,7 +52,7 @@ gcloud compute regions list | head -10
 | **GCP Instance** | `e2-standard-4` | `n2-standard-8` |
 | **vCPUs** | 4 | 8 |
 | **RAM** | 16 GB | 32 GB |
-| **Boot Disk** | 100 GB pd-ssd | 256 GB pd-ssd |
+| **Boot Disk** | 100 GB pd-ssd | 200 GB pd-ssd |
 | **Cost (on-demand)** | ~$97/mo | ~$245/mo |
 | **Cost (1yr CUD)** | ~$70/mo | ~$170/mo |
 | **Docker Compose** | `docker-compose.gcp-standard.yml` | `docker-compose.gcp-production.yml` |
@@ -62,6 +65,11 @@ gcloud compute regions list | head -10
 | **Multiple repos** | ⚠️ (2–3 at once) | ✅ (many simultaneous) |
 | **24/7 agent use** | ⚠️ (single agent) | ✅ |
 | **Best for** | Dev/testing, single project | Multi-project, constant agents |
+
+> ⚠️ **Boot disk size matters:** GCP creates VMs with only a **10 GB** boot disk by default.
+> That is far too small — Docker images, AI models, and logs will fill it within hours.
+> Always pass `--boot-disk-size` explicitly (see commands below).
+> If you hit a quota error with 256 GB, reduce to **200 GB** — that is the recommended size.
 
 ---
 
@@ -91,13 +99,21 @@ gcloud compute instances create antigravity-production \
   --machine-type=n2-standard-8 \
   --image-family=ubuntu-2404-lts-amd64 \
   --image-project=ubuntu-os-cloud \
-  --boot-disk-size=256GB \
+  --boot-disk-size=200GB \
   --boot-disk-type=pd-ssd \
   --tags=http-server,https-server \
   --scopes=https://www.googleapis.com/auth/cloud-platform \
   --metadata=enable-oslogin=true \
   --description="Antigravity Production — n2-standard-8 8vCPU/32GB"
 ```
+
+> 💡 **Disk size:** 200 GB is the recommended boot disk size for production. If you need more
+> space (e.g. for large Ollama models), you can go up to 256 GB — but many GCP free-tier / new
+> projects have a 250–500 GB SSD quota per region. Check yours with:
+> ```bash
+> gcloud compute project-info describe --format="table(quotas[].metric,quotas[].limit,quotas[].usage)" \
+>   | grep -i ssd
+> ```
 
 > 💡 **Zone selection tip**: Choose a zone close to you or your users. Common choices:
 > - US: `us-central1-a`, `us-east1-b`, `us-west1-a`
@@ -153,23 +169,45 @@ gcloud compute firewall-rules list --filter="name:allow-antigravity"
 
 ## SSH Access
 
+### Find Your VM's External IP
+
+```bash
+# Get the external IP of your VM (run this first)
+gcloud compute instances describe antigravity-production \
+  --zone=us-central1-a \
+  --format="get(networkInterfaces[0].accessConfigs[0].natIP)"
+
+# Or list all instances with their IPs
+gcloud compute instances list
+```
+
+> ⚠️ **Important:** The external IP shown in `gcloud compute instances list` is the one to use.
+> Do **not** use the internal IP (e.g. `10.x.x.x`) — that is only reachable within GCP's network.
+
 ### Connect to your VM
 
 ```bash
 # Using gcloud (recommended — handles OS Login & SSH keys automatically)
 gcloud compute ssh antigravity-production --zone=us-central1-a
 
-# Or with direct SSH (after adding your key)
-ssh -i ~/.ssh/google_compute_engine YOUR_USERNAME@YOUR_VM_IP
+# Or with direct SSH — replace EXTERNAL_IP and USERNAME with real values
+ssh -i ~/.ssh/google_compute_engine USERNAME@EXTERNAL_IP
 ```
 
 ### Set up SSH config for quick access
 
+Replace `EXTERNAL_IP` and `YOUR_USERNAME` with your actual values **before** running:
+
 ```bash
-# Add to ~/.ssh/config on your LOCAL machine
+# Find your external IP and username first:
+#   IP:   gcloud compute instances list   (use the "EXTERNAL_IP" column)
+#   User: gcloud compute os-login describe-profile | grep username
+#         or just use your local username if OS Login is not enabled
+
+# Add to ~/.ssh/config on your LOCAL machine (appends — does NOT overwrite)
 cat >> ~/.ssh/config << 'EOF'
 Host antigravity
-    HostName YOUR_VM_IP
+    HostName EXTERNAL_IP
     User YOUR_USERNAME
     IdentityFile ~/.ssh/google_compute_engine
     ServerAliveInterval 60
@@ -179,6 +217,11 @@ EOF
 # Then connect with:
 ssh antigravity
 ```
+
+> ❌ **"Could not resolve hostname" error?**  
+> This means `EXTERNAL_IP` (or `YOUR_VM_IP`) was left as a literal placeholder.  
+> Open `~/.ssh/config`, find the `Host antigravity` block, and replace `HostName EXTERNAL_IP`
+> with the actual numeric IP (e.g. `104.131.108.55`) shown by `gcloud compute instances list`.
 
 ### Use tmux/screen to keep sessions alive
 
@@ -517,7 +560,7 @@ opencode
 
 ### Moltis (Rust AI Agent)
 
-> **Note:** `AloSantana/moltis` is a **fork of `moltis-org/moltis`** that is 13+ commits ahead, with a custom `gsd-opencode` / OpenCode skill adapter and `LOCAL_LINUX_INSTALL.md`. The upstream project is `moltis-org/moltis` — the binary is called **`moltis`** (not `openclaw`).
+> **Note:** `AloSantana/moltis` is a **fork of `moltis-org/moltis`** that is 13+ commits ahead, with a custom OpenCode skill adapter and `LOCAL_LINUX_INSTALL.md`. The upstream project is `moltis-org/moltis` — the binary is called **`moltis`** (not `openclaw`).
 
 ```bash
 # Recommended — via the optional deps script (uses .deb package, falls back to install script)
@@ -543,7 +586,7 @@ sudo ufw allow 13131/tcp comment 'Moltis Web UI'
 
 **First run:** Moltis prints a setup code — open `http://localhost:13131` and enter it. Add your API keys (Gemini, OpenAI, Anthropic) in **Settings → Providers**.
 
-**Install AloSantana's fork** (picks up gsd-opencode skill adapter; see [`LOCAL_LINUX_INSTALL.md`](https://github.com/AloSantana/moltis/blob/main/LOCAL_LINUX_INSTALL.md) in the fork for full details):
+**Install AloSantana's fork** (see [`LOCAL_LINUX_INSTALL.md`](https://github.com/AloSantana/moltis/blob/main/LOCAL_LINUX_INSTALL.md) in the fork for full details):
 ```bash
 # Build from fork source (requires Rust from gcp-bootstrap.sh)
 source ~/.cargo/env
@@ -812,14 +855,21 @@ gcloud compute instances create antigravity-dev \
 ### Resize disk if running low
 
 ```bash
-# Resize the disk (can be done online, no downtime)
-gcloud compute disks resize DISK_NAME \
-  --size=512GB \
+# Resize the boot disk (can be done online, no downtime)
+# Replace DISK_NAME with your disk (usually same name as the VM instance)
+gcloud compute disks resize antigravity-production \
+  --size=200GB \
   --zone=us-central1-a
 
-# Then resize the filesystem
+# Then resize the filesystem (no reboot needed on Linux)
 sudo resize2fs /dev/sda1
+
+# Verify new size
+df -h /
 ```
+
+> 💡 If your VM was accidentally created with the GCP default 10 GB boot disk, run the above
+> commands to expand it to 200 GB. The resize is online — no restart required.
 
 ---
 
@@ -850,6 +900,9 @@ gcloud compute ssh antigravity-production --zone=us-central1-a -- -vvv
 | Problem | Quick fix |
 |---------|-----------|
 | Can't SSH | Check firewall: `gcloud compute firewall-rules list` |
+| "Could not resolve hostname" | Replace placeholder IP in `~/.ssh/config` with the real external IP from `gcloud compute instances list` |
+| Boot disk only 10 GB | VM was created without `--boot-disk-size`. Resize it: `gcloud compute disks resize antigravity-production --size=200GB --zone=us-central1-a` then `sudo resize2fs /dev/sda1` |
+| SSD quota exceeded (256 GB) | Reduce boot disk to 200 GB: add `--boot-disk-size=200GB` or request a quota increase in GCP Console → IAM → Quotas |
 | Docker permission denied | Log out/in for docker group: `newgrp docker` |
 | Nginx 502 | Check backend: `docker compose ps` + `docker compose logs backend` |
 | SSL error | Run certbot: `sudo certbot --nginx -d your-domain.com` |

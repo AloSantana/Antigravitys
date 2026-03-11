@@ -1,6 +1,6 @@
 # OpenCode Integration Guide — Antigravity Workspace
 
-> **Complete guide for setting up OpenCode, oh-my-opencode, gsd-opencode, swarm-tools, and all related plugins with the Antigravity platform.**
+> **Complete guide for setting up OpenCode, oh-my-opencode, swarm-tools, and all related plugins with the Antigravity platform.**
 
 ---
 
@@ -10,14 +10,13 @@
 2. [Quick Start (5 minutes)](#quick-start)
 3. [Core Tools](#core-tools)
 4. [oh-my-opencode — Primary Plugin](#oh-my-opencode)
-5. [gsd-opencode — Spec-Driven Development](#gsd-opencode)
-6. [swarm-tools — Multi-Agent Coordination](#swarm-tools)
-7. [opencode-sessions — Session Management](#opencode-sessions)
-8. [opencode.cafe — Plugin Discovery](#opencodecafe)
-9. [MCP Server Configuration](#mcp-server-configuration)
-10. [Optimal Configuration](#optimal-configuration)
-11. [Agent Workflows](#agent-workflows)
-12. [Troubleshooting](#troubleshooting)
+5. [swarm-tools — Multi-Agent Coordination](#swarm-tools)
+6. [opencode-sessions — Session Management](#opencode-sessions)
+7. [opencode.cafe — Plugin Discovery](#opencodecafe)
+8. [MCP Server Configuration](#mcp-server-configuration)
+9. [Optimal Configuration](#optimal-configuration)
+10. [Agent Workflows](#agent-workflows)
+11. [Troubleshooting](#troubleshooting)
 
 ---
 
@@ -28,7 +27,6 @@ The Antigravity workspace integrates with a rich ecosystem of OpenCode plugins a
 | Repo | Purpose | Install |
 |------|---------|---------|
 | [oh-my-opencode](https://github.com/AloSantana/oh-my-opencode) | Multi-agent orchestration harness with 11 agents, 46 hooks, 26 tools | `npm i -g oh-my-opencode` |
-| [gsd-opencode](https://github.com/AloSantana/gsd-opencode) | Get-Shit-Done spec-driven development system | `npx gsd-opencode` |
 | [swarm-tools](https://github.com/AloSantana/swarm-tools) | Multi-agent swarm coordination with learning | `npm i -g swarm-tools` |
 | [opencode-sessions](https://github.com/AloSantana/opencode-sessions) | Session management with multi-agent collaboration | `npm i opencode-sessions` |
 | [opencode.cafe](https://github.com/AloSantana/opencode.cafe) | Plugin & extension discovery hub | Web app |
@@ -83,15 +81,10 @@ bunx oh-my-opencode install
 bunx oh-my-opencode doctor
 ```
 
-### 3. Install gsd-opencode
+### 3. Install swarm-tools
 
 ```bash
-# Run installer (downloads commands to OpenCode config dir)
-npx gsd-opencode
-
-# Or install globally
-npm install -g gsd-opencode
-gsd-opencode install
+npm install -g opencode-swarm-plugin
 ```
 
 ### 4. Configure the Workspace
@@ -119,7 +112,7 @@ cp .env.example .env
 # Edit with your API keys (minimum required)
 # GEMINI_API_KEY=your-key         # for Gemini models
 # ANTHROPIC_API_KEY=your-key     # for Claude models (oh-my-opencode)
-# GITHUB_TOKEN=your-token        # for GitHub MCP + gsd-opencode
+# GITHUB_TOKEN=your-token        # for GitHub MCP
 ```
 
 ### 6. Start Using
@@ -272,68 +265,6 @@ Available in this workspace:
 
 ---
 
-## gsd-opencode
-
-Spec-driven development system adapted from TÂCHES for OpenCode.
-
-### What It Provides
-
-- **Spec-first development**: Plan before you code
-- **Multi-model subagents**: Different models for planning vs. execution
-- **Slash commands**: `/gsd-init`, `/gsd-plan-phase`, `/gsd-execute-phase`
-- **Model profiles**: quality / balanced / budget
-- **Workflow agents**: Research → Plan → Execute → Verify
-
-### Installation
-
-```bash
-# Download and install slash commands
-npx gsd-opencode
-
-# Or install globally
-npm install -g gsd-opencode
-gsd-opencode install
-```
-
-### Key Commands
-
-```bash
-/gsd-init           # Initialize a new project spec
-/gsd-plan-phase     # Plan the next phase
-/gsd-execute-phase  # Execute the current phase
-/gsd-settings       # Configure model profiles
-/gsd-set-profile quality|balanced|budget
-```
-
-### Model Profiles
-
-| Profile | Planning Model | Execution Model | Verification |
-|---------|---------------|----------------|--------------|
-| quality | claude-opus-4 | claude-sonnet-4 | claude-sonnet-4 |
-| balanced | claude-sonnet-4 | claude-haiku-4 | gemini-flash |
-| budget | gemini-flash | gemini-flash | gemini-flash |
-
-### Integration with Antigravity
-
-GSD works well for:
-- Planning new Antigravity features (use `/gsd-init` with the feature spec)
-- Multi-phase refactoring of `backend/main.py`
-- Building new agent capabilities
-
-**Example workflow:**
-```
-/gsd-init
-> I want to add a new vector memory system using Qdrant to replace ChromaDB
-
-/gsd-plan-phase
-> [Sisyphus analyzes codebase, plans migration phases]
-
-/gsd-execute-phase
-> [Implements phase 1: Qdrant connection and schema]
-```
-
----
-
 ## swarm-tools
 
 Multi-agent swarm coordination for OpenCode with learning capabilities.
@@ -419,7 +350,6 @@ Plugin and extension discovery hub for the OpenCode ecosystem.
 - **Purpose**: Browse and install OpenCode plugins
 - **Relevant plugins for Antigravity**:
   - oh-my-opencode (agent harness)
-  - gsd-opencode (spec-driven dev)
   - swarm-tools (multi-agent coordination)
   - opencode-sessions (session management)
 
@@ -551,11 +481,6 @@ OpenCode session
   │     ├── Sisyphus (primary agent)
   │     ├── Background agents (5 concurrent)
   │     └── Built-in MCPs (Context7, Exa, grep.app)
-  │
-  ├── gsd-opencode commands (slash commands)
-  │     ├── /gsd-init → spec file
-  │     ├── /gsd-plan-phase → planning
-  │     └── /gsd-execute-phase → implementation
   │
   └── MCP Servers (from opencode.json)
         ├── git, memory, sequential-thinking
@@ -697,18 +622,6 @@ echo $ANTHROPIC_API_KEY
 bunx oh-my-opencode doctor
 ```
 
-### "gsd-opencode commands not found"
-
-```bash
-# Reinstall
-npx gsd-opencode@latest
-
-# Check config dir
-ls ~/.config/opencode/  # or $OPENCODE_CONFIG_DIR
-
-# Restart OpenCode (it loads commands at startup)
-```
-
 ### Background agents not running
 
 ```bash
@@ -729,7 +642,6 @@ All forked repos with relevant links:
 | Repo | Original | Our Fork | Key Files |
 |------|---------|----------|-----------|
 | oh-my-opencode | [code-yeongyu/oh-my-opencode](https://github.com/code-yeongyu/oh-my-opencode) | [AloSantana/oh-my-opencode](https://github.com/AloSantana/oh-my-opencode) | `.opencode/`, `sisyphus-prompt.md` |
-| gsd-opencode | [rokicool/gsd-opencode](https://github.com/rokicool/gsd-opencode) | [AloSantana/gsd-opencode](https://github.com/AloSantana/gsd-opencode) | `gsd-opencode/`, `prompts/` |
 | swarm-tools | [opencode-ai/swarm-tools](https://github.com/opencode-ai/swarm-tools) | [AloSantana/swarm-tools](https://github.com/AloSantana/swarm-tools) | `.hive/`, `.opencode/`, `packages/` |
 | opencode-sessions | [opencode-ai/opencode-sessions](https://github.com/opencode-ai/opencode-sessions) | [AloSantana/opencode-sessions](https://github.com/AloSantana/opencode-sessions) | `index.ts` |
 | opencode.cafe | [opencode-ai/opencode.cafe](https://github.com/opencode-ai/opencode.cafe) | [AloSantana/opencode.cafe](https://github.com/AloSantana/opencode.cafe) | `app/` (Next.js) |
