@@ -42,8 +42,14 @@ class ArtifactManager:
         """
         self.artifacts_dir = Path(artifacts_dir)
         self.metadata_file = self.artifacts_dir / "metadata.json"
+        self._storage_available = False
         self._init_storage()
-        logger.info(f"ArtifactManager initialized with directory: {artifacts_dir}")
+        if self._storage_available:
+            logger.info(f"ArtifactManager initialized with directory: {artifacts_dir}")
+        else:
+            logger.warning(
+                f"ArtifactManager running in degraded mode (storage unavailable): {artifacts_dir}"
+            )
 
     def _init_storage(self) -> None:
         """Initialize artifact storage structure."""
@@ -61,11 +67,13 @@ class ArtifactManager:
                 self._save_metadata({})
                 logger.info("Created new metadata file")
             
+            self._storage_available = True
             logger.info("Artifact storage initialized successfully")
             
         except Exception as e:
             logger.error(f"Failed to initialize artifact storage: {e}", exc_info=True)
-            raise
+            self._storage_available = False
+            # Do not raise — continue in degraded mode (mirrors VectorStore Resilience Mode)
 
     def _load_metadata(self) -> Dict[str, Any]:
         """Load artifact metadata."""
@@ -150,9 +158,15 @@ class ArtifactManager:
             Artifact information
             
         Raises:
+            OSError: If storage is unavailable or operation fails
             ValueError: If file is too large
-            OSError: If storage operation fails
         """
+        if not self._storage_available:
+            raise OSError(
+                "Artifact storage unavailable due to initialization failure. "
+                "Check write permissions on the artifacts directory and review "
+                "startup logs for the root cause."
+            )
         # Validate size
         content_size = len(content)
         if content_size > self.MAX_FILE_SIZE:
@@ -316,7 +330,16 @@ class ArtifactManager:
             
         Returns:
             True if deleted, False if not found
+            
+        Raises:
+            OSError: If storage is unavailable or deletion fails
         """
+        if not self._storage_available:
+            raise OSError(
+                "Artifact storage unavailable due to initialization failure. "
+                "Check write permissions on the artifacts directory and review "
+                "startup logs for the root cause."
+            )
         artifact = self.get_artifact(artifact_id)
         if not artifact:
             return False
