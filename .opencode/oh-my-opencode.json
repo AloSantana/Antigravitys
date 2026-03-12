@@ -2,8 +2,8 @@
   "$schema": "https://raw.githubusercontent.com/code-yeongyu/oh-my-opencode/refs/heads/dev/schema/oh-my-opencode.json",
   "agents": {
     "multimodal-looker": {
-      "model": "google/antigravity-gemini-3-flash",
-      "comment": "Using Antigravity Gemini for visual engineering tasks"
+      "model": "google/gemini-2.5-flash",
+      "comment": "Using Gemini 2.5 Flash for visual engineering tasks"
     },
     "sisyphus": {
       "comment": "Main orchestrator - uses Claude Opus 4.6, Kimi K2.5, or GLM 5 based on availability"

@@ -3,10 +3,8 @@
     "enablePermanentToolApproval": true
   },
   "general": {
-    "defaultApprovalMode": "yolo",
+    "defaultApprovalMode": "auto_edit",
     "previewFeatures": true
   },
-  "tools": {
-    "approvalMode": "yolo"
-  }
+  "tools": {}
 }

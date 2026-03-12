@@ -4,27 +4,29 @@
         // Initial fallback URLs (will be replaced by config)
         let API_BASE = window.location.protocol === 'file:' 
             ? 'http://localhost:8000' 
-            : `${window.location.protocol}//${window.location.hostname}:${window.location.port || 8000}`;
+            : window.location.origin;
         let WS_BASE = window.location.protocol === 'file:' 
-            ? 'ws://localhost:8000' 
-            : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.hostname}:${window.location.port || 8000}`;
+            ? 'ws://localhost:8000/ws' 
+            : `${window.location.protocol === 'https:' ? 'wss:' : 'ws:'}//${window.location.host}/ws`;
         
         // Fetch backend configuration and update URLs
         async function fetchBackendConfig() {
             try {
-                // Try multiple possible backend locations
-                const possibleBackendPorts = [
-                    window.location.port,  // Same as frontend
-                    8000,                  // Default backend port
-                    3000                   // Alternative port
-                ];
+                const configUrls = [];
                 
-                for (const port of possibleBackendPorts) {
-                    if (!port) continue;
-                    
-                    const configUrl = window.location.protocol === 'file:'
-                        ? 'http://localhost:8000/config'
-                        : `${window.location.protocol}//${window.location.hostname}:${port}/config`;
+                if (window.location.protocol === 'file:') {
+                    configUrls.push('http://localhost:8000/config');
+                } else {
+                    configUrls.push(`${window.location.origin}/config`);
+                    if (window.location.port && window.location.port !== '8000') {
+                        configUrls.push(`${window.location.protocol}//${window.location.hostname}:8000/config`);
+                    }
+                    if (window.location.port && window.location.port !== '3000') {
+                        configUrls.push(`${window.location.protocol}//${window.location.hostname}:3000/config`);
+                    }
+                }
+                
+                for (const configUrl of configUrls) {
                     
                     try {
                         const response = await fetch(configUrl, {
@@ -37,8 +39,21 @@
                             console.log('Backend configuration loaded:', backendConfig);
                             
                             // Update API and WebSocket base URLs
-                            API_BASE = backendConfig.urls.backend;
-                            WS_BASE = backendConfig.urls.websocket;
+                            // Only override with config URLs if they're not localhost 
+                            // OR if we're actually on localhost — prevents breaking remote access
+                            const configBackend = backendConfig.urls.backend || '';
+                            const configWs = backendConfig.urls.websocket || '';
+                            const isLocalhost = ['localhost', '127.0.0.1'].includes(window.location.hostname);
+                            const configPointsToLocalhost = configBackend.includes('localhost') || configBackend.includes('127.0.0.1');
+                            
+                            if (!configPointsToLocalhost || isLocalhost) {
+                                // Config returns real URLs (ngrok, external host) OR we're on localhost — use them
+                                API_BASE = configBackend;
+                                WS_BASE = configWs;
+                            } else {
+                                // Config returns localhost but we're remote — keep window.location-based URLs
+                                console.log('Config returned localhost URLs but accessing remotely — keeping window.location-based URLs');
+                            }
                             
                             console.log('API Base:', API_BASE);
                             console.log('WebSocket Base:', WS_BASE);
@@ -114,7 +129,7 @@
         }
         
         function connectWebSocket() {
-            ws = new WebSocket(`${WS_BASE}/ws`);
+            ws = new WebSocket(WS_BASE);
             
             ws.onopen = () => {
                 console.log('WebSocket connected to:', WS_BASE);
@@ -147,7 +162,20 @@
             
             ws.onmessage = (event) => {
                 console.log('Message from server:', event.data);
-                addMessage(event.data, "agent");
+                try {
+                    const parsed = JSON.parse(event.data);
+                    const thinking = document.getElementById("thinking");
+                    if (thinking) thinking.remove();
+                    if (parsed.error) {
+                        addMessage(`❌ ${parsed.error}${parsed.details ? ': ' + parsed.details : ''}`, "system");
+                    } else {
+                        addMessage(parsed.response || parsed.text || parsed.content || event.data, "agent");
+                    }
+                } catch (e) {
+                    const thinking = document.getElementById("thinking");
+                    if (thinking) thinking.remove();
+                    addMessage(event.data, "agent");
+                }
             };
         }
         
@@ -274,7 +302,7 @@
                     })
                 });
                 const data = await res.json();
-                addMessage(data.response || JSON.stringify(data), "agent");
+                addMessage(data.response || data.message || JSON.stringify(data), "agent");
             } catch (err) {
                 addMessage(`❌ Failed to handoff code to Jules: ${err}`, "system");
             }
@@ -335,7 +363,9 @@
                     } else {
                         let html = `<span class="message-source">🤝 Dual-Agent Results (${mode})</span>`;
                         for (const [agentName, agentResult] of Object.entries(results)) {
-                            const resultText = typeof agentResult === "string" ? agentResult : JSON.stringify(agentResult, null, 2);
+                            const resultText = typeof agentResult === "string"
+                                ? agentResult
+                                : (agentResult.response || agentResult.text || agentResult.content || JSON.stringify(agentResult, null, 2));
                             html += `<div class="dual-agent-result">
                                 <div class="dual-agent-result-header">@${agentName}</div>
                                 <div>${resultText}</div>
@@ -547,6 +577,7 @@
                 
                 if (data.success) {
                     const container = document.getElementById('modelsContainer');
+                    if (!container) return;
                     container.innerHTML = '';
                     
                     data.models.forEach(model => {
@@ -1258,7 +1289,7 @@
         // Fetch Performance Metrics
         async function fetchPerformanceMetrics() {
             try {
-                const response = await fetch(`${BACKEND_URL}/performance/metrics`);
+                const response = await fetch(`${API_BASE}/performance/metrics`);
                 if (!response.ok) throw new Error('Failed to fetch metrics');
                 
                 const data = await response.json();
@@ -1485,7 +1516,7 @@
         // Fetch Performance History
         async function fetchPerformanceHistory(minutes) {
             try {
-                const response = await fetch(`${BACKEND_URL}/performance/metrics/history?minutes=${minutes}`);
+                const response = await fetch(`${API_BASE}/performance/metrics/history?minutes=${minutes}`);
                 if (!response.ok) throw new Error('Failed to fetch history');
                 
                 const data = await response.json();
@@ -1515,7 +1546,7 @@
         // Export Metrics
         async function exportMetrics() {
             try {
-                const response = await fetch(`${BACKEND_URL}/performance/metrics`);
+                const response = await fetch(`${API_BASE}/performance/metrics`);
                 if (!response.ok) throw new Error('Failed to fetch metrics');
                 
                 const data = await response.json();
@@ -1975,7 +2006,7 @@
                 // Clear previous results
                 clearSwarmResults();
                 
-                const response = await fetch(`${API_BASE}/swarm/execute`, {
+                const response = await fetch(`${API_BASE}/api/swarm/execute`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -2073,7 +2104,7 @@
         // Load agent capabilities
         async function loadSwarmCapabilities() {
             try {
-                const response = await fetch(`${API_BASE}/swarm/capabilities`);
+                const response = await fetch(`${API_BASE}/api/swarm/capabilities`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -2146,7 +2177,7 @@
                     </div>
                 `;
                 
-                const response = await fetch(`${API_BASE}/sandbox/run`, {
+                const response = await fetch(`${API_BASE}/api/sandbox/run`, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
@@ -2239,7 +2270,7 @@
         // Load sandbox status
         async function loadSandboxStatus() {
             try {
-                const response = await fetch(`${API_BASE}/sandbox/status`);
+                const response = await fetch(`${API_BASE}/api/sandbox/status`);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -2600,7 +2631,7 @@
             }
             
             try {
-                const response = await fetch(`${API_BASE}/rotator/keys`, {
+                const response = await fetch(`${API_BASE}/api/rotator/keys`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -2633,7 +2664,7 @@
         // Load all keys
         async function loadRotatorKeys() {
             try {
-                const response = await fetch(`${API_BASE}/rotator/stats`);
+                const response = await fetch(`${API_BASE}/api/rotator/stats`);
                 
                 if (!response.ok) {
                     throw new Error('Failed to load keys');
@@ -2821,7 +2852,7 @@
         // Enable key
         async function enableRotatorKey(keyHash) {
             try {
-                const response = await fetch(`${API_BASE}/rotator/keys/enable`, {
+                const response = await fetch(`${API_BASE}/api/rotator/keys/enable`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ key_hash: keyHash })
@@ -2844,7 +2875,7 @@
         // Disable key
         async function disableRotatorKey(keyHash) {
             try {
-                const response = await fetch(`${API_BASE}/rotator/keys/disable`, {
+                const response = await fetch(`${API_BASE}/api/rotator/keys/disable`, {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ key_hash: keyHash })
@@ -2871,7 +2902,7 @@
             }
             
             try {
-                const response = await fetch(`${API_BASE}/rotator/keys`, {
+                const response = await fetch(`${API_BASE}/api/rotator/keys`, {
                     method: 'DELETE',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ key_hash: keyHash })
@@ -2904,7 +2935,7 @@
             }
             
             try {
-                const response = await fetch(`${API_BASE}/rotator/stats/reset`, {
+                const response = await fetch(`${API_BASE}/api/rotator/stats/reset`, {
                     method: 'POST'
                 });
                 

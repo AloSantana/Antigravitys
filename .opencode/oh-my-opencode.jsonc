@@ -1,97 +1,71 @@
-// oh-my-opencode plugin configuration for Antigravity Workspace
-// Place this file at .opencode/oh-my-opencode.jsonc (project-level)
-// or ~/.config/opencode/oh-my-opencode.jsonc (user-level)
-// Docs: https://github.com/code-yeongyu/oh-my-opencode
 {
-  // ─── Agent Configuration ────────────────────────────────────────────────────
   "agents": {
     "sisyphus": {
-      // Primary orchestration agent — SF Bay Area senior engineer persona
-      // Delegates to specialists, never works alone when experts are available
       "mode": "primary",
-      "model": "anthropic/claude-opus-4-5",
+      "model": "anthropic/claude-opus-4-6",
       "maxTokens": 64000,
-      "thinking": { "budget": 32000 }
+      "thinking": {
+        "type": "enabled", "budget": 32000
+      }
     },
     "oracle": {
-      // Read-only consultation agent for architecture decisions
-      "model": "anthropic/claude-opus-4-5",
+      "model": "anthropic/claude-opus-4-6",
       "mode": "subagent"
     },
     "librarian": {
-      // Codebase understanding + remote doc/code search via Context7 & GitHub
-      "model": "anthropic/claude-sonnet-4-5",
+      "model": "anthropic/claude-sonnet-4-6",
       "mode": "subagent"
     },
     "explore": {
-      // Contextual grep for large codebases — fast parallel search
       "model": "anthropic/claude-haiku-4-5",
       "mode": "subagent"
     },
     "hephaestus": {
-      // Implementation agent — writes production-quality code
-      "model": "anthropic/claude-sonnet-4-5",
+      "model": "anthropic/claude-sonnet-4-6",
       "mode": "subagent"
     },
     "prometheus": {
-      // Long-running background research agent
       "model": "google/gemini-2.5-flash",
       "mode": "subagent"
     },
     "multimodal-looker": {
-      // Analyze PDFs, images, diagrams
       "model": "google/gemini-2.5-pro",
       "mode": "subagent"
     }
   },
-
-  // ─── Categories (agent routing) ─────────────────────────────────────────────
   "categories": {
     "ultrabrain": {
-      // Deep analysis, complex architecture — use for Antigravity system design
-      "model": "anthropic/claude-opus-4-5",
+      "model": "anthropic/claude-opus-4-6",
       "maxTokens": 64000,
-      "thinking": { "budget": 32000 }
+      "thinking": {
+        "type": "enabled", "budget": 32000
+      }
     },
     "visual-engineering": {
-      // Frontend, UI/UX — use for Antigravity web interface work
-      "model": "anthropic/claude-sonnet-4-5"
+      "model": "anthropic/claude-sonnet-4-6"
     },
     "quick": {
-      // Single file changes, typos — use for fast edits
       "model": "anthropic/claude-haiku-4-5",
       "maxTokens": 4000
     },
     "writing": {
-      // Documentation, technical writing
       "model": "google/gemini-2.5-flash"
     }
   },
-
-  // ─── Skills (loaded on demand) ──────────────────────────────────────────────
-  // Skills are loaded when their trigger phrases match
-  // See .opencode/skills/ for available skills
   "disabled_skills": [],
-
-  // ─── Built-in MCPs ──────────────────────────────────────────────────────────
   "mcps": {
     "websearch": {
-      // Built-in web search via Exa or Tavily (auto-selects)
       "enabled": true,
       "exa_api_key": "${EXA_API_KEY}",
       "tavily_api_key": "${TAVILY_API_KEY}"
     },
     "context7": {
-      // Fetch up-to-date library documentation
       "enabled": true
     },
     "grep_app": {
-      // Search across GitHub repositories
       "enabled": true
     }
   },
-
-  // ─── Features ───────────────────────────────────────────────────────────────
   "background_agent": {
     "enabled": true,
     "max_concurrent": 5
@@ -101,11 +75,19 @@
   },
   "skill_loader": {
     "enabled": true,
-    "paths": [".opencode/skills"]
+    "paths": [
+      ".opencode/skills"
+    ]
   },
-
-  // ─── Hooks ──────────────────────────────────────────────────────────────────
   "disabled_hooks": [],
   "disabled_tools": [],
-  "disabled_commands": []
+  "disabled_commands": [],
+  "_migrations": [
+    "model-version:anthropic/claude-opus-4-5->anthropic/claude-opus-4-6",
+    "model-version:anthropic/claude-opus-4-5->anthropic/claude-opus-4-6",
+    "model-version:anthropic/claude-sonnet-4-5->anthropic/claude-sonnet-4-6",
+    "model-version:anthropic/claude-sonnet-4-5->anthropic/claude-sonnet-4-6",
+    "model-version:anthropic/claude-opus-4-5->anthropic/claude-opus-4-6",
+    "model-version:anthropic/claude-sonnet-4-5->anthropic/claude-sonnet-4-6"
+  ]
 }

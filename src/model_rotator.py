@@ -138,9 +138,9 @@ class ModelRotator:
         # Initialize service configurations
         self.service_configs["gemini"] = ServiceConfig(
             service_name="gemini",
-            default_model="gemini-2.0-flash-exp",
+            default_model="gemini-2.5-flash",
             available_models=[
-                "gemini-2.0-flash-exp",
+                "gemini-2.5-flash",
                 "gemini-1.5-pro",
                 "gemini-1.5-flash",
                 "gemini-pro"
