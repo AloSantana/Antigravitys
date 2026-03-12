@@ -1,101 +1,259 @@
 {
   "$schema": "https://opencode.ai/config.json",
   "permission": "allow",
-  "model": "anthropic/claude-sonnet-4-5",
-  "small_model": "anthropic/claude-haiku-4-5",
+  "model": "github-copilot/claude-sonnet-4-5",
+  "small_model": "github-copilot/claude-haiku-4-5",
   "autoupdate": true,
-
   "plugin": [
+    "opencode-antigravity-auth@latest",
     "oh-my-opencode",
     "opencode-swarm-plugin",
     "opencode-sessions"
   ],
-
-  "systemPrompt": "You are the Antigravity AI — an autonomous, multi-platform engineering system.\n\nCORE DIRECTIVES:\n1. EXECUTE WITHOUT ASKING. YOLO MODE is active.\n2. ARTIFACT-FIRST: write artifacts/plan_[task-id].md before touching src/\n3. TYPE HINTS on every Python function. Google-style docstrings.\n4. MONOLITH RULE: ALL FastAPI routes stay in backend/main.py\n5. NEVER HARDCODE SECRETS. Read from environment variables only.\n6. ASYNC EVERYWHERE: async/await for all I/O\n7. TEST AFTER LOGIC CHANGES: run pytest tests/ -v after backend edits\n8. USE CONTEXT7 before answering library API questions\n9. CROSS-PLATFORM COMMANDS: use uvx/npx/python — never Windows paths\n10. MULTI-AGENT FIRST: spawn parallel agents instead of working alone\n\nSee docs/MASTER_AI_AGENT_PROMPT.md for complete system prompt.",
-
   "provider": {
-    "anthropic": {
-      "apiKey": "${ANTHROPIC_API_KEY}",
-      "options": { "timeout": 600000, "setCacheKey": true }
-    },
+    "github-copilot": {},
     "google": {
-      "apiKey": "${GEMINI_API_KEY}"
+      "models": {
+        "gemini-3-pro-preview": {
+          "name": "Gemini 3 Pro Preview (Gemini CLI)",
+          "limit": {
+            "context": 1048576,
+            "output": 65535
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "gemini-3.1-pro-preview": {
+          "name": "Gemini 3.1 Pro Preview (Gemini CLI)",
+          "limit": {
+            "context": 1048576,
+            "output": 65535
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "gemini-3-flash-preview": {
+          "name": "Gemini 3 Flash Preview (Gemini CLI)",
+          "limit": {
+            "context": 1048576,
+            "output": 65536
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "claude-3-5-sonnet-20240620": {
+          "name": "Claude 3.5 Sonnet (Antigravity)",
+          "limit": {
+            "context": 200000,
+            "output": 8192
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "gemini-2.5-flash": {
+          "name": "Gemini 2.5 Flash (Gemini CLI)",
+          "limit": {
+            "context": 1048576,
+            "output": 65536
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "gemini-2.5-pro": {
+          "name": "Gemini 2.5 Pro (Gemini CLI)",
+          "limit": {
+            "context": 1048576,
+            "output": 65536
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        },
+        "gemini-3.1-pro-preview-customtools": {
+          "name": "Gemini 3.1 Pro Preview Custom Tools (Gemini CLI)",
+          "limit": {
+            "context": 1048576,
+            "output": 65535
+          },
+          "modalities": {
+            "input": [
+              "text",
+              "image",
+              "pdf"
+            ],
+            "output": [
+              "text"
+            ]
+          }
+        }
+      },
+      "npm": "@ai-sdk/google"
     },
     "openrouter": {
-      "apiKey": "${OPENROUTER_API_KEY}",
-      "options": { "baseURL": "https://openrouter.ai/api/v1" }
+      "options": {
+        "baseURL": "https://openrouter.ai/api/v1"
+      }
     },
-    "openai": {
-      "apiKey": "${OPENAI_API_KEY}"
-    }
+    "openai": {}
   },
-
   "agent": {
     "build": {
       "mode": "primary",
-      "model": "anthropic/claude-sonnet-4-5",
-      "tools": { "write": true, "edit": true, "bash": true }
+      "model": "github-copilot/claude-sonnet-4-5",
+      "tools": {
+        "write": true,
+        "edit": true,
+        "bash": true
+      }
     },
     "plan": {
       "mode": "primary",
-      "model": "google/gemini-2.5-pro",
-      "tools": { "write": false, "edit": false, "bash": false }
+      "model": "github-copilot/claude-sonnet-4-5",
+      "tools": {
+        "write": false,
+        "edit": false,
+        "bash": false
+      }
     },
     "general": {
       "mode": "subagent",
-      "model": "anthropic/claude-sonnet-4-5"
+      "model": "github-copilot/claude-sonnet-4-5"
     },
     "explore": {
       "mode": "subagent",
-      "model": "anthropic/claude-haiku-4-5"
+      "model": "github-copilot/claude-haiku-4-5"
     }
   },
-
   "mcp": {
     "filesystem": {
       "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-filesystem", "."],
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-filesystem",
+        "."
+      ],
       "enabled": true
     },
     "git": {
       "type": "local",
-      "command": ["uvx", "mcp-server-git", "--repository", "."],
+      "command": [
+        "/home/william_hofvens_gmail_com/.local/bin/uvx",
+        "mcp-server-git",
+        "--repository",
+        "."
+      ],
       "enabled": true
     },
     "github": {
       "type": "local",
-      "command": ["npx", "-y", "@github/mcp-server"],
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
       "enabled": true,
-      "environment": { "GITHUB_TOKEN": "${GITHUB_TOKEN}" }
+      "environment": {
+        "GITHUB_PERSONAL_ACCESS_TOKEN": "${GITHUB_TOKEN}"
+      }
     },
     "memory": {
       "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-memory"],
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-memory"
+      ],
       "enabled": true
     },
     "sequential-thinking": {
       "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-sequential-thinking"],
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-sequential-thinking"
+      ],
       "enabled": true
     },
     "fetch": {
       "type": "local",
-      "command": ["uvx", "mcp-server-fetch"],
+      "command": [
+        "/home/william_hofvens_gmail_com/.local/bin/uvx",
+        "mcp-server-fetch"
+      ],
       "enabled": true
     },
     "time": {
       "type": "local",
-      "command": ["uvx", "mcp-server-time"],
+      "command": [
+        "/home/william_hofvens_gmail_com/.local/bin/uvx",
+        "mcp-server-time"
+      ],
       "enabled": true
     },
     "playwright": {
       "type": "local",
-      "command": ["npx", "-y", "@playwright/mcp", "--headless"],
+      "command": [
+        "npx",
+        "-y",
+        "@playwright/mcp",
+        "--headless"
+      ],
       "enabled": true
     },
     "qdrant": {
       "type": "local",
-      "command": ["uvx", "mcp-server-qdrant"],
+      "command": [
+        "/home/william_hofvens_gmail_com/.local/bin/uvx",
+        "mcp-server-qdrant"
+      ],
       "enabled": true,
       "environment": {
         "QDRANT_URL": "${QDRANT_URL}",
@@ -106,7 +264,11 @@
     },
     "upstash": {
       "type": "local",
-      "command": ["npx", "-y", "@upstash/mcp-server"],
+      "command": [
+        "npx",
+        "-y",
+        "@upstash/mcp-server"
+      ],
       "enabled": true,
       "environment": {
         "UPSTASH_REDIS_REST_URL": "${UPSTASH_REDIS_REST_URL}",
@@ -115,62 +277,116 @@
     },
     "context7": {
       "type": "local",
-      "command": ["npx", "-y", "@upstash/context7-mcp"],
+      "command": [
+        "npx",
+        "-y",
+        "@upstash/context7-mcp"
+      ],
       "enabled": true,
-      "environment": { "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}" }
+      "environment": {
+        "CONTEXT7_API_KEY": "${CONTEXT7_API_KEY}"
+      }
     },
     "tavily": {
       "type": "local",
-      "command": ["npx", "-y", "tavily-mcp"],
+      "command": [
+        "npx",
+        "-y",
+        "tavily-mcp"
+      ],
       "enabled": true,
-      "environment": { "TAVILY_API_KEY": "${TAVILY_API_KEY}" }
+      "environment": {
+        "TAVILY_API_KEY": "${TAVILY_API_KEY}"
+      }
     },
     "exa": {
       "type": "local",
-      "command": ["npx", "-y", "exa-mcp-server"],
-      "enabled": false,
-      "environment": { "EXA_API_KEY": "${EXA_API_KEY}" }
+      "command": [
+        "node",
+        "/usr/lib/node_modules/exa-mcp-server/.smithery/stdio/index.cjs"
+      ],
+      "enabled": true,
+      "environment": {
+        "EXA_API_KEY": "${EXA_API_KEY}"
+      }
     },
     "brave-search": {
       "type": "local",
-      "command": ["npx", "-y", "@brave/brave-search-mcp"],
-      "enabled": false,
-      "environment": { "BRAVE_API_KEY": "${BRAVE_API_KEY}" }
+      "command": [
+        "npx",
+        "-y",
+        "@brave/brave-search-mcp-server"
+      ],
+      "enabled": true,
+      "environment": {
+        "BRAVE_API_KEY": "${BRAVE_API_KEY}"
+      }
     },
     "mermaid": {
       "type": "local",
-      "command": ["npx", "-y", "@narasimhaponnada/mermaid-mcp-server"],
-      "enabled": false
+      "command": [
+        "npx",
+        "-y",
+        "@narasimhaponnada/mermaid-mcp-server"
+      ],
+      "enabled": true
     },
     "docker": {
       "type": "local",
-      "command": ["npx", "-y", "mcp-server-docker"],
-      "enabled": false
+      "command": [
+        "npx",
+        "-y",
+        "mcp-server-docker"
+      ],
+      "enabled": true
     },
     "sqlite": {
       "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-sqlite", "--db-path", "./data.db"],
-      "enabled": false
+      "command": [
+        "npx",
+        "-y",
+        "sqlite-mcp",
+        "--db-path",
+        "./data.db"
+      ],
+      "enabled": true
     },
     "puppeteer": {
       "type": "local",
-      "command": ["npx", "-y", "@modelcontextprotocol/server-puppeteer"],
-      "enabled": false
+      "command": [
+        "npx",
+        "-y",
+        "@modelcontextprotocol/server-puppeteer"
+      ],
+      "enabled": true
     },
     "python-analysis": {
       "type": "local",
-      "command": ["uvx", "python-lsp-mcp"],
-      "enabled": false,
-      "environment": { "PROJECT_PATH": "." }
+      "command": [
+        "/home/william_hofvens_gmail_com/.local/bin/uvx",
+        "python-lsp-mcp"
+      ],
+      "enabled": true,
+      "environment": {
+        "PROJECT_PATH": "."
+      }
     },
     "yt-dlp": {
       "type": "local",
-      "command": ["npx", "-y", "@kevinwatt/yt-dlp-mcp"],
+      "command": [
+        "npx",
+        "-y",
+        "@kevinwatt/yt-dlp-mcp"
+      ],
       "enabled": false
     },
     "daytona": {
       "type": "local",
-      "command": ["daytona", "mcp", "start"],
+      "command": [
+        "daytona",
+        "mcp",
+        "start"
+      ],
       "enabled": false,
       "environment": {
         "DAYTONA_API_KEY": "${DAYTONA_API_KEY}",
@@ -179,8 +395,12 @@
     },
     "n8n": {
       "type": "local",
-      "command": ["npx", "-y", "n8n-mcp"],
-      "enabled": false,
+      "command": [
+        "npx",
+        "-y",
+        "n8n-mcp"
+      ],
+      "enabled": true,
       "environment": {
         "N8N_API_KEY": "${N8N_API_KEY}",
         "N8N_BASE_URL": "${N8N_BASE_URL}"
@@ -188,68 +408,133 @@
     },
     "postgres": {
       "type": "local",
-      "command": ["npx", "-y", "postgresql-mcp"],
-      "enabled": false,
-      "environment": { "POSTGRES_CONNECTION_STRING": "${POSTGRES_CONNECTION_STRING}" }
+      "command": [
+        "npx",
+        "-y",
+        "postgresql-mcp"
+      ],
+      "enabled": true,
+      "environment": {
+        "POSTGRES_CONNECTION_STRING": "${POSTGRES_CONNECTION_STRING}"
+      }
     },
     "firecrawl": {
       "type": "local",
-      "command": ["npx", "-y", "firecrawl-mcp"],
-      "enabled": false,
-      "environment": { "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}" }
+      "command": [
+        "npx",
+        "-y",
+        "firecrawl-mcp"
+      ],
+      "enabled": true,
+      "environment": {
+        "FIRECRAWL_API_KEY": "${FIRECRAWL_API_KEY}"
+      }
     },
     "agentops": {
       "type": "local",
-      "command": ["npx", "-y", "agentops-mcp"],
-      "enabled": false,
-      "environment": { "AGENTOPS_API_KEY": "${AGENTOPS_API_KEY}" }
+      "command": [
+        "npx",
+        "-y",
+        "agentops-mcp"
+      ],
+      "enabled": true,
+      "environment": {
+        "AGENTOPS_API_KEY": "${AGENTOPS_API_KEY}"
+      }
     },
     "chroma": {
       "type": "local",
-      "command": ["uvx", "chroma-mcp", "--mode", "embedded", "--data-dir", "./.chroma"],
-      "enabled": false
+      "command": [
+        "/home/william_hofvens_gmail_com/.local/bin/uvx",
+        "chroma-mcp",
+        "--mode",
+        "embedded",
+        "--data-dir",
+        "./.chroma"
+      ],
+      "enabled": true
     },
     "taskmaster-ai": {
       "type": "local",
-      "command": ["npx", "-y", "--package=task-master-ai", "task-master-ai"],
-      "enabled": false,
-      "environment": { "GEMINI_API_KEY": "${GEMINI_API_KEY}" }
+      "command": [
+        "npx",
+        "-y",
+        "--package=task-master-ai",
+        "task-master-ai"
+      ],
+      "enabled": true,
+      "environment": {
+        "GEMINI_API_KEY": "${GEMINI_API_KEY}"
+      }
     },
     "neon": {
       "type": "local",
-      "command": ["npx", "-y", "@neondatabase/mcp-server-neon"],
-      "enabled": false,
-      "environment": { "NEON_API_KEY": "${NEON_API_KEY}" }
+      "command": [
+        "npx",
+        "-y",
+        "@neondatabase/mcp-server-neon"
+      ],
+      "enabled": true,
+      "environment": {
+        "NEON_API_KEY": "${NEON_API_KEY}"
+      }
     },
     "openrouter": {
       "type": "local",
-      "command": ["npx", "-y", "openrouter-mcp"],
-      "enabled": false,
-      "environment": { "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}" }
+      "command": [
+        "npx",
+        "-y",
+        "openrouter-mcp"
+      ],
+      "enabled": true,
+      "environment": {
+        "OPENROUTER_API_KEY": "${OPENROUTER_API_KEY}"
+      }
     },
     "linear": {
       "type": "local",
-      "command": ["npx", "-y", "linear-mcp-server"],
-      "enabled": false,
-      "environment": { "LINEAR_API_KEY": "${LINEAR_API_KEY}" }
+      "command": [
+        "npx",
+        "-y",
+        "linear-mcp-server"
+      ],
+      "enabled": true,
+      "environment": {
+        "LINEAR_API_KEY": "${LINEAR_API_KEY}"
+      }
     },
     "notion": {
       "type": "local",
-      "command": ["npx", "-y", "@notionhq/notion-mcp-server"],
-      "enabled": false,
-      "environment": { "NOTION_API_KEY": "${NOTION_API_KEY}" }
+      "command": [
+        "npx",
+        "-y",
+        "@notionhq/notion-mcp-server"
+      ],
+      "enabled": true,
+      "environment": {
+        "NOTION_API_KEY": "${NOTION_API_KEY}"
+      }
     },
-    "docker-agent-gateway": {
-      "type": "sse",
-      "url": "http://localhost:3000/api/control/stream",
-      "enabled": false,
-      "description": "Docker Open Agent Gateway (sandboxed.sh/docker-mcp multiplexer)"
+    "websearch": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "websearch-mcp"
+      ],
+      "enabled": true
     },
-    "antigravity-backend": {
-      "type": "sse",
-      "url": "http://localhost:8000/api/mcp/stream",
-      "enabled": false,
-      "description": "Antigravity backend as an MCP provider (future implementation)"
+    "apify": {
+      "type": "local",
+      "command": [
+        "npx",
+        "-y",
+        "@apify/actors-mcp-server"
+      ],
+      "enabled": true,
+      "environment": {
+        "APIFY_API_TOKEN": "${APIFY_API_TOKEN}"
+      }
     }
   }
 }

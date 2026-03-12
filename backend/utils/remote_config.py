@@ -10,8 +10,10 @@ from dotenv import load_dotenv
 
 logger = logging.getLogger(__name__)
 
-# Load environment variables
-load_dotenv()
+# Load environment variables from project root .env
+project_root = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+env_path = os.path.join(project_root, ".env")
+load_dotenv(env_path)
 
 
 class RemoteConfig:

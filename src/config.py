@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     # Google GenAI Configuration
     GOOGLE_API_KEY: str = ""
     GEMINI_API_KEY: str = ""  # Alias for compatibility
-    GEMINI_MODEL_NAME: str = "gemini-2.0-flash-exp"
+    GEMINI_MODEL_NAME: str = "gemini-2.5-flash"
 
     # Anthropic Configuration
     ANTHROPIC_API_KEY: str = ""

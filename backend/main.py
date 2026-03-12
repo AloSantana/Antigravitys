@@ -8,6 +8,7 @@ from slowapi.errors import RateLimitExceeded
 from pydantic import BaseModel, Field
 import uvicorn
 import os
+import json
 import logging
 import signal
 import asyncio
@@ -605,6 +606,173 @@ async def toggle_mcp_server(request: Request, server_name: str, toggle: MCPServe
         raise HTTPException(
             status_code=500,
             detail=f"Failed to toggle MCP server: {str(e)}"
+        )
+
+# ─── MCP Tool Routes ─────────────────────────────────────────────────────────
+# These routes serve the frontend MCP tools panel.
+# /mcp/status → server status (delegates to settings_manager)
+# /mcp/tools → list all discovered tools from mcp_servers.json
+# /mcp/tools/{name} → tool detail
+# /mcp/tools/{name}/execute → tool execution (requires MCP client connection)
+
+# Lazy-initialized MCP client instance
+_mcp_client_instance = None
+
+@app.get("/mcp/status")
+@limiter.limit("30/minute")
+async def get_mcp_status(request: Request):
+    """
+    Get status of all MCP servers.
+    Delegates to settings_manager.get_mcp_servers_status().
+    """
+    try:
+        servers = settings_manager.get_mcp_servers_status()
+        return {
+            "success": True,
+            "servers": servers,
+            "total": len(servers)
+        }
+    except Exception as e:
+        logger.error(f"Error getting MCP status: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get MCP status: {str(e)}"
+        )
+
+@app.get("/mcp/tools")
+@limiter.limit("30/minute")
+async def get_mcp_tools(request: Request):
+    """
+    List all available MCP tools across configured servers.
+    Reads tool definitions from mcp_servers.json config.
+    """
+    try:
+        mcp_config_path = os.path.join(project_root, "mcp_servers.json")
+        tools = []
+        
+        if os.path.exists(mcp_config_path):
+            with open(mcp_config_path, 'r') as f:
+                config_data = json.load(f)
+            
+            for server_name, server_cfg in config_data.get("mcpServers", {}).items():
+                if not server_cfg.get("enabled", True):
+                    continue
+                # Extract tool definitions if available in config
+                server_tools = server_cfg.get("tools", [])
+                for tool in server_tools:
+                    tools.append({
+                        "name": tool.get("name", ""),
+                        "description": tool.get("description", ""),
+                        "server": server_name,
+                        "input_schema": tool.get("inputSchema", tool.get("input_schema", {}))
+                    })
+        
+        return {
+            "success": True,
+            "tools": tools,
+            "total": len(tools)
+        }
+    except Exception as e:
+        logger.error(f"Error listing MCP tools: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to list MCP tools: {str(e)}"
+        )
+
+@app.get("/mcp/tools/{tool_name}")
+@limiter.limit("30/minute")
+async def get_mcp_tool_detail(request: Request, tool_name: str, server: Optional[str] = None):
+    """
+    Get details for a specific MCP tool.
+    
+    Args:
+        tool_name: Name of the tool
+        server: Optional server name filter
+    """
+    try:
+        mcp_config_path = os.path.join(project_root, "mcp_servers.json")
+        
+        if not os.path.exists(mcp_config_path):
+            raise HTTPException(status_code=404, detail="MCP config not found")
+        
+        with open(mcp_config_path, 'r') as f:
+            config_data = json.load(f)
+        
+        for server_name, server_cfg in config_data.get("mcpServers", {}).items():
+            if server and server_name != server:
+                continue
+            for tool in server_cfg.get("tools", []):
+                if tool.get("name") == tool_name:
+                    return {
+                        "name": tool.get("name", ""),
+                        "description": tool.get("description", ""),
+                        "server": server_name,
+                        "input_schema": tool.get("inputSchema", tool.get("input_schema", {})),
+                        "parameters": tool.get("inputSchema", tool.get("input_schema", {})).get("properties", {})
+                    }
+        
+        raise HTTPException(status_code=404, detail=f"Tool '{tool_name}' not found")
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting MCP tool detail: {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to get tool detail: {str(e)}"
+        )
+
+@app.post("/mcp/tools/{tool_name}/execute")
+@limiter.limit("10/minute")
+async def execute_mcp_tool(request: Request, tool_name: str):
+    """
+    Execute an MCP tool by name.
+    
+    Requires MCP client to be connected. Lazily initializes the client
+    on first tool execution request.
+    """
+    try:
+        body = await request.json()
+        server_name = body.get("server", "")
+        arguments = body.get("arguments", {})
+        
+        # Try to initialize MCP client lazily
+        global _mcp_client_instance
+        if _mcp_client_instance is None:
+            try:
+                sys.path.insert(0, project_root)
+                from src.mcp_client import MCPClientManager
+                _mcp_client_instance = MCPClientManager()
+                await _mcp_client_instance.initialize()
+            except Exception as init_err:
+                logger.warning(f"MCP client initialization failed: {init_err}")
+                raise HTTPException(
+                    status_code=503,
+                    detail=f"MCP client not available: {str(init_err)}. Ensure MCP servers are configured and running."
+                )
+        
+        # Call the tool
+        prefixed_name = f"mcp_{server_name}_{tool_name}" if server_name else tool_name
+        result = await _mcp_client_instance.call_tool(prefixed_name, arguments)
+        
+        return {
+            "success": True,
+            "result": result,
+            "tool": tool_name,
+            "server": server_name
+        }
+        
+    except HTTPException:
+        raise
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except RuntimeError as e:
+        raise HTTPException(status_code=503, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error executing MCP tool '{tool_name}': {e}", exc_info=True)
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to execute tool: {str(e)}"
         )
 
 @app.get("/ngrok/status")
@@ -2325,8 +2493,10 @@ async def execute_swarm_task(request: Request, swarm_request: SwarmExecutionRequ
     try:
         # Import swarm system
         import sys
-        sys.path.insert(0, os.path.join(project_root, "src"))
-        from swarm import SwarmOrchestrator
+        # Add project_root to path so 'src.agents' imports work inside swarm.py
+        if project_root not in sys.path:
+            sys.path.insert(0, project_root)
+        from src.swarm import SwarmOrchestrator
         
         # Create orchestrator
         swarm = SwarmOrchestrator()
@@ -2369,8 +2539,9 @@ async def get_swarm_capabilities(request: Request):
     """
     try:
         import sys
-        sys.path.insert(0, os.path.join(project_root, "src"))
-        from swarm import SwarmOrchestrator
+        if project_root not in sys.path:
+            sys.path.insert(0, project_root)
+        from src.swarm import SwarmOrchestrator
         
         swarm = SwarmOrchestrator()
         capabilities = swarm.get_agent_capabilities()
@@ -2421,8 +2592,9 @@ async def run_sandbox_code(request: Request, exec_request: SandboxExecutionReque
     try:
         # Import sandbox system
         import sys
-        sys.path.insert(0, os.path.join(project_root, "src"))
-        from sandbox import get_sandbox
+        if project_root not in sys.path:
+            sys.path.insert(0, project_root)
+        from src.sandbox import get_sandbox
         
         # Get sandbox
         sandbox = get_sandbox()
@@ -2459,9 +2631,10 @@ async def get_sandbox_status(request: Request):
     """
     try:
         import sys
-        sys.path.insert(0, os.path.join(project_root, "src"))
-        from sandbox import get_available_sandboxes
-        from config import settings as src_settings
+        if project_root not in sys.path:
+            sys.path.insert(0, project_root)
+        from src.sandbox import get_available_sandboxes
+        from src.config import settings as src_settings
         
         available_sandboxes = get_available_sandboxes()
         
@@ -2518,8 +2691,9 @@ async def add_rotator_key(request: Request, key_data: ModelRotatorKeyAdd):
     """
     try:
         import sys
-        sys.path.insert(0, os.path.join(project_root, "src"))
-        from model_rotator import get_rotator
+        if project_root not in sys.path:
+            sys.path.insert(0, project_root)
+        from src.model_rotator import get_rotator
         
         rotator = get_rotator()
         success = rotator.add_key(
@@ -2568,8 +2742,9 @@ async def remove_rotator_key(request: Request, key_action: ModelRotatorKeyAction
     """
     try:
         import sys
-        sys.path.insert(0, os.path.join(project_root, "src"))
-        from model_rotator import get_rotator
+        if project_root not in sys.path:
+            sys.path.insert(0, project_root)
+        from src.model_rotator import get_rotator
         
         rotator = get_rotator()
         success = rotator.remove_key(key_action.service, key_action.name)
@@ -2613,8 +2788,9 @@ async def disable_rotator_key(request: Request, key_action: ModelRotatorKeyActio
     """
     try:
         import sys
-        sys.path.insert(0, os.path.join(project_root, "src"))
-        from model_rotator import get_rotator
+        if project_root not in sys.path:
+            sys.path.insert(0, project_root)
+        from src.model_rotator import get_rotator
         
         rotator = get_rotator()
         success = rotator.disable_key(key_action.service, key_action.name)
@@ -2658,8 +2834,9 @@ async def enable_rotator_key(request: Request, key_action: ModelRotatorKeyAction
     """
     try:
         import sys
-        sys.path.insert(0, os.path.join(project_root, "src"))
-        from model_rotator import get_rotator
+        if project_root not in sys.path:
+            sys.path.insert(0, project_root)
+        from src.model_rotator import get_rotator
         
         rotator = get_rotator()
         success = rotator.enable_key(key_action.service, key_action.name)
@@ -2703,8 +2880,9 @@ async def get_rotator_stats(request: Request, service: Optional[str] = None):
     """
     try:
         import sys
-        sys.path.insert(0, os.path.join(project_root, "src"))
-        from model_rotator import get_rotator
+        if project_root not in sys.path:
+            sys.path.insert(0, project_root)
+        from src.model_rotator import get_rotator
         
         rotator = get_rotator()
         
@@ -2746,8 +2924,9 @@ async def reset_rotator_stats(request: Request, service: Optional[str] = None):
     """
     try:
         import sys
-        sys.path.insert(0, os.path.join(project_root, "src"))
-        from model_rotator import get_rotator
+        if project_root not in sys.path:
+            sys.path.insert(0, project_root)
+        from src.model_rotator import get_rotator
         
         rotator = get_rotator()
         rotator.reset_stats(service)
@@ -3010,6 +3189,7 @@ async def uninstall_ecosystem_plugin(plugin_name: str):
 # ═══════════════════════════════════════════════════════════════
 
 
+@app.websocket("/ws")
 async def websocket_endpoint(websocket: WebSocket):
     """
     WebSocket endpoint for real-time agent communication.

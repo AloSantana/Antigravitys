@@ -20,7 +20,7 @@ class TestSettings:
             settings = Settings(_env_file=None)
             
             assert settings.GOOGLE_API_KEY == ""
-            assert settings.GEMINI_MODEL_NAME == "gemini-2.0-flash-exp"
+            assert settings.GEMINI_MODEL_NAME == "gemini-2.5-flash"
             assert settings.AGENT_NAME == "AntigravityAgent"
             assert settings.DEBUG_MODE is False
             assert settings.MEMORY_FILE == "agent_memory.json"
@@ -100,7 +100,7 @@ MEMORY_FILE=env_memory.json
         assert hasattr(settings, 'AGENT_NAME')
     
     @pytest.mark.parametrize("model_name", [
-        "gemini-2.0-flash-exp",
+        "gemini-2.5-flash",
         "gemini-pro",
         "gemini-1.5-pro",
         "custom-model"
