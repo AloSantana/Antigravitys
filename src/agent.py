@@ -8,6 +8,7 @@ from typing import Dict, Any, Optional, Callable
 
 from src.config import settings
 from src.memory import MemoryManager
+from src.hooks import hook_registry, HookEvent
 
 try:
     from google import genai
@@ -35,6 +36,13 @@ class GeminiAgent:
         self.tools: Dict[str, Callable] = {}
         self.mcp_tools: Dict[str, Callable] = {}
         self.context_files = []
+
+        # --- lifecycle: BEFORE_AGENT_INIT ---
+        hook_registry.fire_sync(
+            HookEvent.BEFORE_AGENT_INIT,
+            agent_name=self.settings.AGENT_NAME,
+            data={"model": self.settings.GEMINI_MODEL_NAME},
+        )
         
         print(f"🤖 Initializing {self.settings.AGENT_NAME} with model {self.settings.GEMINI_MODEL_NAME}...")
         
@@ -57,6 +65,13 @@ class GeminiAgent:
             self._initialize_mcp()
         
         print(f"✓ Agent initialized with {len(self.tools)} tools and {len(self.mcp_tools)} MCP tools")
+
+        # --- lifecycle: AFTER_AGENT_INIT ---
+        hook_registry.fire_sync(
+            HookEvent.AFTER_AGENT_INIT,
+            agent_name=self.settings.AGENT_NAME,
+            data={"tools": list(self.tools.keys())},
+        )
 
     def _load_context(self):
         """Load all .md files from .context/ directory."""
