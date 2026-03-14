@@ -3009,6 +3009,89 @@ async def uninstall_ecosystem_plugin(plugin_name: str):
 # End Ecosystem Management API
 # ═══════════════════════════════════════════════════════════════
 
+# ═══════════════════════════════════════════════════════════════
+# Parsewise.ai Document Processing API
+# ═══════════════════════════════════════════════════════════════
+
+from parsewise_client import ParsewiseClient as _ParsewiseClient
+
+_parsewise_client = _ParsewiseClient()
+
+
+class _ParsewiseExtractURLRequest(BaseModel):
+    url: str = Field(..., description="Publicly accessible URL of the document to extract")
+
+
+class _ParsewiseValidateRequest(BaseModel):
+    data: Dict[str, Any] = Field(..., description="Extraction data to validate")
+
+
+@app.post("/api/parsewise/extract")
+async def parsewise_extract(request: Request, file: UploadFile = File(...)):
+    """Upload a document and extract structured data using Parsewise.ai.
+
+    Accepts a multipart file upload and forwards it to the Parsewise extraction
+    endpoint. The raw Parsewise response is returned to the caller.
+    """
+    validate_upload_file(file)
+
+    import tempfile
+    suffix = os.path.splitext(file.filename)[1] if file.filename else ""
+    try:
+        with tempfile.NamedTemporaryFile(delete=False, suffix=suffix) as tmp:
+            tmp_path = tmp.name
+            content = await file.read()
+            tmp.write(content)
+    except Exception as exc:
+        logger.error("parsewise_extract: failed to write temp file: %s", exc)
+        raise HTTPException(status_code=500, detail="Failed to process uploaded file")
+
+    try:
+        result = await _parsewise_client.extract_from_file(tmp_path)
+        return result
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
+    except FileNotFoundError as exc:
+        raise HTTPException(status_code=500, detail=str(exc))
+    except Exception as exc:
+        logger.error("parsewise_extract: extraction failed: %s", exc)
+        raise HTTPException(status_code=502, detail=f"Parsewise extraction failed: {exc}")
+    finally:
+        try:
+            os.unlink(tmp_path)
+        except OSError:
+            pass
+
+
+@app.get("/api/parsewise/status")
+async def parsewise_status():
+    """Check the availability and authentication status of the Parsewise service."""
+    try:
+        result = await _parsewise_client.get_status()
+        return result
+    except Exception as exc:
+        logger.error("parsewise_status: status check failed: %s", exc)
+        raise HTTPException(status_code=500, detail=f"Status check failed: {exc}")
+
+
+@app.post("/api/parsewise/validate")
+async def parsewise_validate(request: _ParsewiseValidateRequest):
+    """Validate previously extracted document data using Parsewise.ai."""
+    try:
+        result = await _parsewise_client.validate_extraction(request.data)
+        return result
+    except RuntimeError as exc:
+        raise HTTPException(status_code=503, detail=str(exc))
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc))
+    except Exception as exc:
+        logger.error("parsewise_validate: validation failed: %s", exc)
+        raise HTTPException(status_code=502, detail=f"Parsewise validation failed: {exc}")
+
+# ═══════════════════════════════════════════════════════════════
+# End Parsewise.ai Document Processing API
+# ═══════════════════════════════════════════════════════════════
+
 
 async def websocket_endpoint(websocket: WebSocket):
     """
